@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">Proyecto_2025</string>
+    <string name="app_name">Clase3</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancelar</string>
+    <string-array name="elementos">
+        <item>Ciclo 5</item>
+        <item>Ciclo 6</item>
+        <item>Ciclo 7</item>
+        <item>Ciclo 8</item>
+    </string-array>
 </resources>
