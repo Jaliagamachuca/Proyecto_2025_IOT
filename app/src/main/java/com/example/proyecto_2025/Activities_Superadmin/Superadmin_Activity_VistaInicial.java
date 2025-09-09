@@ -1,4 +1,4 @@
-package com.example.proyecto_2025.Activities_Administrador;
+package com.example.proyecto_2025.Activities_Superadmin;
 
 import android.os.Bundle;
 
@@ -10,13 +10,13 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.proyecto_2025.R;
 
-public class Admin_Activity1 extends AppCompatActivity {
+public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_admin1);
+        setContentView(R.layout.activity_superadmin_vista_inicial);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);

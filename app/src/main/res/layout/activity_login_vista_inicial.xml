@@ -5,6 +5,6 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activities_Administrador.Admin_Activity1">
+    tools:context=".Activities_Login.Login_Activity_VistaInicial">
 
 </androidx.constraintlayout.widget.ConstraintLayout>

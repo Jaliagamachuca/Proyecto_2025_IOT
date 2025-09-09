@@ -12,6 +12,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Proyecto_2025">
         <activity
+            android:name=".Activities_Usuario.Usuario_Activity_VistaInicial"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Superadmin.Superadmin_Activity_VistaInicial"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Login.Login_Activity_VistaInicial"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.Guia_Activity_VistaInicial"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
+            android:exported="false" />
+        <activity
             android:name=".Activities_Administrador.Admin_Activity1"
             android:exported="false" />
         <activity
