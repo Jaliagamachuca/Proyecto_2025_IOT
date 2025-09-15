@@ -8,4 +8,13 @@
         <item>Ciclo 7</item>
         <item>Ciclo 8</item>
     </string-array>
+
+
+    <string name="add">Añadir</string>
+    <string name="search">Buscar</string>
+    <string name="help">Ayuda</string>
+    <string name="settings">Ajustes</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

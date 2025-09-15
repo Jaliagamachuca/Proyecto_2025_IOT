@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/action_search" android:title="@string/search"
+        android:icon="@drawable/ic_search_24" android:showAsAction="always"/>
+    <item android:id="@+id/action_help" android:title="@string/help"
+        android:icon="@drawable/ic_help_24" android:showAsAction="never"/>
+    <item android:id="@+id/action_settings" android:title="@string/settings"
+        android:icon="@drawable/ic_settings_24" android:showAsAction="never"/>
+</menu>
