@@ -1,26 +1,29 @@
 package com.example.proyecto_2025.Activities_Guia;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.proyecto_2025.BaseActivity;
 import com.example.proyecto_2025.R;
+import com.example.proyecto_2025.databinding.ActivityGuiaTourEnProcesoBinding;
+import com.example.proyecto_2025.databinding.ActivityGuiaVistaInicialBinding;
 
-public class Guia_Tour_en_Proceso extends AppCompatActivity {
+public class Guia_Tour_en_Proceso extends BaseActivity {
+
+    private ActivityGuiaTourEnProcesoBinding binding;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_guia_tour_en_proceso);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        binding = ActivityGuiaTourEnProcesoBinding.inflate(getLayoutInflater());
+        setActivityContent(binding.getRoot());
+
     }
 }
