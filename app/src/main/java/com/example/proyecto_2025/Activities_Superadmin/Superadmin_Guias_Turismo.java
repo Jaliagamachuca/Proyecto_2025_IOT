@@ -13,56 +13,57 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.proyecto_2025.BaseActivity;
 import com.example.proyecto_2025.R;
-import com.example.proyecto_2025.databinding.ActivitySuperadminAdministradoresSedeBinding;
-import com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;
+import com.example.proyecto_2025.databinding.ActivitySuperadminGuiasTurismoBinding;
+import com.example.proyecto_2025.databinding.ActivitySuperadminRegistrarAdministradorBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Superadmin_Administradores_Sede extends BaseActivity {
+public class Superadmin_Guias_Turismo extends BaseActivity {
 
-    private ActivitySuperadminAdministradoresSedeBinding binding;
+    private ActivitySuperadminGuiasTurismoBinding binding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivitySuperadminAdministradoresSedeBinding.inflate(getLayoutInflater());
+        binding = ActivitySuperadminGuiasTurismoBinding.inflate(getLayoutInflater());
         setActivityContent(binding.getRoot());
 
         binding.btn1.setOnClickListener(view ->
-                activarAdministrador());
+                activarGuia());
 
         binding.btn2.setOnClickListener(view ->
-                desactivarAdministrador());
+                desactivarGuia());
 
-        binding.InfoAdmin1.setOnClickListener(v -> {
+
+        binding.InfoGuia1.setOnClickListener(v -> {
             // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Superadmin_Ver_Administrador.class);
+            Intent intent = new Intent(this, Superadmin_Ver_Guia_Turismo.class);
             startActivity(intent);
         });
 
-        binding.InfoAdmin2.setOnClickListener(v -> {
+        binding.InfoGuia2.setOnClickListener(v -> {
             // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Superadmin_Ver_Administrador.class);
+            Intent intent = new Intent(this, Superadmin_Ver_Guia_Turismo.class);
             startActivity(intent);
         });
 
-        binding.btnRegistrarAdministrador.setOnClickListener(v -> {
+        binding.btnRegistrarGuia.setOnClickListener(v -> {
             // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Superadmin_Registrar_Administrador.class);
+            Intent intent = new Intent(this, Superadmin_Registrar_Guias_Turismo.class);
             startActivity(intent);
         });
     }
 
-    public void activarAdministrador() {
+    public void activarGuia() {
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Activar Administrador");
+        dialogBuilder.setTitle("Activar Guía de Turismo");
         dialogBuilder.setMessage("¿Está seguro de activar este usuario?");
         dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
         dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
         dialogBuilder.show();
     }
-    public void desactivarAdministrador() {
+    public void desactivarGuia() {
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Desactivar Administrador");
+        dialogBuilder.setTitle("Desactivar Guía de Turismo");
         dialogBuilder.setMessage("¿Está seguro de desactivar este usuario?");
         dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
         dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));

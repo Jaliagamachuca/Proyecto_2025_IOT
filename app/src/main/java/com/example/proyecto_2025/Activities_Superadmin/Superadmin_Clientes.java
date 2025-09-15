@@ -14,58 +14,54 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.proyecto_2025.BaseActivity;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivitySuperadminAdministradoresSedeBinding;
-import com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;
+import com.example.proyecto_2025.databinding.ActivitySuperadminClientesBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Superadmin_Administradores_Sede extends BaseActivity {
+public class Superadmin_Clientes extends BaseActivity {
 
-    private ActivitySuperadminAdministradoresSedeBinding binding;
+    private ActivitySuperadminClientesBinding binding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivitySuperadminAdministradoresSedeBinding.inflate(getLayoutInflater());
+        binding = ActivitySuperadminClientesBinding.inflate(getLayoutInflater());
         setActivityContent(binding.getRoot());
 
         binding.btn1.setOnClickListener(view ->
-                activarAdministrador());
+                activarCliente());
 
         binding.btn2.setOnClickListener(view ->
-                desactivarAdministrador());
+                desactivarCliente());
 
-        binding.InfoAdmin1.setOnClickListener(v -> {
+        binding.InfoCliente1.setOnClickListener(v -> {
             // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Superadmin_Ver_Administrador.class);
+            Intent intent = new Intent(this, Superadmin_Ver_Cliente.class);
             startActivity(intent);
         });
 
-        binding.InfoAdmin2.setOnClickListener(v -> {
+        binding.InfoCliente2.setOnClickListener(v -> {
             // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Superadmin_Ver_Administrador.class);
-            startActivity(intent);
-        });
-
-        binding.btnRegistrarAdministrador.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Superadmin_Registrar_Administrador.class);
+            Intent intent = new Intent(this, Superadmin_Ver_Cliente.class);
             startActivity(intent);
         });
     }
 
-    public void activarAdministrador() {
+    public void activarCliente() {
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Activar Administrador");
+        dialogBuilder.setTitle("Activar Cliente");
         dialogBuilder.setMessage("¿Está seguro de activar este usuario?");
         dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
         dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
         dialogBuilder.show();
     }
-    public void desactivarAdministrador() {
+    public void desactivarCliente() {
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Desactivar Administrador");
+        dialogBuilder.setTitle("Desactivar Cliente");
         dialogBuilder.setMessage("¿Está seguro de desactivar este usuario?");
         dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
         dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
         dialogBuilder.show();
     }
+
+
 }

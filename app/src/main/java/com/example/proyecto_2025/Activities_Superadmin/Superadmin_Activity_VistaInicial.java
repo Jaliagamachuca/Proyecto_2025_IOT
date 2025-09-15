@@ -23,5 +23,17 @@ public class Superadmin_Activity_VistaInicial extends BaseActivity {
             Intent intent = new Intent(this, Superadmin_Administradores_Sede.class);
             startActivity(intent);
         });
+
+        binding.button4.setOnClickListener(v -> {
+            // Creamos un Intent para ir a OtraActivity
+            Intent intent = new Intent(this, Superadmin_Guias_Turismo.class);
+            startActivity(intent);
+        });
+
+        binding.button5.setOnClickListener(v -> {
+            // Creamos un Intent para ir a OtraActivity
+            Intent intent = new Intent(this, Superadmin_Clientes1.class);
+            startActivity(intent);
+        });
     }
 }

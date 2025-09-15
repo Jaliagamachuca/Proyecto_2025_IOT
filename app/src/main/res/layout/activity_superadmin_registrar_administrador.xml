@@ -83,17 +83,6 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Campo Edad -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textFieldEdad"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Edad"
-            android:layout_marginTop="8dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number" />
-        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Campo Correo Electrónico -->
         <com.google.android.material.textfield.TextInputLayout

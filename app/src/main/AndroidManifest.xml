@@ -12,6 +12,30 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Proyecto_2025">
         <activity
+            android:name=".Activities_Superadmin.Superadmin_Clientes1"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Superadmin.Superadmin_Ver_Cliente"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Superadmin.Superadmin_Ver_Guia_Turismo"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Superadmin.Superadmin_Ver_Administrador"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Superadmin.Superadmin_Rechazar_Guia_Turismo"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Superadmin.Superadmin_Registrar_Guia_Turismo"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Superadmin.Superadmin_Registrar_Guias_Turismo"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Superadmin.Superadmin_Guias_Turismo"
+            android:exported="false" />
+        <activity
             android:name=".Activities_Superadmin.Superadmin_Registrar_Administrador"
             android:exported="false" />
         <activity

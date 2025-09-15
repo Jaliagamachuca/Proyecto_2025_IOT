@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities_Superadmin.Superadmin_Rechazar_Guia_Turismo">
+
+    <!-- Título -->
+
+    <!-- Contenedor vertical de campos -->
+
+    <TextView
+        android:id="@+id/Etiqueta1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rechazar Nuevo Guía de Turismo"
+        android:textColor="#000000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/contenedorCampos"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/Etiqueta1"
+        app:layout_constraintBottom_toTopOf="@id/btnRechazarGuia"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Campo Nombre -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre"
+            android:textStyle="bold"
+            android:textColor="#000000" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text="Juan" />
+
+        <!-- Campo Apellidos -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Apellidos"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginTop="12dp" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text="Pérez Gómez" />
+
+        <!-- Campo DNI -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Número de Documento de Identidad"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginTop="12dp" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="12345678" />
+
+        <!-- Campo Fecha de Nacimiento -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fecha de Nacimiento"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginTop="12dp" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="date"
+            android:text="01/01/1990" />
+
+
+        <!-- Campo Correo -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Correo Electrónico"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginTop="12dp" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:text="juan.perez@example.com" />
+
+        <!-- Campo Teléfono -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Teléfono"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginTop="12dp" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="phone"
+            android:text="987654321" />
+
+        <!-- Campo Domicilio -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Domicilio"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginTop="12dp" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPostalAddress"
+            android:text="Av. Siempre Viva 123, Lima" />
+
+        <!-- Campo Idiomas Hablados -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Idiomas Hablados"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginTop="12dp" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPostalAddress"
+            android:text="Español, Ingles, Aleman" />
+
+    </LinearLayout>
+
+    <!-- Botón Registrar -->
+    <Button
+        android:id="@+id/btnRechazarGuia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#007AFF"
+        android:minHeight="40dp"
+        android:paddingHorizontal="16dp"
+        android:text="Rechazar"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
