@@ -12,6 +12,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Proyecto_2025">
         <activity
+            android:name=".Activities_Guia.Vista_Detalles_Tour_Sin_Botones"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.Vista_Detalles_Tour"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.Guia_Tour_en_Proceso"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.Guia_Historial_Tours"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.Guia_Tours_Pendientes"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.Guia_Solictar_Nuevo_Tour"
+            android:exported="false" />
+        <activity
             android:name=".Activities_Superadmin.Superadmin_Clientes1"
             android:exported="false" />
         <activity
