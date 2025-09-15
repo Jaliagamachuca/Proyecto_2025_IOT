@@ -12,10 +12,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Proyecto_2025">
         <activity
-            android:name=".Activities_Usuario.Usuario_Activity_VistaInicial"
+            android:name=".Activities_Superadmin.Superadmin_Registrar_Administrador"
             android:exported="false" />
         <activity
-            android:name=".Activities_Superadmin.Superadmin_Activity_VistaInicial"
+            android:name=".Activities_Superadmin.Superadmin_Administradores_Sede"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Usuario.Usuario_Activity_VistaInicial"
             android:exported="false" />
         <activity
             android:name=".Activities_Login.Login_Activity_VistaInicial"
@@ -27,13 +30,10 @@
             android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
             android:exported="false" />
         <activity
-            android:name=".Activities_Administrador.Admin_Activity1"
-            android:exported="false" />
-        <activity
             android:name=".MenuActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".Activities_Superadmin.Superadmin_Activity_VistaInicial"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
