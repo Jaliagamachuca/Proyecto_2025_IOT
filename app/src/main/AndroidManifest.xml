@@ -68,14 +68,12 @@
         <activity
             android:name=".Activities_Guia.Guia_Activity_VistaInicial"
             android:exported="false" />
-        <activity
-            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
-            android:exported="false" />
+
         <activity
             android:name=".MenuActivity"
             android:exported="false" />
         <activity
-            android:name=".Activities_Superadmin.Superadmin_Activity_VistaInicial"
+            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

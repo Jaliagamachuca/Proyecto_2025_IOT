@@ -13,8 +13,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Panel del Administrador"
-            app:menu="@menu/menu_admin_home"/>
+            app:title="@string/admin_panel_title"
+            app:menu="@menu/menu_admin_home"
+            app:layout_scrollFlags="scroll|enterAlways" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
@@ -37,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         app:srcCompat="@drawable/ic_add_24"
-    app:tint="?attr/colorOnPrimary"
-    app:layout_anchor="@id/viewPager"
-    app:layout_anchorGravity="bottom|end"/>
+        app:tint="?attr/colorOnPrimary"
+        app:layout_anchor="@id/viewPager"
+        app:layout_anchorGravity="bottom|end"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
