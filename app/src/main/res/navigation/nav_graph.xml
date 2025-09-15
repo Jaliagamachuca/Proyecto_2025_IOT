@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginActivity">
+
+    <!-- Flujo principal de Login y Registro -->
+    <activity
+        android:id="@+id/loginActivity"
+        android:name="com.example.proyecto_2025.joaco.LoginActivity"
+        android:label="Login"
+        tools:layout="@layout/activity_login_joaco">
+        <action
+            android:id="@+id/action_login_to_registro"
+            app:destination="@id/registroActivity" />
+        <action
+            android:id="@+id/action_login_to_recuperar_password"
+            app:destination="@id/recuperarPasswordActivity" />
+    </activity>
+
+    <activity
+        android:id="@+id/registroActivity"
+        android:name="com.example.proyecto_2025.joaco.RegistroActivity"
+        android:label="Registro"
+        tools:layout="@layout/activity_registro_joaco">
+        <action
+            android:id="@+id/action_registro_to_confirmacion"
+            app:destination="@id/confirmacionActivity" />
+    </activity>
+
+    <activity
+        android:id="@+id/confirmacionActivity"
+        android:name="com.example.proyecto_2025.joaco.ConfirmacionActivity"
+        android:label="Confirmación"
+        tools:layout="@layout/activity_confirmacion_joaco">
+        <action
+            android:id="@+id/action_confirmacion_to_exito_cliente"
+            app:destination="@id/exitoClienteActivity" />
+        <action
+            android:id="@+id/action_confirmacion_to_pendiente_guia"
+            app:destination="@id/pendienteGuiaActivity" />
+    </activity>
+
+    <!-- Pantallas finales según rol -->
+    <activity
+        android:id="@+id/exitoClienteActivity"
+        android:name="com.example.proyecto_2025.joaco.ExitoClienteActivity"
+        android:label="Cuenta Creada"
+        tools:layout="@layout/activity_exito_cliente_joaco" />
+
+    <activity
+        android:id="@+id/pendienteGuiaActivity"
+        android:name="com.example.proyecto_2025.joaco.PendienteGuiaActivity"
+        android:label="Pendiente Aprobación"
+        tools:layout="@layout/activity_pendiente_guia_joaco" />
+
+    <!-- Flujo de recuperación de contraseña -->
+    <activity
+        android:id="@+id/recuperarPasswordActivity"
+        android:name="com.example.proyecto_2025.joaco.RecuperarPasswordActivity"
+        android:label="Recuperar Contraseña"
+        tools:layout="@layout/activity_recuperar_password_joaco">
+        <action
+            android:id="@+id/action_recuperar_to_confirmar_email"
+            app:destination="@id/confirmarEmailActivity" />
+    </activity>
+
+    <activity
+        android:id="@+id/confirmarEmailActivity"
+        android:name="com.example.proyecto_2025.joaco.ConfirmarEmailActivity"
+        android:label="Confirmar Email"
+        tools:layout="@layout/activity_confirmar_email_joaco">
+        <action
+            android:id="@+id/action_confirmar_email_to_codigo"
+            app:destination="@id/codigoConfirmacionActivity" />
+    </activity>
+
+    <activity
+        android:id="@+id/codigoConfirmacionActivity"
+        android:name="com.example.proyecto_2025.joaco.CodigoConfirmacionActivity"
+        android:label="Código Confirmación"
+        tools:layout="@layout/activity_codigo_confirmacion_joaco">
+        <action
+            android:id="@+id/action_codigo_to_crear_password"
+            app:destination="@id/crearPasswordActivity" />
+    </activity>
+
+    <activity
+        android:id="@+id/crearPasswordActivity"
+        android:name="com.example.proyecto_2025.joaco.CrearPasswordActivity"
+        android:label="Crear Nueva Contraseña"
+        tools:layout="@layout/activity_crear_password_joaco" />
+
+</navigation>

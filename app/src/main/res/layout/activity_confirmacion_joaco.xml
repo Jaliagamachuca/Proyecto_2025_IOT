@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <!-- Título principal -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Introducir el código de confirmación"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Subtítulo -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Se envió un código de 4 dígitos\na nombre@gmail.com"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:gravity="center"
+        android:layout_marginBottom="40dp" />
+
+    <!-- Campos de código (4 campos separados) -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="40dp">
+
+        <EditText
+            android:id="@+id/et_digit1"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="8dp"
+            android:gravity="center"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textSize="18sp"
+            android:background="@android:drawable/edit_text" />
+
+        <EditText
+            android:id="@+id/et_digit2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="8dp"
+            android:gravity="center"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textSize="18sp"
+            android:background="@android:drawable/edit_text" />
+
+        <EditText
+            android:id="@+id/et_digit3"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="8dp"
+            android:gravity="center"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textSize="18sp"
+            android:background="@android:drawable/edit_text" />
+
+        <EditText
+            android:id="@+id/et_digit4"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="8dp"
+            android:gravity="center"
+            android:inputType="number"
+            android:maxLength="1"
+            android:textSize="18sp"
+            android:background="@android:drawable/edit_text" />
+
+    </LinearLayout>
+
+    <!-- Botón Reenviar código -->
+    <Button
+        android:id="@+id/btn_reenviar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Reenviar código"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#1976D2"
+        android:layout_marginBottom="16dp"
+        android:textSize="16sp" />
+
+    <!-- Botón Continuar -->
+    <Button
+        android:id="@+id/btn_confirmar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Continuar"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#1976D2"
+        android:textSize="16sp" />
+
+</LinearLayout>

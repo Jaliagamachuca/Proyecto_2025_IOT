@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <!-- Ícono de éxito -->
+    <TextView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:text="😊"
+        android:textSize="48sp"
+        android:gravity="center"
+        android:background="#000000"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Título principal -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¡Cuenta creada con éxito!"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Subtítulo -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bienvenido a ToursApp. Ahora puedes empezar a disfrutar nuestros tours."
+        android:textSize="16sp"
+        android:textColor="#666666"
+        android:gravity="center"
+        android:layout_marginBottom="80dp"
+        android:lineSpacingExtra="4dp" />
+
+    <!-- Botón ir al inicio -->
+    <Button
+        android:id="@+id/btn_ir_inicio"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Ir al inicio"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#1976D2"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textAllCaps="false" />
+
+</LinearLayout>

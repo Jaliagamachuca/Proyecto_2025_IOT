@@ -26,21 +26,55 @@
         <activity
             android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
             android:exported="false" />
-        <activity
+        <!--<activity
             android:name=".Activities_Administrador.Admin_Activity1"
-            android:exported="false" />
+            android:exported="false" />-->
         <activity
             android:name=".MenuActivity"
             android:exported="false" />
+
+
         <activity
-            android:name=".MainActivity"
+            android:name=".joaco.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".joaco.RegistroActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".joaco.ConfirmacionActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".joaco.ExitoClienteActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".joaco.PendienteGuiaActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".joaco.RecuperarPasswordActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".joaco.ConfirmarEmailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".joaco.CodigoConfirmacionActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".joaco.CrearPasswordActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
