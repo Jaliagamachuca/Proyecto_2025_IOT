@@ -1,0 +1,26 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:orientation="vertical" android:padding="16dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <TextView android:text="Historial de reservas" android:textStyle="bold" android:textSize="18sp"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+        <EditText android:id="@+id/etDesde" android:hint="Desde" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <EditText android:id="@+id/etHasta" android:hint="Hasta" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <EditText android:id="@+id/etFiltro" android:hint="Empresa / Estado" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+        <Button android:id="@+id/btnAplicar" android:text="Aplicar filtros"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvHistorial"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"/>
+
+        <Button android:id="@+id/btnCsv" android:text="Descargar CSV"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"/>
+        <Button android:id="@+id/btnPdf" android:text="Descargar PDF"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+    </LinearLayout>
+</ScrollView>

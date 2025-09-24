@@ -1,0 +1,46 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:orientation="vertical" android:padding="16dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <TextView android:text="@string/tab_dashboard" android:textStyle="bold"
+            android:textSize="18sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+        <!-- KPIs (placeholders) -->
+        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:weightSum="2" android:paddingTop="12dp">
+            <TextView android:id="@+id/kpiAdmins" android:text="Admins: 0 / 0 / 0"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+            <TextView android:id="@+id/kpiGuias" android:text="Guías: 0 / 0 / 0"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+        </LinearLayout>
+
+        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:weightSum="2" android:paddingTop="8dp">
+            <TextView android:id="@+id/kpiClientes" android:text="Clientes: 0 / 0 / +0"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+            <TextView android:id="@+id/kpiRegistros" android:text="Exportes hoy: 0"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+        </LinearLayout>
+
+        <TextView android:text="Pendientes" android:textStyle="bold"
+            android:paddingTop="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/listaPendientes" android:text="(Guías por habilitar aquí)"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+        <TextView android:text="Atajos" android:textStyle="bold"
+            android:paddingTop="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:weightSum="2">
+            <Button android:id="@+id/btnRegistrarAdmin" android:text="Registrar Admin"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+            <Button android:id="@+id/btnRegistrarGuias" android:text="Registrar Guías"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
+        </LinearLayout>
+
+        <Button android:id="@+id/btnDescargarCSV" android:text="Descargar CSV"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+        <Button android:id="@+id/btnDescargarPDF" android:text="Descargar PDF"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+    </LinearLayout>
+</ScrollView>

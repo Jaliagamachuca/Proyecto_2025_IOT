@@ -1,0 +1,20 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:orientation="vertical" android:padding="16dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <ImageView android:id="@+id/imgAvatar" android:layout_width="80dp" android:layout_height="80dp"
+            android:src="@drawable/ic_person_24"/>
+
+        <TextView android:id="@+id/tvNombre" android:text="Superadmin"
+            android:textStyle="bold" android:textSize="18sp"
+            android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+
+        <Button android:id="@+id/btnEditarPerfil" android:text="Editar perfil"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"/>
+        <Button android:id="@+id/btnCambiarPass" android:text="Cambiar contraseña"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+        <Button android:id="@+id/btnCerrarSesion" android:text="Cerrar sesión"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+    </LinearLayout>
+</ScrollView>

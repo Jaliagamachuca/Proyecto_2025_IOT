@@ -1,0 +1,25 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:orientation="vertical" android:padding="16dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <TextView android:text="@string/tab_dashboard" android:textStyle="bold" android:textSize="18sp"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+        <!-- KPIs mínimos -->
+        <TextView android:id="@+id/kpiPendientes" android:text="Pendientes hoy: 0"
+            android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingTop="8dp"/>
+        <TextView android:id="@+id/kpiEnCurso" android:text="En curso: 0"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView android:id="@+id/kpiCompletados" android:text="Completados (30d): 0"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+        <!-- Atajos -->
+        <Button android:id="@+id/btnIrSolicitar"  android:text="@string/guia_solicitar_tour"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"/>
+        <Button android:id="@+id/btnIrPendientes" android:text="@string/guia_tours_pendientes"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+        <Button android:id="@+id/btnIrHistorial"  android:text="@string/guia_historial_tours"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+    </LinearLayout>
+</ScrollView>

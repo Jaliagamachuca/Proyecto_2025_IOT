@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/nav_dashboard" android:icon="@drawable/ic_dashboard_24" android:title="@string/tab_dashboard"/>
+    <item android:id="@+id/nav_empresas"  android:icon="@drawable/ic_support_24"   android:title="@string/tab_empresas"/> <!-- etiqueta "Empresas" o "Soporte" -->
+    <item android:id="@+id/nav_guias"     android:icon="@drawable/ic_badge_24"      android:title="@string/tab_guias"/>
+    <item android:id="@+id/nav_clientes"  android:icon="@drawable/ic_group_24"      android:title="@string/tab_clientes"/>
+    <item android:id="@+id/nav_registros" android:icon="@drawable/ic_history_24"    android:title="@string/tab_registros"/>
+    <item android:id="@+id/nav_perfil"    android:icon="@drawable/ic_person_24"     android:title="@string/tab_perfil"/>
+</menu>

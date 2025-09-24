@@ -1,0 +1,25 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:orientation="vertical" android:padding="16dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <TextView android:text="@string/tab_dashboard" android:textStyle="bold" android:textSize="18sp"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+        <!-- Próxima salida -->
+        <TextView android:id="@+id/txtProxima" android:text="Próxima salida: (sin reservas)"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="8dp"/>
+
+        <!-- KPIs -->
+        <TextView android:id="@+id/kpiReservas30" android:text="Reservas (30d): 0 / Canceladas: 0"
+            android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingTop="8dp"/>
+        <TextView android:id="@+id/kpiPagos30" android:text="Total pagado (30d): S/ 0.00"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+        <!-- Atajos -->
+        <Button android:id="@+id/btnIrSoporte" android:text="Contactar empresa (Soporte)"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"/>
+        <Button android:id="@+id/btnIrReservas" android:text="Mis reservas"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+    </LinearLayout>
+</ScrollView>
