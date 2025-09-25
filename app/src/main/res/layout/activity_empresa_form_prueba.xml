@@ -1,0 +1,33 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Formulario de prueba" android:textStyle="bold" android:textSize="20sp"/>
+
+        <EditText
+            android:id="@+id/etNombre"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Nombre de empresa" android:layout_marginTop="12dp"/>
+
+        <EditText
+            android:id="@+id/etCorreo"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Correo" android:inputType="textEmailAddress" android:layout_marginTop="8dp"/>
+
+        <EditText
+            android:id="@+id/etTelefono"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Teléfono" android:inputType="phone" android:layout_marginTop="8dp"/>
+
+        <Button
+            android:id="@+id/btnGuardar"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Guardar" android:layout_marginTop="16dp"/>
+    </LinearLayout>
+</ScrollView>

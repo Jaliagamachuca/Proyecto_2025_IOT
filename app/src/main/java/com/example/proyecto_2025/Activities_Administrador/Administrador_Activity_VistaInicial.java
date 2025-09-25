@@ -35,12 +35,17 @@ public class Administrador_Activity_VistaInicial extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        // Bottom bar → cambio de vista (IF/ELSE para evitar el error de constantes)
+        // Bottom bar → cambio de vista
         binding.bottomNav.setOnItemSelectedListener(this::onBottomItemSelected);
 
         // Estado inicial
         binding.bottomNav.setSelectedItemId(R.id.nav_empresa);
         showScreen(SCR_EMPRESA);
+
+        // Botón dentro de la vista Empresa → abre el formulario de prueba
+        binding.scrEmpresa.getRoot().findViewById(R.id.btnIrFormulario)
+                .setOnClickListener(v ->
+                        startActivity(new Intent(this, EmpresaFormPruebaActivity.class)));
     }
 
     private boolean onBottomItemSelected(MenuItem item) {

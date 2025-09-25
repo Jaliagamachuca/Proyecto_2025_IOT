@@ -27,13 +27,17 @@
             android:name=".MenuActivity"
             android:exported="false" />
         <activity
-            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
+            android:name=".Activities_Usuario.Usuario_Activity_VistaInicial"
 
             android:exported="false" />
+        <activity
+            android:name=".Activities_Administrador.EmpresaFormPruebaActivity"
+            android:exported="false"/>
 
 
         <activity
-            android:name=".Activities_Usuario.Usuario_Activity_VistaInicial"
+            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
+
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
