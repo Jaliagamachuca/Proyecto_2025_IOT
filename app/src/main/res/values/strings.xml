@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">Clase3</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancelar</string>
     <string-array name="elementos">
@@ -37,6 +36,37 @@
 
 
     <string name="tab_empresas">Soporte</string> <!-- o "Soporte" -->
+
+
+    <!-- General -->
+    <string name="app_name">Proyecto_2025</string>
+    <string name="untitled">Imagen de galería</string>
+
+    <!-- Empresa -->
+    <string name="empresa_titulo">Empresa</string>
+    <string name="empresa_estado_borrador">Estado: Borrador</string>
+    <string name="empresa_estado_completo">Estado: Completo</string>
+
+    <!-- Checklist -->
+    <string name="check_contacto">• Contacto (correo/teléfono)</string>
+    <string name="check_ubicacion">• Ubicación confirmada</string>
+    <string name="check_fotos">• Galería (mínimo 2)</string>
+    <string name="check_descripcion">• Descripción corta</string>
+
+    <!-- Botones -->
+    <string name="btn_elegir_ubicacion">Elegir ubicación</string>
+    <string name="btn_agregar_fotos">Agregar fotos</string>
+    <string name="btn_guardar">Guardar</string>
+    <string name="btn_publicar">Publicar perfil</string>
+
+    <!-- Placeholders -->
+    <string name="placeholder_direccion">Sin dirección</string>
+    <string name="placeholder_nombre">Nombre comercial (obligatorio)</string>
+    <string name="placeholder_correo">Correo (obligatorio)</string>
+    <string name="placeholder_telefono">Teléfono (obligatorio)</string>
+    <string name="placeholder_web">Sitio web / red social (opcional)</string>
+    <string name="placeholder_descripcion">Descripción corta (obligatoria)</string>
+
 
 
 </resources>

@@ -1,16 +1,147 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent"
-    android:padding="16dp">
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:text="@string/tab_empresa" android:textStyle="bold" android:textSize="18sp"/>
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="16dp">
 
-    <!-- Botón para ir al formulario de prueba -->
-    <Button
-        android:id="@+id/btnIrFormulario"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Formulario de prueba"
-        android:layout_marginTop="16dp"/>
-</LinearLayout>
+        <!-- Encabezado -->
+        <TextView
+            android:id="@+id/tvTitulo"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Empresa" android:textStyle="bold" android:textSize="20sp"/>
+
+        <TextView
+            android:id="@+id/tvEstado"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Estado: Borrador" android:layout_marginTop="4dp"/>
+
+        <!-- Checklist -->
+        <LinearLayout
+            android:id="@+id/boxChecklist"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:layout_marginTop="8dp">
+
+            <TextView android:id="@+id/chkContacto"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="• Contacto (correo/teléfono)"/>
+            <TextView android:id="@+id/chkUbicacion"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="• Ubicación confirmada"/>
+            <TextView android:id="@+id/chkFotos"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="• Galería (mínimo 2)"/>
+            <TextView android:id="@+id/chkDescripcion"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="• Descripción corta"/>
+        </LinearLayout>
+
+        <!-- Formulario amigable (Material) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNombre" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="Nombre comercial (obligatorio)"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCorreo" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="Correo (obligatorio)" android:inputType="textEmailAddress"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTelefono" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="Teléfono (obligatorio)" android:inputType="phone"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etWeb" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="Sitio web / red social (opcional)" android:inputType="textUri"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDescripcion" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="Descripción corta (obligatoria)" android:maxLength="500"
+                android:minLines="2"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Ubicación -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Ubicación" android:textStyle="bold" android:layout_marginTop="12dp"/>
+
+        <!-- Card con preview de mapa (no interactivo) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardMap"
+            android:layout_width="match_parent" android:layout_height="200dp"
+            android:layout_marginTop="6dp"
+            android:clickable="false" android:focusable="false"
+            android:descendantFocusability="blocksDescendants"
+            app:cardCornerRadius="16dp" app:cardUseCompatPadding="true">
+
+            <FrameLayout
+                android:layout_width="match_parent" android:layout_height="match_parent">
+
+                <org.osmdroid.views.MapView
+                    android:id="@+id/mapPreview"
+                    android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:clickable="false" android:focusable="false"/>
+
+                <!-- Etiqueta de dirección encima del mapa -->
+                <TextView
+                    android:id="@+id/tvDireccion"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:padding="8dp" android:text="Sin dirección"
+                    android:background="#66000000" android:textColor="#FFFFFF"/>
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <Button
+            android:id="@+id/btnElegirUbicacion" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Elegir / Cambiar ubicación" android:layout_marginTop="8dp"/>
+
+        <!-- Galería -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Galería (mínimo 2 fotos)" android:textStyle="bold"
+            android:layout_marginTop="12dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvGaleria" android:layout_width="match_parent" android:layout_height="120dp"
+            android:layout_marginTop="6dp"/>
+
+        <Button
+            android:id="@+id/btnAgregarFotos" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Agregar fotos"/>
+
+        <!-- Acciones -->
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="end" android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnGuardar" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Guardar"/>
+            <Button
+                android:id="@+id/btnPublicar" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Publicar perfil" android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
