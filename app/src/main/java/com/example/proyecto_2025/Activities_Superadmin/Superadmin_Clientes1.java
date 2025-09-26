@@ -17,7 +17,7 @@ import com.example.proyecto_2025.databinding.ActivitySuperadminAdministradoresSe
 import com.example.proyecto_2025.databinding.ActivitySuperadminClientes1Binding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Superadmin_Clientes1 extends BaseActivity {
+public class Superadmin_Clientes1 extends AppCompatActivity {
 
     private ActivitySuperadminClientes1Binding binding;
 
@@ -25,7 +25,7 @@ public class Superadmin_Clientes1 extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySuperadminClientes1Binding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
         binding.btn1.setOnClickListener(view ->
                 activarCliente());

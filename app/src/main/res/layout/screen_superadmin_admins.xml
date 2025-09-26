@@ -1,12 +1,141 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="16dp"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <EditText android:id="@+id/etBuscarAdmin" android:hint="Buscar admin"
-        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    <!-- Buscador -->
+    <EditText
+        android:id="@+id/etBuscarAdmin"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Buscar admin"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
+    <!-- Título -->
+    <TextView
+        android:id="@+id/Etiqueta1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Administradores Registrados"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/etBuscarAdmin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- ==== ADMIN 1 ==== -->
+    <TextView
+        android:id="@+id/Admin1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Administrador 1"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/Etiqueta1"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/InfoAdmin1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
+        android:text="Ver información del usuario"
+        android:textAllCaps="false"
+        android:textColor="#007AFF"
+        app:layout_constraintTop_toBottomOf="@id/Admin1"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/btn1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#007AFF"
+        android:minHeight="40dp"
+        android:paddingHorizontal="16dp"
+        android:text="ACTIVAR"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toTopOf="@id/Admin1"
+        app:layout_constraintBottom_toBottomOf="@id/InfoAdmin1"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- ==== ADMIN 2 ==== -->
+    <TextView
+        android:id="@+id/Admin2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Administrador 2"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/InfoAdmin1"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/InfoAdmin2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
+        android:text="Ver información del usuario"
+        android:textAllCaps="false"
+        android:textColor="#007AFF"
+        app:layout_constraintTop_toBottomOf="@id/Admin2"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/btn2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#007AFF"
+        android:minHeight="40dp"
+        android:paddingHorizontal="16dp"
+        android:text="DESACTIVAR"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toTopOf="@id/Admin2"
+        app:layout_constraintBottom_toBottomOf="@id/InfoAdmin2"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Registrar Nuevo Admin -->
+    <Button
+        android:id="@+id/btnRegistrarAdministrador"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#007AFF"
+        android:minHeight="40dp"
+        android:paddingHorizontal="16dp"
+        android:text="Registrar Nuevo Administrador"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Si luego quieres lista dinámica, descomenta este -->
+    <!--
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvAdmins"
-        android:layout_width="match_parent" android:layout_height="0dp"
-        android:layout_weight="1"/>
-</LinearLayout>
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/Etiqueta1"
+        app:layout_constraintBottom_toTopOf="@id/btnRegistrarAdministrador"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+    -->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

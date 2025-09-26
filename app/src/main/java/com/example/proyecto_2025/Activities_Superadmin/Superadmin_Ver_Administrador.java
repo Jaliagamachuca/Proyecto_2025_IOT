@@ -16,7 +16,7 @@ import com.example.proyecto_2025.databinding.ActivitySuperadminRechazarGuiaTuris
 import com.example.proyecto_2025.databinding.ActivitySuperadminVerAdministradorBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Superadmin_Ver_Administrador extends BaseActivity {
+public class Superadmin_Ver_Administrador extends AppCompatActivity {
 
     private ActivitySuperadminVerAdministradorBinding binding;
 
@@ -24,7 +24,7 @@ public class Superadmin_Ver_Administrador extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySuperadminVerAdministradorBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
         binding.btnActivarAdministrador.setOnClickListener(view ->
                 ActivarAdministrador());

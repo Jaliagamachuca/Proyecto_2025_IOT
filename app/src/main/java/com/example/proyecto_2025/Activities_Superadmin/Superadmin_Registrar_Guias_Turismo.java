@@ -15,7 +15,7 @@ import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivitySuperadminGuiasTurismoBinding;
 import com.example.proyecto_2025.databinding.ActivitySuperadminRegistrarGuiasTurismoBinding;
 
-public class Superadmin_Registrar_Guias_Turismo extends BaseActivity {
+public class Superadmin_Registrar_Guias_Turismo extends AppCompatActivity {
 
     private ActivitySuperadminRegistrarGuiasTurismoBinding binding;
 
@@ -23,7 +23,7 @@ public class Superadmin_Registrar_Guias_Turismo extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySuperadminRegistrarGuiasTurismoBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
         binding.btn1.setOnClickListener(v -> {
             // Creamos un Intent para ir a OtraActivity

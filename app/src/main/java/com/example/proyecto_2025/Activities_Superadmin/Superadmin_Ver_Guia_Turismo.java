@@ -16,7 +16,7 @@ import com.example.proyecto_2025.databinding.ActivitySuperadminVerAdministradorB
 import com.example.proyecto_2025.databinding.ActivitySuperadminVerGuiaTurismoBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Superadmin_Ver_Guia_Turismo extends BaseActivity {
+public class Superadmin_Ver_Guia_Turismo extends AppCompatActivity {
 
     private ActivitySuperadminVerGuiaTurismoBinding binding;
 
@@ -24,7 +24,7 @@ public class Superadmin_Ver_Guia_Turismo extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySuperadminVerGuiaTurismoBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
         binding.btnActivarGuia.setOnClickListener(view ->
                 ActivarGuia());

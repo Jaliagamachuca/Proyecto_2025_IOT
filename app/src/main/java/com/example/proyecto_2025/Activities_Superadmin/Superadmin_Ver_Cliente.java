@@ -5,6 +5,7 @@ import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -15,7 +16,7 @@ import com.example.proyecto_2025.databinding.ActivitySuperadminVerClientesBindin
 import com.example.proyecto_2025.databinding.ActivitySuperadminVerGuiaTurismoBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Superadmin_Ver_Cliente extends BaseActivity {
+public class Superadmin_Ver_Cliente extends AppCompatActivity {
 
     private ActivitySuperadminVerClientesBinding binding;
 
@@ -23,7 +24,7 @@ public class Superadmin_Ver_Cliente extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySuperadminVerClientesBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
         binding.btnActivarCliente.setOnClickListener(view ->
                 ActivarCliente());

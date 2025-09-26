@@ -16,7 +16,7 @@ import com.example.proyecto_2025.databinding.ActivitySuperadminRechazarGuiaTuris
 import com.example.proyecto_2025.databinding.ActivitySuperadminRegistrarGuiaTurismoBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Superadmin_Rechazar_Guia_Turismo extends BaseActivity {
+public class Superadmin_Rechazar_Guia_Turismo extends AppCompatActivity {
 
     private ActivitySuperadminRechazarGuiaTurismoBinding binding;
 
@@ -24,7 +24,7 @@ public class Superadmin_Rechazar_Guia_Turismo extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySuperadminRechazarGuiaTurismoBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
         binding.btnRechazarGuia.setOnClickListener(view ->
                 RechazarGuia());

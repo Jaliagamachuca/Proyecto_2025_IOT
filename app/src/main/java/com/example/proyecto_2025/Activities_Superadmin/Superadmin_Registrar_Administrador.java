@@ -16,7 +16,7 @@ import com.example.proyecto_2025.databinding.ActivitySuperadminAdministradoresSe
 import com.example.proyecto_2025.databinding.ActivitySuperadminRegistrarAdministradorBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Superadmin_Registrar_Administrador extends BaseActivity {
+public class Superadmin_Registrar_Administrador extends AppCompatActivity {
 
     private ActivitySuperadminRegistrarAdministradorBinding binding;
 
@@ -24,7 +24,7 @@ public class Superadmin_Registrar_Administrador extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySuperadminRegistrarAdministradorBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
         binding.btnRegistrarAdministrador.setOnClickListener(view ->
                 RegistrarAdministrador());

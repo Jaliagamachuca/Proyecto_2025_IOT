@@ -1,12 +1,133 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="16dp"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <EditText android:id="@+id/etBuscarGuia" android:hint="Buscar guía"
-        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    <!-- Buscador -->
+    <EditText
+        android:id="@+id/etBuscarGuia"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Buscar Guia"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <androidx.recyclerview.widget.RecyclerView
+    <!-- Título -->
+    <TextView
+        android:id="@+id/Etiqueta1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Guias Registrados"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/etBuscarGuia"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- ==== Guia 1 ==== -->
+    <TextView
+        android:id="@+id/Guia1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Guia 1"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/Etiqueta1"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/InfoGuia1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
+        android:text="Ver información del usuario"
+        android:textAllCaps="false"
+        android:textColor="#007AFF"
+        app:layout_constraintTop_toBottomOf="@id/Guia1"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/btn1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#007AFF"
+        android:minHeight="40dp"
+        android:paddingHorizontal="16dp"
+        android:text="ACTIVAR"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toTopOf="@id/Guia1"
+        app:layout_constraintBottom_toBottomOf="@id/InfoGuia1"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- ==== Guia 2 ==== -->
+    <TextView
+        android:id="@+id/Guia2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Guia 2"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/InfoGuia1"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/InfoGuia2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
+        android:text="Ver información del usuario"
+        android:textAllCaps="false"
+        android:textColor="#007AFF"
+        app:layout_constraintTop_toBottomOf="@id/Guia2"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <Button
+        android:id="@+id/btn2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#007AFF"
+        android:minHeight="40dp"
+        android:paddingHorizontal="16dp"
+        android:text="DESACTIVAR"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toTopOf="@id/Guia2"
+        app:layout_constraintBottom_toBottomOf="@id/InfoGuia2"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Registrar Nuevo Guia -->
+    <Button
+        android:id="@+id/btnRegistrarGuia"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#007AFF"
+        android:minHeight="40dp"
+        android:paddingHorizontal="16dp"
+        android:text="Registrar Nuevo Guia"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvGuias"
         android:layout_width="match_parent" android:layout_height="0dp"
-        android:layout_weight="1"/>
-</LinearLayout>
+        android:layout_weight="1"/> -->
+</androidx.constraintlayout.widget.ConstraintLayout>

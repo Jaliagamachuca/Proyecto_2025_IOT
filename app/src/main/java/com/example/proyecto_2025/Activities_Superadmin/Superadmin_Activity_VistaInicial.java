@@ -2,6 +2,7 @@ package com.example.proyecto_2025.Activities_Superadmin;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -10,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 /**
  * HomeView Superadmin (sin fragments):
@@ -94,20 +96,124 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
 
         // FAB contextual
         if (screenId == SCR_ADMINS) {
+
             binding.fab.setVisibility(View.VISIBLE);
             binding.fab.setImageResource(R.drawable.ic_add_24);
             binding.fab.setOnClickListener(v ->
                     startActivity(new Intent(this,
                             com.example.proyecto_2025.Activities_Superadmin.Superadmin_Registrar_Administrador.class)));
+            // ⚡ Aquí configuras el botón dentro del layout de Admins
+            binding.scrAdmins.InfoAdmin1.setOnClickListener(v ->
+                    startActivity(new Intent(this,
+                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Administrador.class)));
+            binding.scrAdmins.InfoAdmin2.setOnClickListener(v ->
+                    startActivity(new Intent(this,
+                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Administrador.class)));
+            binding.scrAdmins.btn1.setOnClickListener(view ->
+                    activarAdministrador());
+
+            binding.scrAdmins.btn2.setOnClickListener(view ->
+                    desactivarAdministrador());
+            binding.scrAdmins.btnRegistrarAdministrador.setOnClickListener(v -> {
+                // Creamos un Intent para ir a OtraActivity
+                Intent intent = new Intent(this, Superadmin_Registrar_Administrador.class);
+                startActivity(intent);
+            });
+
         } else if (screenId == SCR_GUIAS) {
             binding.fab.setVisibility(View.VISIBLE);
             binding.fab.setImageResource(R.drawable.ic_person_add_24);
             binding.fab.setOnClickListener(v ->
                     startActivity(new Intent(this,
                             com.example.proyecto_2025.Activities_Superadmin.Superadmin_Registrar_Guias_Turismo.class)));
+            // ⚡ Aquí configuras el botón dentro del layout de Admins
+            binding.scrGuias.InfoGuia1.setOnClickListener(v ->
+                    startActivity(new Intent(this,
+                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Guia_Turismo.class)));
+            binding.scrGuias.InfoGuia2.setOnClickListener(v ->
+                    startActivity(new Intent(this,
+                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Guia_Turismo.class)));
+            binding.scrGuias.btn1.setOnClickListener(view ->
+                    activarGuia());
+
+            binding.scrGuias.btn2.setOnClickListener(view ->
+                    desactivarGuia());
+            binding.scrGuias.btnRegistrarGuia.setOnClickListener(v -> {
+                // Creamos un Intent para ir a OtraActivity
+                Intent intent = new Intent(this, Superadmin_Registrar_Guias_Turismo.class);
+                startActivity(intent);
+            });
+        } else if (screenId == SCR_CLIENTES) {
+            binding.fab.setVisibility(View.VISIBLE);
+            binding.fab.setImageResource(R.drawable.ic_person_add_24);
+            binding.fab.setOnClickListener(v ->
+                    startActivity(new Intent(this,
+                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Cliente.class)));
+            // ⚡ Aquí configuras el botón dentro del layout de Admins
+            binding.scrClientes.InfoCliente1.setOnClickListener(v ->
+                    startActivity(new Intent(this,
+                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Cliente.class)));
+            binding.scrClientes.InfoCliente2.setOnClickListener(v ->
+                    startActivity(new Intent(this,
+                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Cliente.class)));
+            binding.scrClientes.btn1.setOnClickListener(view ->
+                    activarCliente());
+
+            binding.scrClientes.btn2.setOnClickListener(view ->
+                    desactivarCliente());
         } else {
             binding.fab.setVisibility(View.GONE);
             binding.fab.setOnClickListener(null);
         }
+    }
+    public void activarAdministrador() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("Activar Administrador");
+        dialogBuilder.setMessage("¿Está seguro de activar este usuario?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
+    }
+    public void desactivarAdministrador() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("Desactivar Administrador");
+        dialogBuilder.setMessage("¿Está seguro de desactivar este usuario?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
+    }
+
+    public void activarGuia() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("Activar Guía de Turismo");
+        dialogBuilder.setMessage("¿Está seguro de activar este usuario?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
+    }
+    public void desactivarGuia() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("Desactivar Guía de Turismo");
+        dialogBuilder.setMessage("¿Está seguro de desactivar este usuario?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
+    }
+
+    public void activarCliente() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("Activar Cliente");
+        dialogBuilder.setMessage("¿Está seguro de activar este usuario?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
+    }
+    public void desactivarCliente() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("Desactivar Cliente");
+        dialogBuilder.setMessage("¿Está seguro de desactivar este usuario?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
     }
 }
