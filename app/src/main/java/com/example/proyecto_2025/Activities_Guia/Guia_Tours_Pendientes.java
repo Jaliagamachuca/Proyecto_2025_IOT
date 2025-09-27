@@ -19,7 +19,7 @@ import com.example.proyecto_2025.databinding.ActivityGuiaToursPendientesBinding;
 import com.example.proyecto_2025.databinding.ActivitySuperadminAdministradoresSedeBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Guia_Tours_Pendientes extends BaseActivity {
+public class Guia_Tours_Pendientes extends AppCompatActivity {
 
     private ActivityGuiaToursPendientesBinding binding;
 
@@ -27,7 +27,7 @@ public class Guia_Tours_Pendientes extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityGuiaToursPendientesBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
         binding.btn1.setOnClickListener(v -> {
             // Creamos un Intent para ir a OtraActivity

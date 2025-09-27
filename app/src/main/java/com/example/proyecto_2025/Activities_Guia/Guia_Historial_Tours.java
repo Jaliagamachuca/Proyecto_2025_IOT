@@ -18,14 +18,14 @@ import com.example.proyecto_2025.databinding.ActivityGuiaSolictarNuevoTourBindin
 import com.example.proyecto_2025.databinding.ActivityGuiaToursPendientesBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Guia_Historial_Tours extends BaseActivity {
+public class Guia_Historial_Tours extends AppCompatActivity {
 
     private ActivityGuiaHistorialToursBinding binding;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityGuiaHistorialToursBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
         binding.InfoTour1.setOnClickListener(v -> {
             // Creamos un Intent para ir a OtraActivity

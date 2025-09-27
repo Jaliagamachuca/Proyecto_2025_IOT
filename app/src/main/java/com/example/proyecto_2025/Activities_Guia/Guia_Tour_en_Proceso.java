@@ -15,7 +15,7 @@ import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivityGuiaTourEnProcesoBinding;
 import com.example.proyecto_2025.databinding.ActivityGuiaVistaInicialBinding;
 
-public class Guia_Tour_en_Proceso extends BaseActivity {
+public class Guia_Tour_en_Proceso extends AppCompatActivity {
 
     private ActivityGuiaTourEnProcesoBinding binding;
 
@@ -23,7 +23,7 @@ public class Guia_Tour_en_Proceso extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityGuiaTourEnProcesoBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
     }
 }

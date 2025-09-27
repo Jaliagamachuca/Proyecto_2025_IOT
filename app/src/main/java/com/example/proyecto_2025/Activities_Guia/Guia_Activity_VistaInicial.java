@@ -2,6 +2,7 @@ package com.example.proyecto_2025.Activities_Guia;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -10,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivityGuiaVistaInicialBinding;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class Guia_Activity_VistaInicial extends AppCompatActivity {
 
@@ -44,12 +46,89 @@ public class Guia_Activity_VistaInicial extends AppCompatActivity {
         // Toggle interno de "Mis tours": Solicitar / Pendientes / Historial
         binding.scrMisTours.toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) return;
-            showSubScreen(checkedId);
+
+            if (checkedId == R.id.btnSolicitar) {
+                showSubScreen(SUB_SOLICITAR);
+            } else if (checkedId == R.id.btnPendientes) {
+                showSubScreen(SUB_PENDIENTES);
+            } else if (checkedId == R.id.btnHistorial) {
+                showSubScreen(SUB_HISTORIAL);
+            }
         });
 
+        // Solicitar Tour
+        binding.scrMisTours.subSolicitar.btn1.setOnClickListener(view ->
+                solicitarTour());
+
+        binding.scrMisTours.subSolicitar.btn2.setOnClickListener(view ->
+                rechazarTour());
+
+        binding.scrMisTours.subSolicitar.btn3.setOnClickListener(view ->
+                errorSolicitar());
+
+        binding.scrMisTours.subSolicitar.btn4.setOnClickListener(view ->
+                errorCancelar());
+
         binding.scrMisTours.subSolicitar.InfoTour1.setOnClickListener(v -> {
-            startActivity(new Intent(this, Vista_Detalles_Tour.class));
+            // Creamos un Intent para ir a OtraActivity
+            Intent intent = new Intent(this, Vista_Detalles_Tour.class);
+            startActivity(intent);
         });
+
+        binding.scrMisTours.subSolicitar.InfoTour2.setOnClickListener(v -> {
+            // Creamos un Intent para ir a OtraActivity
+            Intent intent = new Intent(this, Vista_Detalles_Tour.class);
+            startActivity(intent);
+        });
+
+        binding.scrMisTours.subSolicitar.InfoTour3.setOnClickListener(v -> {
+            // Creamos un Intent para ir a OtraActivity
+            Intent intent = new Intent(this, Vista_Detalles_Tour.class);
+            startActivity(intent);
+        });
+
+        binding.scrMisTours.subSolicitar.InfoTour4.setOnClickListener(v -> {
+            // Creamos un Intent para ir a OtraActivity
+            Intent intent = new Intent(this, Vista_Detalles_Tour.class);
+            startActivity(intent);
+        });
+
+        // Tours Pendientes
+        binding.scrMisTours.subPendientes.btn1.setOnClickListener(v -> {
+            Intent intent = new Intent(this, Guia_Tour_en_Proceso.class);
+            startActivity(intent);
+        });
+
+        binding.scrMisTours.subPendientes.btn2.setOnClickListener(view ->
+                iniciarTour());
+
+        binding.scrMisTours.subPendientes.InfoTour1.setOnClickListener(v -> {
+            // Creamos un Intent para ir a OtraActivity
+            Intent intent = new Intent(this, Vista_Detalles_Tour_Sin_Botones.class);
+            startActivity(intent);
+        });
+
+        binding.scrMisTours.subPendientes.InfoTour2.setOnClickListener(v -> {
+            // Creamos un Intent para ir a OtraActivity
+            Intent intent = new Intent(this, Vista_Detalles_Tour_Sin_Botones.class);
+            startActivity(intent);
+        });
+
+        // Historial de Tours
+        binding.scrMisTours.subHistorial.InfoTour1.setOnClickListener(v -> {
+            // Creamos un Intent para ir a OtraActivity
+            Intent intent = new Intent(this, Vista_Detalles_Tour_Sin_Botones.class);
+            startActivity(intent);
+        });
+
+        binding.scrMisTours.subHistorial.InfoTour2.setOnClickListener(v -> {
+            // Creamos un Intent para ir a OtraActivity
+            Intent intent = new Intent(this, Vista_Detalles_Tour_Sin_Botones.class);
+            startActivity(intent);
+        });
+
+        binding.scrMisTours.subHistorial.btnDescargarPDF.setOnClickListener(view ->
+                descargarTour());
 
         // Botones de atajo en Dashboard → abren "Mis tours" con la subpantalla correspondiente
         binding.scrDashboard.btnIrSolicitar.setOnClickListener(v -> {
@@ -117,8 +196,70 @@ public class Guia_Activity_VistaInicial extends AppCompatActivity {
         vPendientes.setVisibility(View.GONE);
         vHistorial.setVisibility(View.GONE);
 
-        View target = (subId == SUB_SOLICITAR) ? vSolicitar :
-                (subId == SUB_PENDIENTES) ? vPendientes : vHistorial;
+        View target;
+        if (subId == SUB_SOLICITAR) {
+            target = vSolicitar;
+        } else if (subId == SUB_PENDIENTES) {
+            target = vPendientes;
+        } else if (subId == SUB_HISTORIAL) {
+            target = vHistorial;
+        } else {
+            // fallback para que nunca quede en blanco
+            target = vSolicitar;
+        }
         target.setVisibility(View.VISIBLE);
+    }
+
+    public void solicitarTour() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("Solicitar Tour");
+        dialogBuilder.setMessage("¿Está seguro de solicitar este tour?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
+    }
+    public void rechazarTour() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("Cancelar Tour");
+        dialogBuilder.setMessage("¿Está seguro cancelar la solicitud de este tour?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
+    }
+
+    public void errorSolicitar() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("ERROR");
+        dialogBuilder.setMessage("Usted ya tiene otro tour solicitado con la misma fecha, cancele la solicitud anterior y vuelva a intentarlo ");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
+    }
+
+    public void errorCancelar() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("ERROR");
+        dialogBuilder.setMessage("Este Tour ya ha sido publicado por el Administrador de la Empresa, ya no puede cancelar su solicitud");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
+    }
+
+    public void iniciarTour() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("Iniciar Tour");
+        dialogBuilder.setMessage("¿Está seguro de iniciar este tour?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
+    }
+
+    public void descargarTour() {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+        dialogBuilder.setTitle("PDF");
+        dialogBuilder.setMessage("¿Está seguro de descargar la informacion en formato PDF?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+        dialogBuilder.show();
     }
 }
