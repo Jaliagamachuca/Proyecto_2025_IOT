@@ -1,5 +1,6 @@
 package com.example.proyecto_2025.Activities_Guia;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,6 +45,10 @@ public class Guia_Activity_VistaInicial extends AppCompatActivity {
         binding.scrMisTours.toggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) return;
             showSubScreen(checkedId);
+        });
+
+        binding.scrMisTours.subSolicitar.InfoTour1.setOnClickListener(v -> {
+            startActivity(new Intent(this, Vista_Detalles_Tour.class));
         });
 
         // Botones de atajo en Dashboard → abren "Mis tours" con la subpantalla correspondiente

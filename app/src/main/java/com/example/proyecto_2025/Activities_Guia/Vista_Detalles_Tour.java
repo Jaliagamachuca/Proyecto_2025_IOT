@@ -16,7 +16,7 @@ import com.example.proyecto_2025.databinding.ActivitySuperadminVerGuiaTurismoBin
 import com.example.proyecto_2025.databinding.ActivityVistaDetallesTourBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Vista_Detalles_Tour extends BaseActivity {
+public class Vista_Detalles_Tour extends AppCompatActivity {
 
     private ActivityVistaDetallesTourBinding binding;
 
@@ -24,7 +24,7 @@ public class Vista_Detalles_Tour extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityVistaDetallesTourBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
         binding.btnSolicitarTour.setOnClickListener(view ->
                 solicitarTour());

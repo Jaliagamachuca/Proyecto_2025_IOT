@@ -1,7 +1,54 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
-    <EditText android:id="@+id/etBuscarOferta" android:hint="Buscar oferta"
-        android:layout_width="match_parent" android:layout_height="wrap_content"/>
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvOfertas" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/>
+    <!--<EditText android:id="@+id/etBuscarOferta" android:hint="Buscar oferta"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/> -->
+
+    <TextView
+        android:id="@+id/Etiqueta1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tours Disponibles"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        />
+
+    <TextView
+        android:id="@+id/Tour1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tour 1"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        />
+
+    <Button
+        android:id="@+id/InfoTour1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:padding="0dp"
+        android:text="Click aquí para ver información del tour"
+        android:textAllCaps="false"
+        android:textColor="#007AFF"
+        />
+
+    <Button
+        android:id="@+id/btn1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#007AFF"
+        android:minHeight="40dp"
+        android:paddingHorizontal="16dp"
+        android:text="SOLICITAR"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        />
+
+
+    <!--<androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvOfertas" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"/> -->
 </LinearLayout>

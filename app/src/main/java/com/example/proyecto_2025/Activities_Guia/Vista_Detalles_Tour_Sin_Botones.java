@@ -16,7 +16,7 @@ import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivityGuiaToursPendientesBinding;
 import com.example.proyecto_2025.databinding.ActivityVistaDetallesTourSinBotonesBinding;
 
-public class Vista_Detalles_Tour_Sin_Botones extends BaseActivity {
+public class Vista_Detalles_Tour_Sin_Botones extends AppCompatActivity {
 
     private ActivityVistaDetallesTourSinBotonesBinding binding;
 
@@ -24,7 +24,7 @@ public class Vista_Detalles_Tour_Sin_Botones extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityVistaDetallesTourSinBotonesBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
     }
 }

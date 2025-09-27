@@ -19,7 +19,7 @@ import com.example.proyecto_2025.databinding.ActivityGuiaSolictarNuevoTourBindin
 import com.example.proyecto_2025.databinding.ActivityGuiaToursPendientesBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Guia_Solictar_Nuevo_Tour extends BaseActivity {
+public class Guia_Solictar_Nuevo_Tour extends AppCompatActivity {
 
     private ActivityGuiaSolictarNuevoTourBinding binding;
 
@@ -27,7 +27,7 @@ public class Guia_Solictar_Nuevo_Tour extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityGuiaSolictarNuevoTourBinding.inflate(getLayoutInflater());
-        setActivityContent(binding.getRoot());
+        setContentView(binding.getRoot());
 
         binding.btn1.setOnClickListener(view ->
                 solicitarTour());
