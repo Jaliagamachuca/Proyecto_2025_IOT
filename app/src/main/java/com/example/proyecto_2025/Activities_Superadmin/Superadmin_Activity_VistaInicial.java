@@ -8,10 +8,19 @@ import android.view.View;
 
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * HomeView Superadmin (sin fragments):
@@ -21,6 +30,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
 
     private ActivitySuperadminVistaInicialBinding binding;
+
+    private EmployeeService employeeService;  // 🔹 servicio retrofit
 
     // IDs de raíces (coinciden con los android:id de cada <include/>)
     private static final int SCR_DASHBOARD = R.id.scrDashboard;
@@ -102,7 +113,7 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
             binding.fab.setOnClickListener(v ->
                     startActivity(new Intent(this,
                             com.example.proyecto_2025.Activities_Superadmin.Superadmin_Registrar_Administrador.class)));
-            // ⚡ Aquí configuras el botón dentro del layout de Admins
+            /*
             binding.scrAdmins.InfoAdmin1.setOnClickListener(v ->
                     startActivity(new Intent(this,
                             com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Administrador.class)));
@@ -118,7 +129,11 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
                 // Creamos un Intent para ir a OtraActivity
                 Intent intent = new Intent(this, Superadmin_Registrar_Administrador.class);
                 startActivity(intent);
-            });
+            }); */
+
+            // 🔹 Aquí cargamos el RecyclerView de Admins con Retrofit
+            createRetrofitService();
+            cargarListaWebService();
 
         } else if (screenId == SCR_GUIAS) {
             binding.fab.setVisibility(View.VISIBLE);
@@ -165,6 +180,48 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
             binding.fab.setVisibility(View.GONE);
             binding.fab.setOnClickListener(null);
         }
+
+    }
+
+    // ================== Retrofit ==================
+    public void createRetrofitService() {
+        employeeService = new Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:8080") // ⚡ cambia según tu backend
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(EmployeeService.class);
+    }
+
+    public void cargarListaWebService() {
+        employeeService.obtenerLista().enqueue(new Callback<EmployeeDto>() {
+            @Override
+            public void onResponse(Call<EmployeeDto> call, Response<EmployeeDto> response) {
+                if (response.isSuccessful()) {
+                    EmployeeDto body = response.body();
+                    List<Employee> employeeList = body.getLista();
+
+                    EmployeeAdapter employeeAdapter = new EmployeeAdapter();
+                    employeeAdapter.setListaEmpleados(employeeList);
+                    employeeAdapter.setContext(Superadmin_Activity_VistaInicial.this);
+
+                    // 🔹 RecyclerView de scrAdmins
+                    binding.scrAdmins.recyclerView.setAdapter(employeeAdapter);
+                    binding.scrAdmins.recyclerView.setLayoutManager(
+                            new LinearLayoutManager(Superadmin_Activity_VistaInicial.this)
+                    );
+
+                } else {
+                    Log.d("msg-superadmin", "response unsuccessful");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<EmployeeDto> call, Throwable t) {
+                Log.d("msg-superadmin", "algo pasó!!!");
+                Log.d("msg-superadmin", t.getMessage());
+                t.printStackTrace();
+            }
+        });
     }
     public void activarAdministrador() {
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
