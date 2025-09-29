@@ -45,7 +45,7 @@ public class Guia_Tour_en_Proceso extends AppCompatActivity {
             startActivity(intent);
         });
 
-        binding.btnFinalizarTour.setOnClickListener(view ->
+        binding.btnFinaliarTour.setOnClickListener(view ->
                 FinalizarTour());
 
     }
