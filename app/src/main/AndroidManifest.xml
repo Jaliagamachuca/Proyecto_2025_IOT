@@ -16,9 +16,18 @@
         android:localeConfig="@xml/locales_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.Proyecto_2025"
+        android:usesCleartextTraffic="true"
         tools:targetApi="33">
+        <activity
+            android:name=".Activities_Guia.Guia_Registrar_Progreso"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.Guia_Registrar_CheckOut"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.Guia_Registrar_CheckIn"
+            android:exported="false" />
         <activity
             android:name=".Activities_Login.Login_Activity_VistaInicial"
             android:exported="false" />
@@ -31,11 +40,9 @@
         <activity
             android:name=".Activities_Administrador.EmpresaFormPruebaActivity"
             android:exported="false" />
-
         <activity android:name=".Activities_Administrador.TourListActivity" />
         <activity android:name=".Activities_Administrador.TourFormActivity" />
         <activity android:name=".Activities_Administrador.TourDetalleActivity" />
-
         <activity
             android:name=".Activities_Superadmin.EmployeeDetailActivity"
             android:exported="false" />
@@ -75,13 +82,10 @@
         <activity
             android:name=".Activities_Guia.Guia_Activity_VistaInicial"
             android:exported="false" />
-
         <activity
             android:name=".Activities_Superadmin.Superadmin_Activity_VistaInicial"
             android:exported="false" />
-
         <activity
-
             android:name=".Activities_Guia.Guia_Historial_Tours"
             android:exported="false" />
         <activity
@@ -99,10 +103,8 @@
         <activity
             android:name=".Activities_Guia.Vista_Detalles_Tour_Sin_Botones"
             android:exported="false" />
-
         <activity
             android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
-
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -110,7 +112,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".joaco.RegistroActivity"
             android:exported="false" />
