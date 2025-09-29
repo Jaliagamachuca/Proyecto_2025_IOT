@@ -72,4 +72,5 @@
     <string name="es_porcentaje">¿Es porcentaje?</string>
     <string name="propuesta_pago">Propuesta pago</string>
     <string name="id_gu_a">ID Guía</string>
+    <string name="overflow_menu" />
 </resources>

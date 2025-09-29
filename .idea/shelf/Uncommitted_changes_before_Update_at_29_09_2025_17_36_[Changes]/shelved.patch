@@ -1,0 +1,384 @@
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\">\r\n\r\n    <uses-permission android:name=\"android.permission.INTERNET\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\" />\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\r\n        android:fullBackupContent=\"@xml/backup_rules\"\r\n        android:icon=\"@mipmap/ic_launcher\"\r\n        android:label=\"@string/app_name\"\r\n        android:localeConfig=\"@xml/locales_config\"\r\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\r\n        android:supportsRtl=\"true\"\r\n        android:usesCleartextTraffic=\"true\"\r\n        android:theme=\"@style/Theme.Proyecto_2025\"\r\n        tools:targetApi=\"33\">\r\n        <activity\r\n            android:name=\".Activities_Login.Login_Activity_VistaInicial\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".MenuActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Usuario.Usuario_Activity_VistaInicial\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Administrador.EmpresaFormPruebaActivity\"\r\n            android:exported=\"false\" />\r\n\r\n        <activity android:name=\".Activities_Administrador.TourListActivity\" />\r\n        <activity android:name=\".Activities_Administrador.TourFormActivity\" />\r\n        <activity android:name=\".Activities_Administrador.TourDetalleActivity\" />\r\n        <activity android:name=\".Activities_Administrador.Admin_Guias_HomeActivity\" android:exported=\"false\"/>\r\n        <activity android:name=\".Activities_Administrador.GuideDirectoryActivity\" android:exported=\"false\"/>\r\n        <activity\r\n            android:name=\".Activities_Administrador.GuiaFormActivity\"\r\n            android:exported=\"false\" />\r\n\r\n        <activity android:name=\".Activities_Administrador.GuideProfileActivity\" android:exported=\"false\"/>\r\n        <activity android:name=\".Activities_Administrador.OfferCreateActivity\" android:exported=\"false\"/>\r\n        <activity android:name=\".Activities_Administrador.OfferInboxActivity\" android:exported=\"false\"/>\r\n        <activity android:name=\".Activities_Administrador.AssignGuideActivity\" android:exported=\"false\"/>\r\n\r\n\r\n\r\n        <activity\r\n            android:name=\".Activities_Superadmin.EmployeeDetailActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Administradores_Sede\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Clientes\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Clientes1\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Guias_Turismo\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Rechazar_Guia_Turismo\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Registrar_Administrador\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Registrar_Guia_Turismo\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Registrar_Guias_Turismo\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Ver_Administrador\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Ver_Cliente\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Ver_Guia_Turismo\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Activity_VistaInicial\"\r\n            android:exported=\"false\" />\r\n\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Activity_VistaInicial\"\r\n            android:exported=\"false\" />\r\n\r\n        <activity\r\n\r\n            android:name=\".Activities_Guia.Guia_Historial_Tours\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Solictar_Nuevo_Tour\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Tour_en_Proceso\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Tours_Pendientes\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Vista_Detalles_Tour\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Vista_Detalles_Tour_Sin_Botones\"\r\n            android:exported=\"false\" />\r\n\r\n        <activity\r\n            android:name=\".Activities_Administrador.Administrador_Activity_VistaInicial\"\r\n\r\n            android:exported=\"true\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n\r\n        <activity\r\n            android:name=\".joaco.RegistroActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Administrador.MapPickerActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.ConfirmacionActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.ExitoClienteActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.PendienteGuiaActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.RecuperarPasswordActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.ConfirmarEmailActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.CodigoConfirmacionActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.CrearPasswordActivity\"\r\n            android:exported=\"false\" />\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	(revision 96342288cb1fc06412f595cdb6861ceb60be0b35)
++++ b/app/src/main/AndroidManifest.xml	(date 1759185368135)
+@@ -20,7 +20,7 @@
+         android:theme="@style/Theme.Proyecto_2025"
+         tools:targetApi="33">
+         <activity
+-            android:name=".Activities_Login.Login_Activity_VistaInicial"
++            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
+             android:exported="false" />
+         <activity
+             android:name=".MenuActivity"
+@@ -113,8 +113,7 @@
+             android:exported="false" />
+ 
+         <activity
+-            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
+-
++            android:name=".joaco.LoginActivity"
+             android:exported="true">
+             <intent-filter>
+                 <action android:name="android.intent.action.MAIN" />
+Index: app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferCreateActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.Activities_Administrador;\r\n\r\nimport android.app.DatePickerDialog;\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.*;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.data.OfferRepository;\r\nimport com.example.proyecto_2025.data.TourRepository;\r\nimport com.example.proyecto_2025.model.*;\r\nimport java.util.*;\r\n\r\npublic class OfferCreateActivity extends AppCompatActivity {\r\n\r\n    @Override protected void onCreate(Bundle b){\r\n        super.onCreate(b);\r\n        setContentView(R.layout.offer_create);\r\n\r\n        Guide guide = (Guide) getIntent().getSerializableExtra(\"guide\");\r\n\r\n        TextView tvGuide = findViewById(R.id.tvGuide);\r\n        Spinner spTour = findViewById(R.id.spTour);\r\n        TextView tvStart = findViewById(R.id.tvStart);\r\n        TextView tvEnd = findViewById(R.id.tvEnd);\r\n        RadioGroup rgPay = findViewById(R.id.rgPay);\r\n        EditText etAmount = findViewById(R.id.etAmount);\r\n        Button btnSend = findViewById(R.id.btnSend);\r\n\r\n        tvGuide.setText(\"Guía: \"+guide.getName());\r\n\r\n        List<Tour> tours = TourRepository.get().withoutGuide();\r\n        ArrayList<String> titles = new ArrayList<>();\r\n        for(Tour t:tours) titles.add(t.getTitle());\r\n        ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, titles);\r\n        spTour.setAdapter(ad);\r\n\r\n        final Calendar start = Calendar.getInstance();\r\n        final Calendar end   = Calendar.getInstance();\r\n\r\n        tvStart.setOnClickListener(v-> pickDate(tvStart, start));\r\n        tvEnd.setOnClickListener(v-> pickDate(tvEnd, end));\r\n\r\n        btnSend.setOnClickListener(v->{\r\n            if(spTour.getSelectedItem()==null){ Toast.makeText(this,\"Selecciona un tour\",Toast.LENGTH_SHORT).show(); return; }\r\n            String tourId = tours.get(spTour.getSelectedItemPosition()).getId();\r\n            Offer.PayMode payMode = (rgPay.getCheckedRadioButtonId()==R.id.rbFijo) ? Offer.PayMode.FIJO : Offer.PayMode.POR_HORA;\r\n            double amount;\r\n            try { amount = Double.parseDouble(etAmount.getText().toString()); }\r\n            catch (Exception e){ Toast.makeText(this,\"Monto inválido\",Toast.LENGTH_SHORT).show(); return; }\r\n\r\n            Offer o = new Offer(UUID.randomUUID().toString(), guide.getId(), tourId,\r\n                    start.getTime(), end.getTime(), payMode, amount, Offer.Status.PENDIENTE);\r\n            OfferRepository.get().add(o);\r\n\r\n            Toast.makeText(this,\"Oferta enviada\",Toast.LENGTH_SHORT).show();\r\n            startActivity(new Intent(this, OfferInboxActivity.class));\r\n            finish();\r\n        });\r\n    }\r\n\r\n    private void pickDate(TextView tv, Calendar cal){\r\n        new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {\r\n            cal.set(Calendar.YEAR, year); cal.set(Calendar.MONTH, month); cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);\r\n            tv.setText(String.format(Locale.getDefault(), \"%02d/%02d/%04d\", dayOfMonth, month+1, year));\r\n        }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferCreateActivity.java b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferCreateActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferCreateActivity.java	(revision 96342288cb1fc06412f595cdb6861ceb60be0b35)
++++ b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferCreateActivity.java	(date 1759181965606)
+@@ -3,57 +3,95 @@
+ import android.app.DatePickerDialog;
+ import android.content.Intent;
+ import android.os.Bundle;
+-import android.widget.*;
++import android.widget.ArrayAdapter;
++import android.widget.Button;
++import android.widget.EditText;
++import android.widget.RadioGroup;
++import android.widget.TextView;
++import android.widget.Toast;
++
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import com.example.proyecto_2025.R;
+ import com.example.proyecto_2025.data.OfferRepository;
+-import com.example.proyecto_2025.data.TourRepository;
+-import com.example.proyecto_2025.model.*;
+-import java.util.*;
++import com.example.proyecto_2025.model.Guide;
++import com.example.proyecto_2025.model.Offer;
++
++import java.util.ArrayList;
++import java.util.Calendar;
++import java.util.Locale;
++import java.util.UUID;
+ 
+ public class OfferCreateActivity extends AppCompatActivity {
+ 
++    // Listas simples para el spinner (mock por ahora)
++    private final ArrayList<String> tourIds    = new ArrayList<>();
++    private final ArrayList<String> tourTitles = new ArrayList<>();
++
+     @Override protected void onCreate(Bundle b){
+         super.onCreate(b);
+         setContentView(R.layout.offer_create);
+ 
+         Guide guide = (Guide) getIntent().getSerializableExtra("guide");
++        if (guide == null) { finish(); return; }
+ 
+-        TextView tvGuide = findViewById(R.id.tvGuide);
+-        Spinner spTour = findViewById(R.id.spTour);
+-        TextView tvStart = findViewById(R.id.tvStart);
+-        TextView tvEnd = findViewById(R.id.tvEnd);
+-        RadioGroup rgPay = findViewById(R.id.rgPay);
+-        EditText etAmount = findViewById(R.id.etAmount);
+-        Button btnSend = findViewById(R.id.btnSend);
++        TextView tvGuide   = findViewById(R.id.tvGuide);
++        TextView tvStart   = findViewById(R.id.tvStart);
++        TextView tvEnd     = findViewById(R.id.tvEnd);
++        RadioGroup rgPay   = findViewById(R.id.rgPay);
++        EditText etAmount  = findViewById(R.id.etAmount);
++        Button btnSend     = findViewById(R.id.btnSend);
++        android.widget.Spinner spTour = findViewById(R.id.spTour);
+ 
+-        tvGuide.setText("Guía: "+guide.getName());
++        tvGuide.setText("Guía: " + guide.getName());
+ 
+-        List<Tour> tours = TourRepository.get().withoutGuide();
+-        ArrayList<String> titles = new ArrayList<>();
+-        for(Tour t:tours) titles.add(t.getTitle());
+-        ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, titles);
++        // --------- CARGA DE TOURS (MOCK) ----------
++        seedToursForDemo(); // quita esto cuando conectes tu repo real
++
++        ArrayAdapter<String> ad = new ArrayAdapter<>(
++                this, android.R.layout.simple_spinner_dropdown_item, tourTitles);
+         spTour.setAdapter(ad);
++        // ------------------------------------------
+ 
+         final Calendar start = Calendar.getInstance();
+         final Calendar end   = Calendar.getInstance();
+ 
+-        tvStart.setOnClickListener(v-> pickDate(tvStart, start));
+-        tvEnd.setOnClickListener(v-> pickDate(tvEnd, end));
++        tvStart.setOnClickListener(v -> pickDate(tvStart, start));
++        tvEnd.setOnClickListener(v -> pickDate(tvEnd, end));
+ 
+-        btnSend.setOnClickListener(v->{
+-            if(spTour.getSelectedItem()==null){ Toast.makeText(this,"Selecciona un tour",Toast.LENGTH_SHORT).show(); return; }
+-            String tourId = tours.get(spTour.getSelectedItemPosition()).getId();
+-            Offer.PayMode payMode = (rgPay.getCheckedRadioButtonId()==R.id.rbFijo) ? Offer.PayMode.FIJO : Offer.PayMode.POR_HORA;
++        btnSend.setOnClickListener(v -> {
++            if (spTour.getSelectedItemPosition() == android.widget.AdapterView.INVALID_POSITION) {
++                Toast.makeText(this, "Selecciona un tour", Toast.LENGTH_SHORT).show();
++                return;
++            }
++            String tourId = tourIds.get(spTour.getSelectedItemPosition());
++
++            Offer.PayMode payMode =
++                    (rgPay.getCheckedRadioButtonId() == R.id.rbFijo)
++                            ? Offer.PayMode.FIJO
++                            : Offer.PayMode.POR_HORA;
++
+             double amount;
+-            try { amount = Double.parseDouble(etAmount.getText().toString()); }
+-            catch (Exception e){ Toast.makeText(this,"Monto inválido",Toast.LENGTH_SHORT).show(); return; }
++            try {
++                amount = Double.parseDouble(etAmount.getText().toString().trim());
++            } catch (Exception e) {
++                Toast.makeText(this, "Monto inválido", Toast.LENGTH_SHORT).show();
++                return;
++            }
+ 
+-            Offer o = new Offer(UUID.randomUUID().toString(), guide.getId(), tourId,
+-                    start.getTime(), end.getTime(), payMode, amount, Offer.Status.PENDIENTE);
++            Offer o = new Offer(
++                    UUID.randomUUID().toString(),
++                    guide.getId(),
++                    tourId,
++                    start.getTime(),
++                    end.getTime(),
++                    payMode,
++                    amount,
++                    Offer.Status.PENDIENTE
++            );
+             OfferRepository.get().add(o);
+ 
+-            Toast.makeText(this,"Oferta enviada",Toast.LENGTH_SHORT).show();
++            Toast.makeText(this, "Oferta enviada", Toast.LENGTH_SHORT).show();
+             startActivity(new Intent(this, OfferInboxActivity.class));
+             finish();
+         });
+@@ -61,8 +99,18 @@
+ 
+     private void pickDate(TextView tv, Calendar cal){
+         new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+-            cal.set(Calendar.YEAR, year); cal.set(Calendar.MONTH, month); cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+-            tv.setText(String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, month+1, year));
++            cal.set(Calendar.YEAR, year);
++            cal.set(Calendar.MONTH, month);
++            cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
++            tv.setText(String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, month + 1, year));
+         }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();
+     }
++
++    /** Datos de ejemplo para que el flujo sea presentable */
++    private void seedToursForDemo() {
++        if (!tourIds.isEmpty()) return;
++        tourIds.add("t1");  tourTitles.add("City Tour Cusco");
++        tourIds.add("t2");  tourTitles.add("Valle Sagrado Full Day");
++        // agrega más si quieres
++    }
+ }
+Index: app/src/main/java/com/example/proyecto_2025/joaco/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.joaco;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.Button;\r\nimport android.widget.TextView;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport com.example.proyecto_2025.R;\r\n\r\npublic class LoginActivity extends AppCompatActivity {\r\n\r\n    private Button btnAcceder;\r\n    private TextView txtRegistrarse;\r\n    private TextView txtOlvidastePassword;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_login_joaco);\r\n\r\n        initViews();\r\n        setupListeners();\r\n    }\r\n\r\n    private void initViews() {\r\n        btnAcceder = findViewById(R.id.btn_acceder);\r\n        txtRegistrarse = findViewById(R.id.txt_registrarse);\r\n        txtOlvidastePassword = findViewById(R.id.txt_olvidaste_password);\r\n    }\r\n\r\n    private void setupListeners() {\r\n        btnAcceder.setOnClickListener(v -> {\r\n            android.widget.Toast.makeText(this, \"Función de login pendiente\", android.widget.Toast.LENGTH_SHORT).show();\r\n        });\r\n\r\n        txtRegistrarse.setOnClickListener(v -> {\r\n            navigateToRegistro();\r\n        });\r\n\r\n        txtOlvidastePassword.setOnClickListener(v -> {\r\n            Intent intent = new Intent(this, RecuperarPasswordActivity.class);\r\n            startActivity(intent);\r\n        });\r\n    }\r\n\r\n    private void navigateToRegistro() {\r\n        Intent intent = new Intent(this, RegistroActivity.class);\r\n        startActivity(intent);\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/joaco/LoginActivity.java b/app/src/main/java/com/example/proyecto_2025/joaco/LoginActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/joaco/LoginActivity.java	(revision 96342288cb1fc06412f595cdb6861ceb60be0b35)
++++ b/app/src/main/java/com/example/proyecto_2025/joaco/LoginActivity.java	(date 1759184814214)
+@@ -4,9 +4,17 @@
+ import android.os.Bundle;
+ import android.widget.Button;
+ import android.widget.TextView;
++import androidx.appcompat.app.AlertDialog;
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import com.example.proyecto_2025.R;
+ 
++// IMPORTA TUS ACTIVIDADES REALES DE CADA ROL:
++import com.example.proyecto_2025.Activities_Superadmin.Superadmin_Activity_VistaInicial;
++import com.example.proyecto_2025.Activities_Administrador.Administrador_Activity_VistaInicial;
++import com.example.proyecto_2025.Activities_Guia.Guia_Activity_VistaInicial;
++import com.example.proyecto_2025.Activities_Usuario.Usuario_Activity_VistaInicial;
++
+ public class LoginActivity extends AppCompatActivity {
+ 
+     private Button btnAcceder;
+@@ -17,7 +25,6 @@
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_login_joaco);
+-
+         initViews();
+         setupListeners();
+     }
+@@ -29,22 +36,37 @@
+     }
+ 
+     private void setupListeners() {
+-        btnAcceder.setOnClickListener(v -> {
+-            android.widget.Toast.makeText(this, "Función de login pendiente", android.widget.Toast.LENGTH_SHORT).show();
+-        });
++        btnAcceder.setOnClickListener(v -> showRolePicker());
+ 
+         txtRegistrarse.setOnClickListener(v -> {
+-            navigateToRegistro();
++            startActivity(new Intent(this, RegistroActivity.class));
+         });
+ 
+         txtOlvidastePassword.setOnClickListener(v -> {
+-            Intent intent = new Intent(this, RecuperarPasswordActivity.class);
+-            startActivity(intent);
++            startActivity(new Intent(this, RecuperarPasswordActivity.class));
+         });
+     }
+ 
+-    private void navigateToRegistro() {
+-        Intent intent = new Intent(this, RegistroActivity.class);
+-        startActivity(intent);
++    private void showRolePicker() {
++        final CharSequence[] roles = {"Superadmin", "Admin", "Guía", "Usuario"};
++        new AlertDialog.Builder(this)
++                .setTitle("Ingresar como…")
++                .setItems(roles, (dialog, which) -> {
++                    switch (which) {
++                        case 0: // Superadmin
++                            startActivity(new Intent(this, Superadmin_Activity_VistaInicial.class));
++                            break;
++                        case 1: // Admin
++                            startActivity(new Intent(this, Administrador_Activity_VistaInicial.class));
++                            break;
++                        case 2: // Guía
++                            startActivity(new Intent(this, Guia_Activity_VistaInicial.class));
++                            break;
++                        case 3: // Usuario
++                            startActivity(new Intent(this, Usuario_Activity_VistaInicial.class));
++                            break;
++                    }
++                })
++                .show();
+     }
+ }
+Index: app/src/main/java/com/example/proyecto_2025/adapter/GuideAdapter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.adapter;\r\n\r\nimport android.content.Context;\r\nimport android.view.*;\r\nimport android.widget.*;\r\nimport androidx.annotation.NonNull;\r\nimport androidx.recyclerview.widget.RecyclerView;\r\nimport com.bumptech.glide.Glide;\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.model.Guide;\r\nimport java.util.*;\r\n\r\npublic class GuideAdapter extends RecyclerView.Adapter<GuideAdapter.VH> {\r\n    public interface OnAction {\r\n        void onProfile(Guide g);\r\n        void onOffer(Guide g);\r\n    }\r\n    private final Context ctx;\r\n    private final List<Guide> data;\r\n    private final OnAction listener;\r\n\r\n    public GuideAdapter(Context ctx, List<Guide> data, OnAction l){\r\n        this.ctx=ctx; this.data=data; this.listener=l;\r\n    }\r\n\r\n    @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {\r\n        View v = LayoutInflater.from(ctx).inflate(R.layout.item_guide_card, parent, false);\r\n        return new VH(v);\r\n    }\r\n\r\n    @Override public void onBindViewHolder(@NonNull VH h, int i) {\r\n        Guide g = data.get(i);\r\n        h.name.setText(g.getName());\r\n        h.zone.setText(g.getZone());\r\n        h.rating.setText(String.format(Locale.getDefault(),\"%.1f ★\", g.getRating()));\r\n        h.langs.setText(g.getLanguages().toString().replace(\"[\",\"\").replace(\"]\",\"\").replace(\",\",\" · \"));\r\n        Glide.with(ctx).load(g.getPhotoUrl()).into(h.photo);\r\n        h.btnProfile.setOnClickListener(v-> listener.onProfile(g));\r\n        h.btnOffer.setOnClickListener(v-> listener.onOffer(g));\r\n    }\r\n\r\n    @Override public int getItemCount(){ return data.size(); }\r\n\r\n    static class VH extends RecyclerView.ViewHolder{\r\n        ImageView photo; TextView name, zone, rating, langs; Button btnProfile, btnOffer;\r\n        VH(@NonNull View v){\r\n            super(v);\r\n            photo=v.findViewById(R.id.imgGuide);\r\n            name=v.findViewById(R.id.tvName);\r\n            zone=v.findViewById(R.id.tvZone);\r\n            rating=v.findViewById(R.id.tvRating);\r\n            langs=v.findViewById(R.id.tvLangs);\r\n            btnProfile=v.findViewById(R.id.btnProfile);\r\n            btnOffer=v.findViewById(R.id.btnOffer);\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/adapter/GuideAdapter.java b/app/src/main/java/com/example/proyecto_2025/adapter/GuideAdapter.java
+--- a/app/src/main/java/com/example/proyecto_2025/adapter/GuideAdapter.java	(revision 96342288cb1fc06412f595cdb6861ceb60be0b35)
++++ b/app/src/main/java/com/example/proyecto_2025/adapter/GuideAdapter.java	(date 1759184880890)
+@@ -50,7 +50,7 @@
+             zone=v.findViewById(R.id.tvZone);
+             rating=v.findViewById(R.id.tvRating);
+             langs=v.findViewById(R.id.tvLangs);
+-            btnProfile=v.findViewById(R.id.btnProfile);
++            //btnProfile=v.findViewById(R.id.btnProfile);
+             btnOffer=v.findViewById(R.id.btnOffer);
+         }
+     }
+Index: app/src/main/res/layout/guide_directory.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/guide_directory.xml b/app/src/main/res/layout/guide_directory.xml
+new file mode 100644
+--- /dev/null	(date 1759182053375)
++++ b/app/src/main/res/layout/guide_directory.xml	(date 1759182053375)
+@@ -0,0 +1,31 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    android:orientation="vertical"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:padding="16dp">
++
++    <!-- Barra de búsqueda -->
++    <EditText
++        android:id="@+id/etSearch"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:hint="Buscar guía"
++        android:drawableStart="@android:drawable/ic_menu_search"
++        android:inputType="text"
++        android:padding="12dp"
++        android:background="@drawable/bg_input"
++        android:layout_marginBottom="12dp"/>
++
++    <!-- Lista de guías -->
++    <androidx.recyclerview.widget.RecyclerView
++        android:id="@+id/rvGuides"
++        android:layout_width="match_parent"
++        android:layout_height="0dp"
++        android:layout_weight="1"
++        android:clipToPadding="false"
++        android:paddingBottom="8dp"
++        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
++
++</LinearLayout>
+Index: app/src/main/res/values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><resources>\r\n    <string name=\"ok\">Ok</string>\r\n    <string name=\"cancel\">Cancelar</string>\r\n    <string-array name=\"elementos\">\r\n        <item>Ciclo 5</item>\r\n        <item>Ciclo 6</item>\r\n        <item>Ciclo 7</item>\r\n        <item>Ciclo 8</item>\r\n    </string-array>\r\n\r\n\r\n    <string name=\"search\">Buscar</string>\r\n    <string name=\"help\">Ayuda</string>\r\n    <string name=\"settings\">Ajustes</string>\r\n    <string name=\"hello_blank_fragment\">Hello blank fragment</string>\r\n    <string name=\"admin_panel_title\">Panel del Administrador</string>\r\n    <string name=\"tab_empresa\">Empresa</string>\r\n    <string name=\"tab_tours\">Tours</string>\r\n    <string name=\"tab_guias\">Guías</string>\r\n    <string name=\"tab_reportes\">Reportes</string>\r\n    <string name=\"tab_chat\">Chat</string>\r\n    <string name=\"add\">Agregar</string>\r\n    <string name=\"tab_perfil\">Perfil</string>\r\n\r\n    <string name=\"tab_dashboard\">Dashboard</string>\r\n    <string name=\"tab_admins\">Admins</string>\r\n    <string name=\"tab_clientes\">Clientes</string>\r\n    <string name=\"tab_registros\">Registros</string>\r\n\r\n\r\n    <string name=\"tab_mis_tours\">Mis tours</string>\r\n\r\n    <string name=\"guia_solicitar_tour\">Solicitar tour</string>\r\n    <string name=\"guia_tours_pendientes\">Pendientes</string>\r\n    <string name=\"guia_historial_tours\">Historial</string>\r\n\r\n\r\n    <string name=\"tab_empresas\">Soporte</string> <!-- o \"Soporte\" -->\r\n\r\n\r\n    <!-- General -->\r\n    <string name=\"app_name\">Proyecto_2025</string>\r\n    <string name=\"untitled\">Imagen de galería</string>\r\n\r\n    <!-- Empresa -->\r\n    <string name=\"empresa_titulo\">Empresa</string>\r\n    <string name=\"empresa_estado_borrador\">Estado: Borrador</string>\r\n    <string name=\"empresa_estado_completo\">Estado: Completo</string>\r\n\r\n    <!-- Checklist -->\r\n    <string name=\"check_contacto\">• Contacto (correo/teléfono)</string>\r\n    <string name=\"check_ubicacion\">• Ubicación confirmada</string>\r\n    <string name=\"check_fotos\">• Galería (mínimo 2)</string>\r\n    <string name=\"check_descripcion\">• Descripción corta</string>\r\n\r\n    <!-- Botones -->\r\n    <string name=\"btn_elegir_ubicacion\">Elegir ubicación</string>\r\n    <string name=\"btn_agregar_fotos\">Agregar fotos</string>\r\n    <string name=\"btn_guardar\">Guardar</string>\r\n    <string name=\"btn_publicar\">Publicar perfil</string>\r\n\r\n    <!-- Placeholders -->\r\n    <string name=\"placeholder_direccion\">Sin dirección</string>\r\n    <string name=\"placeholder_nombre\">Nombre comercial (obligatorio)</string>\r\n    <string name=\"placeholder_correo\">Correo (obligatorio)</string>\r\n    <string name=\"placeholder_telefono\">Teléfono (obligatorio)</string>\r\n    <string name=\"placeholder_web\">Sitio web / red social (opcional)</string>\r\n    <string name=\"placeholder_descripcion\">Descripción corta (obligatoria)</string>\r\n\r\n    <string name=\"img\">Imagen</string>\r\n    <string name=\"content_image\">Imagen del tour</string>\r\n    <string name=\"es_porcentaje\">¿Es porcentaje?</string>\r\n    <string name=\"propuesta_pago\">Propuesta pago</string>\r\n    <string name=\"id_gu_a\">ID Guía</string>\r\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+--- a/app/src/main/res/values/strings.xml	(revision 96342288cb1fc06412f595cdb6861ceb60be0b35)
++++ b/app/src/main/res/values/strings.xml	(date 1759182377695)
+@@ -72,4 +72,5 @@
+     <string name="es_porcentaje">¿Es porcentaje?</string>
+     <string name="propuesta_pago">Propuesta pago</string>
+     <string name="id_gu_a">ID Guía</string>
++    <string name="overflow_menu" />
+ </resources>
+\ No newline at end of file
+Index: app/src/main/res/layout/item_guide_card.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<com.google.android.material.card.MaterialCardView xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"wrap_content\"\r\n    android:layout_margin=\"8dp\"\r\n    app:cardCornerRadius=\"12dp\">\r\n\r\n    <LinearLayout\r\n        android:orientation=\"horizontal\"\r\n        android:padding=\"12dp\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\">\r\n\r\n        <ImageView\r\n            android:id=\"@+id/imgGuide\"\r\n            android:layout_width=\"64dp\"\r\n            android:layout_height=\"64dp\"\r\n            android:scaleType=\"centerCrop\" />\r\n\r\n        <LinearLayout\r\n            android:orientation=\"vertical\"\r\n            android:layout_width=\"0dp\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginStart=\"12dp\"\r\n            android:layout_weight=\"1\">\r\n\r\n            <TextView\r\n                android:id=\"@+id/tvName\"\r\n                android:text=\"Nombre\"\r\n                android:textStyle=\"bold\"\r\n                android:textSize=\"16sp\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\" />\r\n\r\n            <TextView\r\n                android:id=\"@+id/tvZone\"\r\n                android:text=\"Zona\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\" />\r\n\r\n            <TextView\r\n                android:id=\"@+id/tvLangs\"\r\n                android:text=\"Idiomas\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\" />\r\n\r\n            <!-- ESTE es el que te falta -->\r\n            <TextView\r\n                android:id=\"@+id/tvRating\"\r\n                android:text=\"★ 4.8\"\r\n                android:textColor=\"#E0A200\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\" />\r\n        </LinearLayout>\r\n\r\n        <LinearLayout\r\n            android:orientation=\"vertical\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\">\r\n\r\n            <com.google.android.material.button.MaterialButton\r\n                android:id=\"@+id/btnProfile\"\r\n                android:text=\"Perfil\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\" />\r\n\r\n            <com.google.android.material.button.MaterialButton\r\n                android:id=\"@+id/btnOffer\"\r\n                android:text=\"Oferta\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:layout_marginTop=\"4dp\"/>\r\n        </LinearLayout>\r\n    </LinearLayout>\r\n</com.google.android.material.card.MaterialCardView>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/item_guide_card.xml b/app/src/main/res/layout/item_guide_card.xml
+--- a/app/src/main/res/layout/item_guide_card.xml	(revision 96342288cb1fc06412f595cdb6861ceb60be0b35)
++++ b/app/src/main/res/layout/item_guide_card.xml	(date 1759182377701)
+@@ -54,23 +54,12 @@
+                 android:layout_height="wrap_content" />
+         </LinearLayout>
+ 
+-        <LinearLayout
+-            android:orientation="vertical"
+-            android:layout_width="wrap_content"
+-            android:layout_height="wrap_content">
+-
+-            <com.google.android.material.button.MaterialButton
+-                android:id="@+id/btnProfile"
+-                android:text="Perfil"
+-                android:layout_width="wrap_content"
+-                android:layout_height="wrap_content" />
+-
+-            <com.google.android.material.button.MaterialButton
+-                android:id="@+id/btnOffer"
+-                android:text="Oferta"
+-                android:layout_width="wrap_content"
+-                android:layout_height="wrap_content"
+-                android:layout_marginTop="4dp"/>
+-        </LinearLayout>
++        <ImageButton
++            android:id="@+id/btnMore"
++            android:layout_width="40dp"
++            android:layout_height="40dp"
++            android:background="?attr/selectableItemBackgroundBorderless"
++            android:contentDescription="@string/overflow_menu"
++            android:src="@drawable/ic_more_vert_24" />
+     </LinearLayout>
+ </com.google.android.material.card.MaterialCardView>

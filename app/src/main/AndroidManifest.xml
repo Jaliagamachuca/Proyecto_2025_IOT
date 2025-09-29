@@ -20,7 +20,7 @@
         android:theme="@style/Theme.Proyecto_2025"
         tools:targetApi="33">
         <activity
-            android:name=".Activities_Login.Login_Activity_VistaInicial"
+            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
             android:exported="false" />
         <activity
             android:name=".MenuActivity"
@@ -113,8 +113,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
-
+            android:name=".joaco.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

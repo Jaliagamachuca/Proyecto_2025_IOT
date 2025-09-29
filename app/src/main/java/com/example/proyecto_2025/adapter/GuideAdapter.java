@@ -50,7 +50,7 @@ public class GuideAdapter extends RecyclerView.Adapter<GuideAdapter.VH> {
             zone=v.findViewById(R.id.tvZone);
             rating=v.findViewById(R.id.tvRating);
             langs=v.findViewById(R.id.tvLangs);
-            btnProfile=v.findViewById(R.id.btnProfile);
+            //btnProfile=v.findViewById(R.id.btnProfile);
             btnOffer=v.findViewById(R.id.btnOffer);
         }
     }
