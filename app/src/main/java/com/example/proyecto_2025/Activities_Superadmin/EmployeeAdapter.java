@@ -11,7 +11,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.IrvEmployeeBinding;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.List;
 
@@ -35,35 +37,31 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         Employee employee = listaEmpleados.get(position);
         holder.employee = employee;
 
-        if (position % 2.0 == 1) {
-            holder.binding.getRoot().setBackgroundColor(0xF3E5F5FF);
-        } else {
-            holder.binding.getRoot().setBackgroundColor(Color.WHITE); // o el color que uses normalmente
-        }
+        // Mostrar nombre completo
+        String fullName = employee.getFirstName() + " " + employee.getLastName();
+        holder.binding.textViewFullName.setText(fullName);
 
-        TextView tvFirstName = holder.binding.textViewFirstName;
-        TextView tvLastName = holder.binding.textViewLastName;
-        TextView tvSalary = holder.binding.textViewSalary;
-
-        tvFirstName.setText(employee.getFirstName());
-        tvLastName.setText(employee.getLastName());
-        tvSalary.setText(" S/. " + String.valueOf(employee.getSalary()));
-
-        if (employee.getSalary() >= 10000) {
-            tvSalary.setTextColor(Color.RED);
-        } else {
-            tvSalary.setTextColor(Color.BLACK);
-        }
-
+        // 🔹 Botón "Ver información"
         holder.binding.buttonInformacion.setOnClickListener(view -> {
-            String id = employee.getId();
-            Log.d(TAG, "Presionando el empleado con id: " + id);
-
             Intent intent = new Intent(context, EmployeeDetailActivity.class);
             intent.putExtra("employee", employee);
-
             context.startActivity(intent);
         });
+
+        // 🔹 Lógica del botón según salario
+        if (employee.getSalary() >= 10000) {
+            holder.binding.buttonActivar.setText("DESACTIVAR");
+            holder.binding.buttonActivar.setBackgroundTintList(
+                    context.getResources().getColorStateList(android.R.color.holo_red_dark)
+            );
+            holder.binding.buttonActivar.setOnClickListener(v -> mostrarDialogDesactivar(employee));
+        } else {
+            holder.binding.buttonActivar.setText("ACTIVAR");
+            holder.binding.buttonActivar.setBackgroundTintList(
+                    context.getResources().getColorStateList(android.R.color.holo_green_dark)
+            );
+            holder.binding.buttonActivar.setOnClickListener(v -> mostrarDialogActivar(employee));
+        }
     }
 
     @Override
@@ -96,5 +94,30 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
             super(binding.getRoot());
             this.binding = binding;
         }
+    }
+    private void mostrarDialogActivar(Employee empleado) {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(context);
+        dialogBuilder.setTitle("Activar Administrador");
+        dialogBuilder.setMessage("¿Está seguro de activar al usuario " + empleado.getFirstName() + "?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) ->
+                Log.d("msg-test", "btn neutral")
+        );
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) ->
+                Log.d("msg-test", "Usuario activado: " + empleado.getFirstName())
+        );
+        dialogBuilder.show();
+    }
+
+    private void mostrarDialogDesactivar(Employee empleado) {
+        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(context);
+        dialogBuilder.setTitle("Desactivar Administrador");
+        dialogBuilder.setMessage("¿Está seguro de desactivar al usuario " + empleado.getFirstName() + "?");
+        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) ->
+                Log.d("msg-test", "btn neutral")
+        );
+        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) ->
+                Log.d("msg-test", "Usuario desactivado: " + empleado.getFirstName())
+        );
+        dialogBuilder.show();
     }
 }
