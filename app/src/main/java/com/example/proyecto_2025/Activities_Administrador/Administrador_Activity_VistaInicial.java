@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.adapter.ImageUriAdapter;
 import com.example.proyecto_2025.data.EmpresaRepository;
+import com.example.proyecto_2025.data.TourRepository;
 import com.example.proyecto_2025.databinding.ActivityAdministradorVistaInicialBinding;
 import com.example.proyecto_2025.model.Empresa;
 import com.google.android.material.snackbar.Snackbar;
@@ -125,6 +126,31 @@ public class Administrador_Activity_VistaInicial extends AppCompatActivity {
 
         // Inicializa la sección Empresa
         initEmpresaSection();
+        initToursSection();
+    }
+    private void initToursSection() {
+        TourRepository repo = new TourRepository(this);
+        java.util.List<com.example.proyecto_2025.model.Tour> ultimos = repo.findLastN(3);
+
+        androidx.recyclerview.widget.LinearLayoutManager lm =
+                new androidx.recyclerview.widget.LinearLayoutManager(this,
+                        androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false);
+        binding.scrTours.rvUltimos.setLayoutManager(lm);
+
+        com.example.proyecto_2025.adapter.TourAdapter adapter =
+                new com.example.proyecto_2025.adapter.TourAdapter(
+                        ultimos,
+                        t -> {
+                            Intent i = new Intent(this, TourDetalleActivity.class);
+                            i.putExtra("id", t.id);
+                            startActivity(i);
+                        },
+                        (t, anchor) -> {}
+                );
+        binding.scrTours.rvUltimos.setAdapter(adapter);
+
+        binding.scrTours.btnVerTodos.setOnClickListener(v ->
+                startActivity(new Intent(this, TourListActivity.class)));
     }
 
     private boolean onBottomItemSelected(MenuItem item) {

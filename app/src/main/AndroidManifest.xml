@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Opcionales para “mi ubicación” -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -17,7 +17,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.Proyecto_2025">
+        android:theme="@style/Theme.Proyecto_2025"
+        tools:targetApi="33">
         <activity
             android:name=".Activities_Login.Login_Activity_VistaInicial"
             android:exported="false" />
@@ -31,6 +32,9 @@
             android:name=".Activities_Administrador.EmpresaFormPruebaActivity"
             android:exported="false" />
 
+        <activity android:name=".Activities_Administrador.TourListActivity" />
+        <activity android:name=".Activities_Administrador.TourFormActivity" />
+        <activity android:name=".Activities_Administrador.TourDetalleActivity" />
 
         <activity
             android:name=".Activities_Superadmin.EmployeeDetailActivity"
@@ -71,7 +75,13 @@
         <activity
             android:name=".Activities_Guia.Guia_Activity_VistaInicial"
             android:exported="false" />
+
         <activity
+            android:name=".Activities_Superadmin.Superadmin_Activity_VistaInicial"
+            android:exported="false" />
+
+        <activity
+
             android:name=".Activities_Guia.Guia_Historial_Tours"
             android:exported="false" />
         <activity
@@ -91,7 +101,8 @@
             android:exported="false" />
 
         <activity
-            android:name=".Activities_Superadmin.Superadmin_Activity_VistaInicial"
+            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
+
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
