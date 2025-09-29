@@ -121,7 +121,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity
+            android:name=".Activities_Guia.Guia_Registrar_CheckOut"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.Guia_Registrar_Progreso"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.Guia_Registrar_CheckIn"
+            android:exported="false" />
         <activity
             android:name=".joaco.RegistroActivity"
             android:exported="false" />
