@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".Activities_Guia.Guia_Registrar_Progreso">
+
+    <EditText
+        android:id="@+id/etBuscarCliente"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Buscar lugar"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Título -->
+    <TextView
+        android:id="@+id/Etiqueta1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Registrar Posicion"
+        android:textColor="#000000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/etBuscarCliente"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- ==== TOUR 1 fila ==== -->
+    <TextView
+        android:id="@+id/Tour1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lugar 1"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/Etiqueta1"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/precioTour1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Santa Bárbara #567"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/Tour1"
+        app:layout_constraintBottom_toBottomOf="@id/Tour1"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- ==== TOUR 2 fila ==== -->
+    <TextView
+        android:id="@+id/Tour2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lugar 2"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/Tour1"
+        app:layout_constraintStart_toStartOf="parent"/>
+    <Button
+        android:id="@+id/btn1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#007AFF"
+        android:minHeight="48dp"
+        android:paddingHorizontal="20dp"
+        android:text="REGISTRAR UBICACION"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toTopOf="@id/Tour2"
+        app:layout_constraintBottom_toBottomOf="@id/Tour2"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

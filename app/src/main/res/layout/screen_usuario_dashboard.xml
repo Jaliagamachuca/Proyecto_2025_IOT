@@ -1,25 +1,411 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
-    <LinearLayout android:orientation="vertical" android:padding="16dp"
-        android:layout_width="match_parent" android:layout_height="wrap_content">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light">
 
-        <TextView android:text="@string/tab_dashboard" android:textStyle="bold" android:textSize="18sp"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <!-- Próxima salida -->
-        <TextView android:id="@+id/txtProxima" android:text="Próxima salida: (sin reservas)"
-            android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="8dp"/>
+        <!-- Header con saludo personalizado -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
 
-        <!-- KPIs -->
-        <TextView android:id="@+id/kpiReservas30" android:text="Reservas (30d): 0 / Canceladas: 0"
-            android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingTop="8dp"/>
-        <TextView android:id="@+id/kpiPagos30" android:text="Total pagado (30d): S/ 0.00"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <ImageView
+                android:id="@+id/ivPerfilUsuario"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_person_24"
+                android:scaleType="centerCrop" />
 
-        <!-- Atajos -->
-        <Button android:id="@+id/btnIrSoporte" android:text="Contactar empresa (Soporte)"
-            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"/>
-        <Button android:id="@+id/btnIrReservas" android:text="Mis reservas"
-            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/txtSaludo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="¡Hola, Usuario!"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/txtFechaHoy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hoy es Jueves, 25 de Septiembre"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ivNotificaciones"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_notifications"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+        </LinearLayout>
+
+        <!-- Card: Próxima reserva/tour -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🎯 Tu próximo tour"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:layout_marginBottom="8dp" />
+
+                <LinearLayout
+                    android:id="@+id/layoutProximoTour"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/txtNombreProximoTour"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tour Machu Picchu Express"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtFechaProximoTour"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📅 28 de Septiembre, 6:00 AM"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_secondary" />
+
+                    <TextView
+                        android:id="@+id/txtEmpresaProximoTour"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🏢 Inka Expeditions SAC"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_secondary" />
+
+                    <Button
+                        android:id="@+id/btnVerQRCheckIn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Ver QR Check-in"
+                        android:backgroundTint="@color/primary_color"
+                        style="@style/Widget.Material3.Button" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtSinReservas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No tienes tours programados"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:visibility="visible" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- KPIs del usuario -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <!-- Reservas totales -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/txtTotalReservas"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_color" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tours realizados"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_secondary"
+                        android:textAlignment="center" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Gasto total -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:id="@+id/txtGastoTotal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="S/ 0.00"
+                        android:textColor="@color/success_color"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total invertido"
+                        android:textAlignment="center"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+
+        <!-- Acciones rápidas -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Acciones rápidas"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="12dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <Button
+                android:id="@+id/btnExplorarTours"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="🔍 Explorar Tours"
+                android:backgroundTint="@color/primary_color"
+                style="@style/Widget.Material3.Button" />
+
+            <Button
+                android:id="@+id/btnMisReservas"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="📋 Mis Reservas"
+                android:backgroundTint="@color/secondary_color"
+                style="@style/Widget.Material3.Button" />
+        </LinearLayout>
+
+        <!-- Tours recomendados/populares -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Tours recomendados para ti"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:id="@+id/btnVerTodosTours"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ver todos"
+                android:textSize="14sp"
+                android:textColor="@color/primary_color"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                android:padding="8dp" />
+        </LinearLayout>
+
+        <!-- RecyclerView horizontal para tours recomendados -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvToursRecomendados"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Card: Tour en progreso (si hay) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardTourEnProgreso"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/accent_light"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🚌 Tour en progreso"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/txtTourActual"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tour Cusco Mágico"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtEstadoTour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📍 Actualmente en: Plaza de Armas"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary" />
+
+                <Button
+                    android:id="@+id/btnSeguirTour"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Ver en mapa"
+                    android:backgroundTint="@color/primary_color"
+                    style="@style/Widget.Material3.Button.UnelevatedButton" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Historial reciente -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Actividad reciente"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary" />
+        </LinearLayout>
+
+        <!-- Lista de actividad reciente -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvActividadReciente"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false" />
+
+        <!-- Soporte/Chat -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_support"
+                    app:tint="@color/primary_color" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:text="¿Necesitas ayuda?"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary" />
+
+                <Button
+                    android:id="@+id/btnContactarSoporte"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chat"
+                    android:backgroundTint="@color/primary_color"
+                    style="@style/Widget.Material3.Button.UnelevatedButton" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
     </LinearLayout>
 </ScrollView>

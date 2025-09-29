@@ -32,37 +32,31 @@
             android:layout_height="match_parent"
             android:visibility="visible"/>
 
-        <!-- Empresas / Soporte (chat por empresa) -->
+        <!-- Explorar -->
         <include
-            android:id="@+id/scrEmpresas"
-            layout="@layout/screen_usuario_empresas"
+            android:id="@+id/scrExplorar"
+            layout="@layout/screen_usuario_explorar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"/>
 
-        <!-- Guías (asignados a mis reservas próximas) -->
+        <!-- Reservas -->
         <include
-            android:id="@+id/scrGuias"
-            layout="@layout/screen_usuario_guias"
+            android:id="@+id/scrReservas"
+            layout="@layout/screen_usuario_reservas"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"/>
 
-        <!-- Clientes (Mis reservas / Pasajeros) -->
+        <!-- Seguimiento -->
         <include
-            android:id="@+id/scrClientes"
-            layout="@layout/screen_usuario_clientes"
+            android:id="@+id/scrSeguimiento"
+            layout="@layout/screen_usuario_seguimiento"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"/>
 
-        <!-- Registros (historial y comprobantes) -->
-        <include
-            android:id="@+id/scrRegistros"
-            layout="@layout/screen_usuario_registros"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"/>
+
 
         <!-- Perfil -->
         <include

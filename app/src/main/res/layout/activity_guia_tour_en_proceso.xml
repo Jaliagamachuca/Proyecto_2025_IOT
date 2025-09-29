@@ -96,7 +96,7 @@
         app:srcCompat="@drawable/bustour" />
 
     <Button
-        android:id="@+id/btnRegistrarAdministrador"
+        android:id="@+id/btnFinaliarTour"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="#007AFF"

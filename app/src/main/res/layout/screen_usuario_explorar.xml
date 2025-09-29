@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light">
+
+    <!-- Barra de búsqueda -->
+    <EditText
+        android:id="@+id/etBuscarTour"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Buscar tours o empresas..."
+        android:layout_marginBottom="16dp" />
+
+    <!-- Título -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Destinos populares"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Botones de filtro -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/btnTodos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="Todos"
+            android:backgroundTint="@color/primary_color" />
+
+        <Button
+            android:id="@+id/btnCusco"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cusco" />
+    </LinearLayout>
+
+    <!-- Lista -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Empresas de turismo"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="12dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvEmpresasTurismo"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>
