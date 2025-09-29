@@ -24,7 +24,9 @@
         <Spinner
             android:id="@+id/spTour"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_field"
+            android:minHeight="48dp" />
 
         <TextView
             android:text="Inicio"
@@ -34,11 +36,13 @@
 
         <TextView
             android:id="@+id/tvStart"
-            android:background="@drawable/bg_input"
+            android:text="Seleccionar fecha"
+            android:background="@drawable/bg_field"
             android:padding="12dp"
+            android:minHeight="48dp"
+            android:gravity="center_vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Seleccionar fecha" />
+            android:layout_height="wrap_content" />
 
         <TextView
             android:text="Fin"
@@ -48,11 +52,13 @@
 
         <TextView
             android:id="@+id/tvEnd"
-            android:background="@drawable/bg_input"
+            android:text="Seleccionar fecha"
+            android:background="@drawable/bg_field"
             android:padding="12dp"
+            android:minHeight="48dp"
+            android:gravity="center_vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Seleccionar fecha" />
+            android:layout_height="wrap_content" />
 
         <TextView
             android:text="Pago"
@@ -90,7 +96,9 @@
         <EditText
             android:id="@+id/etAmount"
             android:inputType="numberDecimal"
-            android:background="@drawable/bg_input"
+            android:background="@drawable/bg_field"
+            android:padding="12dp"
+            android:minHeight="48dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
