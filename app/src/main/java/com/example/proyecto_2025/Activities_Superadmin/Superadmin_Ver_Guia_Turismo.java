@@ -1,5 +1,6 @@
 package com.example.proyecto_2025.Activities_Superadmin;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -26,17 +27,57 @@ public class Superadmin_Ver_Guia_Turismo extends AppCompatActivity {
         binding = ActivitySuperadminVerGuiaTurismoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.btnActivarGuia.setOnClickListener(view ->
-                ActivarGuia());
+        Intent intent = getIntent();
+        Employee employee = (Employee) intent.getSerializableExtra("employee");
 
+        if (employee != null) {
+            // 🔹 Asignar valores dinámicos
+            binding.inputNombre.setText(employee.getFirstName());
+            binding.inputApellidos.setText(employee.getLastName());
+            binding.inputDni.setText(employee.getJobId()); // ajusta a tu modelo real
+            // binding.inputFechaNacimiento.setText(employee.getBirthDate()); // idem si tienes campo
+            binding.inputCorreo.setText(employee.getEmail());
+            binding.inputTelefono.setText(employee.getPhoneNumber());
+            binding.inputDomicilio.setText(String.valueOf(employee.getSalary()));
+        }
+
+        // 🔹 Configurar el botón según condición
+        if (employee != null) {
+            if (employee.getSalary() >= 10000) {
+                binding.btnActivarGuia.setText("DESACTIVAR");
+                binding.btnActivarGuia.setBackgroundTintList(
+                        getResources().getColorStateList(android.R.color.holo_red_dark)
+                );
+                binding.btnActivarGuia.setOnClickListener(v -> mostrarDialogDesactivar(employee));
+            } else {
+                binding.btnActivarGuia.setText("ACTIVAR");
+                binding.btnActivarGuia.setBackgroundTintList(
+                        getResources().getColorStateList(android.R.color.holo_green_dark)
+                );
+                binding.btnActivarGuia.setOnClickListener(v -> mostrarDialogActivar(employee));
+            }
+        }
     }
 
-    public void ActivarGuia() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Activar Guía de Turismo");
-        dialogBuilder.setMessage("¿Está seguro de activar este usuario?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
+    private void mostrarDialogActivar(Employee empleado) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Activar Administrador")
+                .setMessage("¿Está seguro de activar al usuario " + empleado.getFirstName() + "?")
+                .setNeutralButton(R.string.cancel, (dialog, i) ->
+                        Log.d("msg-test", "cancelado"))
+                .setPositiveButton(R.string.ok, (dialog, i) ->
+                        Log.d("msg-test", "Usuario activado: " + empleado.getFirstName()))
+                .show();
+    }
+
+    private void mostrarDialogDesactivar(Employee empleado) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Desactivar Administrador")
+                .setMessage("¿Está seguro de desactivar al usuario " + empleado.getFirstName() + "?")
+                .setNeutralButton(R.string.cancel, (dialog, i) ->
+                        Log.d("msg-test", "cancelado"))
+                .setPositiveButton(R.string.ok, (dialog, i) ->
+                        Log.d("msg-test", "Usuario desactivado: " + empleado.getFirstName()))
+                .show();
     }
 }

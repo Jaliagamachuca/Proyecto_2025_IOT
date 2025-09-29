@@ -43,7 +43,17 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
 
         // 🔹 Botón "Ver información"
         holder.binding.buttonInformacion.setOnClickListener(view -> {
-            Intent intent = new Intent(context, EmployeeDetailActivity.class);
+            Intent intent;
+
+            double salario = employee.getSalary();
+            if (salario <= 8000) {
+                intent = new Intent(context, Superadmin_Ver_Administrador.class);
+            } else if (salario <= 10000) {
+                intent = new Intent(context, Superadmin_Ver_Guia_Turismo.class);
+            } else {
+                intent = new Intent(context, Superadmin_Ver_Cliente.class);
+            }
+
             intent.putExtra("employee", employee);
             context.startActivity(intent);
         });

@@ -14,6 +14,7 @@ import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -59,6 +60,10 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
         // Estado inicial: Dashboard
         binding.bottomNav.setSelectedItemId(R.id.nav_dashboard);
         showScreen(SCR_DASHBOARD);
+
+        // ⚡️ Llamamos aquí siempre, así la lista llega a Admins, Guias y Clientes
+        createRetrofitService();
+        cargarListaWebService();
     }
 
     private boolean onBottomItemSelected(MenuItem item) {
@@ -129,11 +134,7 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
                 // Creamos un Intent para ir a OtraActivity
                 Intent intent = new Intent(this, Superadmin_Registrar_Administrador.class);
                 startActivity(intent);
-            }); */
-
-            // 🔹 Aquí cargamos el RecyclerView de Admins con Retrofit
-            createRetrofitService();
-            cargarListaWebService();
+            });*/
 
         } else if (screenId == SCR_GUIAS) {
             binding.fab.setVisibility(View.VISIBLE);
@@ -141,7 +142,7 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
             binding.fab.setOnClickListener(v ->
                     startActivity(new Intent(this,
                             com.example.proyecto_2025.Activities_Superadmin.Superadmin_Registrar_Guias_Turismo.class)));
-            // ⚡ Aquí configuras el botón dentro del layout de Admins
+            /*
             binding.scrGuias.InfoGuia1.setOnClickListener(v ->
                     startActivity(new Intent(this,
                             com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Guia_Turismo.class)));
@@ -157,14 +158,14 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
                 // Creamos un Intent para ir a OtraActivity
                 Intent intent = new Intent(this, Superadmin_Registrar_Guias_Turismo.class);
                 startActivity(intent);
-            });
+            }); */
         } else if (screenId == SCR_CLIENTES) {
             binding.fab.setVisibility(View.VISIBLE);
             binding.fab.setImageResource(R.drawable.ic_person_add_24);
             binding.fab.setOnClickListener(v ->
                     startActivity(new Intent(this,
                             com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Cliente.class)));
-            // ⚡ Aquí configuras el botón dentro del layout de Admins
+            /*
             binding.scrClientes.InfoCliente1.setOnClickListener(v ->
                     startActivity(new Intent(this,
                             com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Cliente.class)));
@@ -175,7 +176,7 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
                     activarCliente());
 
             binding.scrClientes.btn2.setOnClickListener(view ->
-                    desactivarCliente());
+                    desactivarCliente()); */
         } else {
             binding.fab.setVisibility(View.GONE);
             binding.fab.setOnClickListener(null);
@@ -200,13 +201,46 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
                     EmployeeDto body = response.body();
                     List<Employee> employeeList = body.getLista();
 
-                    EmployeeAdapter employeeAdapter = new EmployeeAdapter();
-                    employeeAdapter.setListaEmpleados(employeeList);
-                    employeeAdapter.setContext(Superadmin_Activity_VistaInicial.this);
+                    // 🔹 Dividir la lista en 3 sublistas según salario
+                    List<Employee> listaAdmins = new ArrayList<>();
+                    List<Employee> listaGuias = new ArrayList<>();
+                    List<Employee> listaClientes = new ArrayList<>();
 
-                    // 🔹 RecyclerView de scrAdmins
-                    binding.scrAdmins.recyclerView.setAdapter(employeeAdapter);
+                    for (Employee e : employeeList) {
+                        double salario = e.getSalary();
+                        if (salario <= 8000) {
+                            listaAdmins.add(e);
+                        } else if (salario <= 10000) {
+                            listaGuias.add(e);
+                        } else {
+                            listaClientes.add(e);
+                        }
+                    }
+
+                    // 🔹 Adapter para Admins
+                    EmployeeAdapter adapterAdmins = new EmployeeAdapter();
+                    adapterAdmins.setListaEmpleados(listaAdmins);
+                    adapterAdmins.setContext(Superadmin_Activity_VistaInicial.this);
+                    binding.scrAdmins.recyclerView.setAdapter(adapterAdmins);
                     binding.scrAdmins.recyclerView.setLayoutManager(
+                            new LinearLayoutManager(Superadmin_Activity_VistaInicial.this)
+                    );
+
+                    // 🔹 Adapter para Guias
+                    EmployeeAdapter adapterGuias = new EmployeeAdapter();
+                    adapterGuias.setListaEmpleados(listaGuias);
+                    adapterGuias.setContext(Superadmin_Activity_VistaInicial.this);
+                    binding.scrGuias.recyclerView.setAdapter(adapterGuias);
+                    binding.scrGuias.recyclerView.setLayoutManager(
+                            new LinearLayoutManager(Superadmin_Activity_VistaInicial.this)
+                    );
+
+                    // 🔹 Adapter para Clientes
+                    EmployeeAdapter adapterClientes = new EmployeeAdapter();
+                    adapterClientes.setListaEmpleados(listaClientes);
+                    adapterClientes.setContext(Superadmin_Activity_VistaInicial.this);
+                    binding.scrClientes.recyclerView.setAdapter(adapterClientes);
+                    binding.scrClientes.recyclerView.setLayoutManager(
                             new LinearLayoutManager(Superadmin_Activity_VistaInicial.this)
                     );
 
@@ -217,60 +251,8 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<EmployeeDto> call, Throwable t) {
-                Log.d("msg-superadmin", "algo pasó!!!");
-                Log.d("msg-superadmin", t.getMessage());
-                t.printStackTrace();
+                Log.e("msg-superadmin", "error: " + t.getMessage());
             }
         });
-    }
-    public void activarAdministrador() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Activar Administrador");
-        dialogBuilder.setMessage("¿Está seguro de activar este usuario?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
-    }
-    public void desactivarAdministrador() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Desactivar Administrador");
-        dialogBuilder.setMessage("¿Está seguro de desactivar este usuario?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
-    }
-
-    public void activarGuia() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Activar Guía de Turismo");
-        dialogBuilder.setMessage("¿Está seguro de activar este usuario?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
-    }
-    public void desactivarGuia() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Desactivar Guía de Turismo");
-        dialogBuilder.setMessage("¿Está seguro de desactivar este usuario?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
-    }
-
-    public void activarCliente() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Activar Cliente");
-        dialogBuilder.setMessage("¿Está seguro de activar este usuario?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
-    }
-    public void desactivarCliente() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Desactivar Cliente");
-        dialogBuilder.setMessage("¿Está seguro de desactivar este usuario?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
     }
 }
