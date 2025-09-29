@@ -1,0 +1,30 @@
+<!-- res/layout/item_guide_chip.xml -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="220dp" android:layout_height="match_parent"
+    android:layout_marginEnd="12dp" app:cardCornerRadius="16dp">
+
+    <LinearLayout
+        android:orientation="horizontal" android:padding="12dp"
+        android:layout_width="match_parent" android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/imgGuide"
+            android:layout_width="56dp" android:layout_height="56dp"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
+            android:orientation="vertical" android:layout_marginStart="8dp"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1">
+
+            <TextView android:id="@+id/tvName" android:textStyle="bold" android:maxLines="1"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+            <TextView android:id="@+id/tvLangs" android:textColor="#666" android:maxLines="1"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+            <TextView android:id="@+id/tvZone" android:textColor="#666" android:maxLines="1"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,50 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp" android:background="@color/white"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <!-- KPIs -->
+        <LinearLayout android:orientation="horizontal" android:weightSum="2"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp" android:layout_height="100dp" android:layout_marginEnd="8dp"
+                app:cardCornerRadius="16dp" android:layout_weight="1">
+                <LinearLayout android:padding="16dp" android:orientation="vertical"
+                    android:layout_width="match_parent" android:layout_height="match_parent">
+                    <TextView android:text="Pendientes" android:textStyle="bold" android:textSize="16sp"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <TextView android:id="@+id/kpiPend" android:text="0" android:textSize="28sp"
+                        android:textColor="@color/black" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp" android:layout_height="100dp" android:layout_marginStart="8dp"
+                app:cardCornerRadius="16dp" android:layout_weight="1">
+                <LinearLayout android:padding="16dp" android:orientation="vertical"
+                    android:layout_width="match_parent" android:layout_height="match_parent">
+                    <TextView android:text="Aceptadas" android:textStyle="bold" android:textSize="16sp"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <TextView android:id="@+id/kpiAcep" android:text="0" android:textSize="28sp"
+                        android:textColor="@color/black" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- Accesos -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExplorar" style="@style/Widget.MaterialComponents.Button"
+            android:text="Explorar Guías" android:layout_marginTop="16dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOfertas" android:text="Bandeja de Ofertas"
+            android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAsignar" android:text="Asignar Guía (aceptadas)"
+            android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+</ScrollView>

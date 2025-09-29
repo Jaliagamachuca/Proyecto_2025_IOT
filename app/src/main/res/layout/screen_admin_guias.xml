@@ -1,7 +1,108 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent"
+<!-- res/layout/screen_admin_guias.xml -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:padding="16dp">
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:text="@string/tab_guias" android:textStyle="bold" android:textSize="18sp"/>
-    <!-- TODO: estado/ubicación guía -->
-</LinearLayout>
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <!-- Título -->
+        <TextView
+            android:id="@+id/tvHeaderGuias"
+            android:text="@string/tab_guias"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- KPIs -->
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal" android:weightSum="2">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp" android:layout_height="96dp"
+                android:layout_marginEnd="8dp" android:layout_weight="1"
+                app:cardCornerRadius="16dp">
+                <LinearLayout
+                    android:padding="12dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent" android:layout_height="match_parent">
+                    <TextView android:text="Ofertas pendientes" android:textStyle="bold"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <TextView android:id="@+id/kpiOfertasPend"
+                        android:text="0" android:textSize="28sp"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp" android:layout_height="96dp"
+                android:layout_marginStart="8dp" android:layout_weight="1"
+                app:cardCornerRadius="16dp">
+                <LinearLayout
+                    android:padding="12dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent" android:layout_height="match_parent">
+                    <TextView android:text="Ofertas aceptadas" android:textStyle="bold"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    <TextView android:id="@+id/kpiOfertasAcep"
+                        android:text="0" android:textSize="28sp"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- Acciones rápidas -->
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal" android:weightSum="3">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExplorarGuias"
+                android:text="Explorar guías"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOfertasGuias"
+                android:text="Bandeja de ofertas"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp" android:layout_marginEnd="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCalendarioGuias"
+                android:text="Calendario"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <!-- Sugeridos (horizontal) -->
+        <TextView
+            android:text="Sugeridos para tus tours"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvGuiasSugeridos"
+            android:layout_width="match_parent" android:layout_height="120dp"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Estado/ayuda -->
+        <TextView
+            android:id="@+id/tvEmptyGuias"
+            android:text="No hay guías sugeridos con tus filtros actuales."
+            android:visibility="gone"
+            android:textColor="#666"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"/>
+    </LinearLayout>
+</ScrollView>

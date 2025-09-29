@@ -35,6 +35,18 @@
         <activity android:name=".Activities_Administrador.TourListActivity" />
         <activity android:name=".Activities_Administrador.TourFormActivity" />
         <activity android:name=".Activities_Administrador.TourDetalleActivity" />
+        <activity android:name=".Activities_Administrador.Admin_Guias_HomeActivity" android:exported="false"/>
+        <activity android:name=".Activities_Administrador.GuideDirectoryActivity" android:exported="false"/>
+        <activity
+            android:name=".Activities_Administrador.GuiaFormActivity"
+            android:exported="false" />
+
+        <activity android:name=".Activities_Administrador.GuideProfileActivity" android:exported="false"/>
+        <activity android:name=".Activities_Administrador.OfferCreateActivity" android:exported="false"/>
+        <activity android:name=".Activities_Administrador.OfferInboxActivity" android:exported="false"/>
+        <activity android:name=".Activities_Administrador.AssignGuideActivity" android:exported="false"/>
+
+
 
         <activity
             android:name=".Activities_Superadmin.EmployeeDetailActivity"

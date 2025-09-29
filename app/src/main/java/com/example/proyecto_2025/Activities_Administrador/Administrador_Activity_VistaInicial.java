@@ -24,6 +24,12 @@ import com.example.proyecto_2025.data.TourRepository;
 import com.example.proyecto_2025.databinding.ActivityAdministradorVistaInicialBinding;
 import com.example.proyecto_2025.model.Empresa;
 import com.google.android.material.snackbar.Snackbar;
+import androidx.recyclerview.widget.RecyclerView;
+import com.example.proyecto_2025.adapter.GuideAdapter;
+import com.example.proyecto_2025.data.OfferRepository;
+import com.example.proyecto_2025.data.GuideRepository;
+import com.example.proyecto_2025.model.Guide;
+import com.example.proyecto_2025.model.Offer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +57,7 @@ public class Administrador_Activity_VistaInicial extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityAdministradorVistaInicialBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        com.example.proyecto_2025.data.GuideRepository.get().seedIfEmpty(this);
 
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
@@ -127,6 +134,63 @@ public class Administrador_Activity_VistaInicial extends AppCompatActivity {
         // Inicializa la sección Empresa
         initEmpresaSection();
         initToursSection();
+        initGuiasSection();
+
+    }
+    private GuideAdapter guiasAdapter;
+    private final java.util.List<Guide> sugeridos = new java.util.ArrayList<>();
+
+    private void initGuiasSection() {
+        // Acciones rápidas
+        binding.scrGuias.btnExplorarGuias.setOnClickListener(v ->
+                startActivity(new Intent(this, GuideDirectoryActivity.class)));
+
+        binding.scrGuias.btnOfertasGuias.setOnClickListener(v ->
+                startActivity(new Intent(this, OfferInboxActivity.class)));
+
+        binding.scrGuias.btnCalendarioGuias.setOnClickListener(v -> {
+            // Si aún no tienes calendario, deja un placeholder o navega a una Activity vacía
+            Snackbar.make(binding.getRoot(), "Calendario de guías (próxima iteración)", Snackbar.LENGTH_SHORT).show();
+        });
+
+        // Carrusel horizontal de guías sugeridos
+        RecyclerView rv = binding.scrGuias.rvGuiasSugeridos;
+        rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+        // Usamos el mismo GuideAdapter, pero con layout simple (chip)
+        guiasAdapter = new GuideAdapter(this, sugeridos, new GuideAdapter.OnAction() {
+            @Override public void onProfile(Guide g) {
+                Intent i = new Intent(Administrador_Activity_VistaInicial.this, GuideProfileActivity.class);
+                i.putExtra("guide", g);
+                startActivity(i);
+            }
+            @Override public void onOffer(Guide g) {
+                Intent i = new Intent(Administrador_Activity_VistaInicial.this, OfferCreateActivity.class);
+                i.putExtra("guide", g);
+                startActivity(i);
+            }
+        });
+        rv.setAdapter(guiasAdapter);
+
+        // Primera carga
+        refreshGuiasDashboard();
+    }
+
+    /** Llama esto cuando regreses a la pestaña o tras enviar/aceptar ofertas */
+    private void refreshGuiasDashboard() {
+        // KPIs
+        int pend = OfferRepository.get().byStatus(Offer.Status.PENDIENTE).size();
+        int acep = OfferRepository.get().byStatus(Offer.Status.ACEPTADA).size();
+        binding.scrGuias.kpiOfertasPend.setText(String.valueOf(pend));
+        binding.scrGuias.kpiOfertasAcep.setText(String.valueOf(acep));
+
+        // Sugeridos: muestra algunos guías (podrías filtrar por zona/idioma más adelante)
+        sugeridos.clear();
+        java.util.List<Guide> all = GuideRepository.get().all();
+        for (int i = 0; i < Math.min(5, all.size()); i++) sugeridos.add(all.get(i));
+        guiasAdapter.notifyDataSetChanged();
+
+        binding.scrGuias.tvEmptyGuias.setVisibility(sugeridos.isEmpty() ? View.VISIBLE : View.GONE);
     }
     private void initToursSection() {
         TourRepository repo = new TourRepository(this);
@@ -205,10 +269,11 @@ public class Administrador_Activity_VistaInicial extends AppCompatActivity {
                 startActivity(new Intent(this, TourFormActivity.class));
             });
         } else if (screenId == SCR_GUIAS) {
-            binding.fab.setVisibility(View.VISIBLE);
-            binding.fab.setImageResource(R.drawable.ic_person_add_24);
-            binding.fab.setOnClickListener(v ->
-                    startActivity(new Intent(this, GuiaFormActivity.class)));
+            binding.fab.setVisibility(View.GONE);
+            binding.fab.setOnClickListener(null);
+
+            // Refresca KPIs/carrusel
+            refreshGuiasDashboard();
         } else {
             binding.fab.setVisibility(View.GONE);
             binding.fab.setOnClickListener(null);
