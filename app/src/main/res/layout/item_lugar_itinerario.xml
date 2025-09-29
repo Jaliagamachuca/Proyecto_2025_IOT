@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:gravity="center_vertical">
+
+    <!-- Indicador de estado (círculo) -->
+    <View
+        android:id="@+id/indicadorEstado"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/circle_background" />
+
+    <!-- Información del lugar -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtNombreLugar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Plaza de Armas"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:id="@+id/txtEstadoLugar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Visitando ahora"
+            android:textSize="12sp"
+            android:textColor="@color/primary_color" />
+    </LinearLayout>
+
+    <!-- Hora -->
+    <TextView
+        android:id="@+id/txtHoraLugar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10:30"
+        android:textSize="12sp"
+        android:textColor="@color/text_secondary" />
+</LinearLayout>
