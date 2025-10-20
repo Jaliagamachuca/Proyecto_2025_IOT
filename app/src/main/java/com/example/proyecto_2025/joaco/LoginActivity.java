@@ -63,6 +63,9 @@ public class LoginActivity extends AppCompatActivity {
                             startActivity(new Intent(this, Guia_Activity_VistaInicial.class));
                             break;
                         case 3: // Usuario
+                            // Guarda un email simple para esta fase local
+                            getSharedPreferences("user_prefs", MODE_PRIVATE)
+                                    .edit().putString("current_user_email", "usuario@demo.com").apply();
                             startActivity(new Intent(this, Usuario_Activity_VistaInicial.class));
                             break;
                     }

@@ -55,4 +55,17 @@ dependencies {
     implementation libs.converter.gson
     implementation libs.gson
 
+
+    implementation libs.core.ktx
+    implementation libs.recyclerview
+
+    // ROOM
+    implementation libs.room.runtime
+    annotationProcessor libs.room.compiler
+
+    // WORKMANAGER (recordatorios)
+    implementation libs.work.runtime
+
+    // GSON si no lo tienes ya
+
 }
