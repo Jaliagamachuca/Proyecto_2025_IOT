@@ -78,7 +78,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🎯 Tu próximo tour"
+                    android:text="Tu próximo tour"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"
@@ -103,7 +103,7 @@
                         android:id="@+id/txtFechaProximoTour"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="📅 28 de Septiembre, 6:00 AM"
+                        android:text="28 de Septiembre, 6:00 AM"
                         android:textSize="12sp"
                         android:textColor="@color/text_secondary" />
 
@@ -111,7 +111,7 @@
                         android:id="@+id/txtEmpresaProximoTour"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🏢 Inka Expeditions SAC"
+                        android:text="Inka Expeditions SAC"
                         android:textSize="12sp"
                         android:textColor="@color/text_secondary" />
 
@@ -143,7 +143,7 @@
             android:orientation="horizontal"
             android:layout_marginBottom="16dp">
 
-            <!-- Reservas totales -->
+            <!-- Tours realizados -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -160,7 +160,7 @@
                     android:gravity="center">
 
                     <TextView
-                        android:id="@+id/txtTotalReservas"
+                        android:id="@+id/txtTotalTours"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
@@ -195,7 +195,7 @@
                     android:padding="12dp">
 
                     <TextView
-                        android:id="@+id/txtGastoTotal"
+                        android:id="@+id/txtTotalInvertido"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="S/ 0.00"
@@ -236,7 +236,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="🔍 Explorar Tours"
+                android:text="Explorar Tours"
                 android:backgroundTint="@color/primary_color"
                 style="@style/Widget.Material3.Button" />
 
@@ -246,7 +246,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="📋 Mis Reservas"
+                android:text="Mis Reservas"
                 android:backgroundTint="@color/secondary_color"
                 style="@style/Widget.Material3.Button" />
         </LinearLayout>
@@ -309,7 +309,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🚌 Tour en progreso"
+                    android:text="Tour en progreso"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"
@@ -327,7 +327,7 @@
                     android:id="@+id/txtEstadoTour"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📍 Actualmente en: Plaza de Armas"
+                    android:text="Actualmente en: Plaza de Armas"
                     android:textSize="12sp"
                     android:textColor="@color/text_secondary" />
 
@@ -360,7 +360,6 @@
                 android:textColor="@color/text_primary" />
         </LinearLayout>
 
-        <!-- Lista de actividad reciente -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvActividadReciente"
             android:layout_width="match_parent"

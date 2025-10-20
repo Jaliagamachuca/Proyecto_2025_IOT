@@ -3,6 +3,7 @@ package com.example.proyecto_2025.Activities_Usuario;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,11 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.google.android.material.tabs.TabLayout;
 
-/**
- * Activity principal del Cliente
- * Bottom bar: Dashboard, Explorar, Reservas, Seguimiento, Perfil
- * Navegación directa entre 5 pantallas principales
- */
+
 public class Usuario_Activity_VistaInicial extends AppCompatActivity {
 
     private ActivityUsuarioVistaInicialBinding binding;
@@ -44,15 +41,20 @@ public class Usuario_Activity_VistaInicial extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        // Bottom bar → navegación
+        // 1) Notifs + Seed
+        com.example.proyecto_2025.notif.NotificationHelper.ensureChannel(this);
+        com.example.proyecto_2025.data.seed.SeedLoader.loadIfNeeded(this);
+
+        // 2) Bottom bar
         binding.bottomNav.setOnItemSelectedListener(this::onBottomItemSelected);
 
-        setupRecyclerViewEmpresas();
-        setupRecyclerViewToursRecomendados();
-        setupRecyclerViewReservas();
+        // 3) UI
+        setupRecyclerViewEmpresas();           // mock visual (puedes dejarlo igual)
+        setupRecyclerViewToursRecomendados();  // AHORA reserva real
+        setupRecyclerViewReservas();           // lee local (simple)
         setupRecyclerViewItinerario();
 
-        // Atajos desde Dashboard
+        // 4) Atajos
         binding.scrDashboard.btnContactarSoporte.setOnClickListener(v -> {
             binding.bottomNav.setSelectedItemId(R.id.nav_explorar);
             showScreen(SCR_EXPLORAR);
@@ -62,10 +64,34 @@ public class Usuario_Activity_VistaInicial extends AppCompatActivity {
             showScreen(SCR_RESERVAS);
         });
 
-        // Estado inicial
+        // 5) Estado inicial + KPIs
         binding.bottomNav.setSelectedItemId(R.id.nav_dashboard);
         showScreen(SCR_DASHBOARD);
+        cargarKpisDesdeLocal();   // <--- NUEVO
+    }
 
+
+    private String currentUserEmail() {
+        return getSharedPreferences("user_prefs", MODE_PRIVATE)
+                .getString("current_user_email", "usuario@demo.com");
+    }
+
+    private void cargarKpisDesdeLocal() {
+        // Lee de ReservaRepository y refresca KPIs del dashboard y la pantalla de Reservas
+        new Thread(() -> {
+            com.example.proyecto_2025.data.repository.ReservaRepository repo =
+                    new com.example.proyecto_2025.data.repository.ReservaRepository(this);
+            String email = currentUserEmail();
+
+            int completadas = repo.countCompletadas(email);
+            double total = repo.totalGastado(email);
+
+            runOnUiThread(() -> {
+                // KPIs del Dashboard (usa tus TextViews según binding del layout)
+                binding.scrDashboard.txtTotalTours.setText(String.valueOf(completadas));
+                binding.scrDashboard.txtTotalInvertido.setText(String.format("S/ %.2f", total));
+            });
+        }).start();
     }
 
     private boolean onBottomItemSelected(MenuItem item) {
@@ -156,17 +182,60 @@ public class Usuario_Activity_VistaInicial extends AppCompatActivity {
 
 
     private void setupRecyclerViewToursRecomendados() {
+        // Los ítems siguen siendo UI de ejemplo, pero al hacer click creamos una reserva REAL
         List<TourRecomendado> tours = crearToursRecomendados();
 
         ToursRecomendadosAdapter adapter = new ToursRecomendadosAdapter(tours, tour -> {
-            // Click en tour recomendado
-            // TODO: Navegar a detalles del tour
+            // Para enlazar con nuestra DB local, elegimos un tour por nombre
+            new Thread(() -> {
+                var db = com.example.proyecto_2025.data.local.db.AppDatabase.get(this);
+                // Busca el primero que tenga ese nombre en la semilla
+                var list = db.tourDao().getAll();
+                long tourId = -1;
+                for (var t : list) if (t.nombre.equalsIgnoreCase(tour.getNombre())) { tourId = t.id; break; }
+                if (tourId == -1 && !list.isEmpty()) tourId = list.get(0).id; // fallback
+
+                var repo = new com.example.proyecto_2025.data.repository.ReservaRepository(this);
+                long resId = repo.crearReserva(tourId, currentUserEmail());
+
+                runOnUiThread(() -> {
+                    Toast.makeText(this,
+                            resId > 0 ? "Reserva creada y notificada" : "No se pudo crear la reserva",
+                            Toast.LENGTH_SHORT).show();
+                    // Refresca KPIs y lista de reservas
+                    cargarKpisDesdeLocal();
+                    refrescarListaReservasProximas();
+                });
+            }).start();
         });
 
         binding.scrDashboard.rvToursRecomendados.setLayoutManager(
                 new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         binding.scrDashboard.rvToursRecomendados.setAdapter(adapter);
     }
+
+    private void refrescarListaReservasProximas() {
+        new Thread(() -> {
+            var repo = new com.example.proyecto_2025.data.repository.ReservaRepository(this);
+            var proximas = repo.proximas(currentUserEmail());
+            // Mapear a tu modelo visual Reserva (nombre, fecha, empresa, estado, imagen)
+            List<Reserva> ui = new ArrayList<>();
+            var db = com.example.proyecto_2025.data.local.db.AppDatabase.get(this);
+            for (var r : proximas) {
+                var t = db.tourDao().find(r.tourId);
+                ui.add(new Reserva(t.nombre,
+                        new java.text.SimpleDateFormat("dd MMM yyyy").format(new java.util.Date(t.inicioUtc)),
+                        "Empresa", "Próxima", // empresa real lo añadiremos luego con JOIN
+                        R.drawable.macchupicchu // placeholder según portadaKey
+                ));
+            }
+            runOnUiThread(() -> {
+                binding.scrReservas.recyclerViewReservas.setLayoutManager(new LinearLayoutManager(this));
+                binding.scrReservas.recyclerViewReservas.setAdapter(new ReservasAdapter(ui));
+            });
+        }).start();
+    }
+
 
     private List<TourRecomendado> crearToursRecomendados() {
         List<TourRecomendado> tours = new ArrayList<>();

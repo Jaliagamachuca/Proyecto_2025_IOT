@@ -1,0 +1,45 @@
+[
+  {
+    "nombre": "Inka Expeditions SAC",
+    "ciudad": "Cusco",
+    "pais": "Perú",
+    "logoKey": "ic_business_24",
+    "tours": [
+      {
+        "nombre": "Tour Machu Picchu",
+        "descripcion": "Experiencia guiada a Machu Picchu",
+        "inicioUtc": 1760552400000,
+        "finUtc":   1760638800000,
+        "precio": 350.0,
+        "rating": 4.5,
+        "portadaKey": "macchupicchu"
+      },
+      {
+        "nombre": "Valle Sagrado",
+        "descripcion": "Full day por Pisac y Ollantaytambo",
+        "inicioUtc": 1760206800000,
+        "finUtc":   1760235600000,
+        "precio": 120.0,
+        "rating": 4.7,
+        "portadaKey": "vallesagrado"
+      }
+    ]
+  },
+  {
+    "nombre": "Mountain Adventures",
+    "ciudad": "Cusco",
+    "pais": "Perú",
+    "logoKey": "ic_business_24",
+    "tours": [
+      {
+        "nombre": "Salkantay Trek",
+        "descripcion": "Trekking de alta montaña",
+        "inicioUtc": 1761772800000,
+        "finUtc":   1762122000000,
+        "precio": 280.0,
+        "rating": 4.3,
+        "portadaKey": "salcantay"
+      }
+    ]
+  }
+]
