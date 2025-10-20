@@ -73,4 +73,9 @@
     <string name="propuesta_pago">Propuesta pago</string>
     <string name="id_gu_a">ID Guía</string>
     <string name="overflow_menu" />
+
+    <string name="sin_tours">Sin tours disponibles</string>
+    <string name="crear_tour">Crear nuevo tour</string>
+    <string name="opciones">Opciones del tour</string>
+
 </resources>

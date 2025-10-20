@@ -213,7 +213,7 @@ public class Administrador_Activity_VistaInicial extends AppCompatActivity {
                 );
         binding.scrTours.rvUltimos.setAdapter(adapter);
 
-        binding.scrTours.btnVerTodos.setOnClickListener(v ->
+        binding.scrTours.btnVerTodosUltimos.setOnClickListener(v ->
                 startActivity(new Intent(this, TourListActivity.class)));
     }
 

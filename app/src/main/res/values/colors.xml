@@ -25,4 +25,18 @@
     <!-- Card colors -->
     <color name="card_background">#FFFFFF</color>
     <color name="card_shadow">#1A000000</color>
+
+    <!-- ====== NUEVOS: Estados de Tours ====== -->
+    <!-- Usando tus colores existentes para mantener consistencia -->
+    <color name="estado_publicado">#27AE60</color>          <!-- Verde: success_color -->
+    <color name="estado_pendiente">#F39C12</color>          <!-- Naranja: warning_color -->
+    <color name="estado_borrador">#7F8C8D</color>           <!-- Gris: text_secondary -->
+    <color name="estado_en_curso">#FF6B35</color>           <!-- Rojo/naranja: secondary_color -->
+    <color name="estado_finalizado">#4ECDC4</color>         <!-- Azul: primary_color -->
+
+    <!-- Alias para compatibilidad con los layouts que te pasé -->
+    <color name="primary">@color/primary_color</color>
+    <color name="warning">@color/warning_color</color>
+    <color name="divider">#E0E0E0</color>
+
 </resources>
