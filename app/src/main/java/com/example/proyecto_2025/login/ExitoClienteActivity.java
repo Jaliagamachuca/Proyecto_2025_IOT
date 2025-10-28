@@ -1,29 +1,30 @@
-package com.example.proyecto_2025.joaco;
+package com.example.proyecto_2025.login;
 
 import android.os.Bundle;
 import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.proyecto_2025.R;
 
-public class PendienteGuiaActivity extends AppCompatActivity {
+public class ExitoClienteActivity extends AppCompatActivity {
 
-    private Button btnCerrarSesion;
+    private Button btnIrInicio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pendiente_guia_joaco);
+        setContentView(R.layout.activity_exito_cliente_joaco);
 
         initViews();
         setupListeners();
     }
 
     private void initViews() {
-        btnCerrarSesion = findViewById(R.id.btn_cerrar_sesion);
+        btnIrInicio = findViewById(R.id.btn_ir_inicio);
     }
 
     private void setupListeners() {
-        btnCerrarSesion.setOnClickListener(v -> {
+        btnIrInicio.setOnClickListener(v -> {
+            // Volver al login o ir a pantalla principal
             finish();
         });
     }

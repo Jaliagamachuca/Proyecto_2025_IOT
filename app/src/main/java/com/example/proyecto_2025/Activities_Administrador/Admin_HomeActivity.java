@@ -34,7 +34,7 @@ import com.example.proyecto_2025.model.Offer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Administrador_Activity_VistaInicial extends AppCompatActivity {
+public class Admin_HomeActivity extends AppCompatActivity {
 
     private ActivityAdministradorVistaInicialBinding binding;
 
@@ -160,12 +160,12 @@ public class Administrador_Activity_VistaInicial extends AppCompatActivity {
         // Usamos el mismo GuideAdapter, pero con layout simple (chip)
         guiasAdapter = new GuideAdapter(this, sugeridos, new GuideAdapter.OnAction() {
             @Override public void onProfile(Guide g) {
-                Intent i = new Intent(Administrador_Activity_VistaInicial.this, GuideProfileActivity.class);
+                Intent i = new Intent(Admin_HomeActivity.this, GuideProfileActivity.class);
                 i.putExtra("guide", g);
                 startActivity(i);
             }
             @Override public void onOffer(Guide g) {
-                Intent i = new Intent(Administrador_Activity_VistaInicial.this, OfferCreateActivity.class);
+                Intent i = new Intent(Admin_HomeActivity.this, OfferCreateActivity.class);
                 i.putExtra("guide", g);
                 startActivity(i);
             }

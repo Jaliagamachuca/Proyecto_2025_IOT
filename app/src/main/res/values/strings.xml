@@ -77,5 +77,6 @@
     <string name="sin_tours">Sin tours disponibles</string>
     <string name="crear_tour">Crear nuevo tour</string>
     <string name="opciones">Opciones del tour</string>
+    <string name="bienvenido_a_toursapp">Bienvenido a ToursApp!</string>
 
 </resources>

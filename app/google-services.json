@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "922034366297",
+    "project_id": "qhapaq-nian-2025",
+    "storage_bucket": "qhapaq-nian-2025.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:922034366297:android:1be1a44ed94e6af75fce48",
+        "android_client_info": {
+          "package_name": "com.example.proyecto_2025"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCagiRyOil1bLsw31eTQNx-FiDlFKV5jPw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

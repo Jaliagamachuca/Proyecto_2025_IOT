@@ -1,21 +1,20 @@
-package com.example.proyecto_2025.joaco;
+package com.example.proyecto_2025.login;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.proyecto_2025.R;
 
-public class CodigoConfirmacionActivity extends AppCompatActivity {
+public class ConfirmarEmailActivity extends AppCompatActivity {
 
     private Button btnContinuar;
-    private ImageButton btnVolver;
+    private Button btnReenviar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_codigo_confirmacion_joaco);
+        setContentView(R.layout.activity_confirmar_email_joaco);
 
         initViews();
         setupListeners();
@@ -23,17 +22,18 @@ public class CodigoConfirmacionActivity extends AppCompatActivity {
 
     private void initViews() {
         btnContinuar = findViewById(R.id.btn_continuar);
-        btnVolver = findViewById(R.id.btn_volver);
+        btnReenviar = findViewById(R.id.btn_reenviar);
     }
 
     private void setupListeners() {
-        btnVolver.setOnClickListener(v -> {
-            finish(); // Volver a la pantalla anterior
+        btnContinuar.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CodigoConfirmacionActivity.class);
+            startActivity(intent);
         });
 
-        btnContinuar.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CrearPasswordActivity.class);
-            startActivity(intent);
+        btnReenviar.setOnClickListener(v -> {
+            // Simular reenvío de código
+            android.widget.Toast.makeText(this, "Código reenviado", android.widget.Toast.LENGTH_SHORT).show();
         });
     }
 }

@@ -22,13 +22,13 @@
         android:theme="@style/Theme.Proyecto_2025"
         tools:targetApi="33">
         <activity
-            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
+            android:name=".Activities_Administrador.Admin_HomeActivity"
             android:exported="false" />
         <activity
             android:name=".MenuActivity"
             android:exported="false" />
         <activity
-            android:name=".Activities_Usuario.Usuario_Activity_VistaInicial"
+            android:name=".Activities_Usuario.Cliente_HomeActivity"
             android:exported="false" />
         <activity
             android:name=".Activities_Administrador.EmpresaFormPruebaActivity"
@@ -87,11 +87,11 @@
             android:name=".Activities_Superadmin.Superadmin_Ver_Guia_Turismo"
             android:exported="false" />
         <activity
-            android:name=".Activities_Guia.Guia_Activity_VistaInicial"
+            android:name=".Activities_Guia.Guia_HomeActivity"
             android:exported="false" />
 
         <activity
-            android:name=".Activities_Superadmin.Superadmin_Activity_VistaInicial"
+            android:name=".Activities_Superadmin.Superadmin_HomeActivity"
             android:exported="false" />
 
         <activity
@@ -115,7 +115,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".joaco.LoginActivity"
+            android:name=".login.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -133,31 +133,31 @@
             android:name=".Activities_Guia.Guia_Registrar_CheckIn"
             android:exported="false" />
         <activity
-            android:name=".joaco.RegistroActivity"
+            android:name=".login.RegistroActivity"
             android:exported="false" />
         <activity
             android:name=".Activities_Administrador.MapPickerActivity"
             android:exported="false" />
         <activity
-            android:name=".joaco.ConfirmacionActivity"
+            android:name=".login.ConfirmacionActivity"
             android:exported="false" />
         <activity
-            android:name=".joaco.ExitoClienteActivity"
+            android:name=".login.ExitoClienteActivity"
             android:exported="false" />
         <activity
-            android:name=".joaco.PendienteGuiaActivity"
+            android:name=".login.PendienteGuiaActivity"
             android:exported="false" />
         <activity
-            android:name=".joaco.RecuperarPasswordActivity"
+            android:name=".login.RecuperarPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".joaco.ConfirmarEmailActivity"
+            android:name=".login.ConfirmarEmailActivity"
             android:exported="false" />
         <activity
-            android:name=".joaco.CodigoConfirmacionActivity"
+            android:name=".login.CodigoConfirmacionActivity"
             android:exported="false" />
         <activity
-            android:name=".joaco.CrearPasswordActivity"
+            android:name=".login.CrearPasswordActivity"
             android:exported="false" />
     </application>
 

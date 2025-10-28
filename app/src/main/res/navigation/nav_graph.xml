@@ -8,9 +8,9 @@
     <!-- Flujo principal de Login y Registro -->
     <activity
         android:id="@+id/loginActivity"
-        android:name="com.example.proyecto_2025.joaco.LoginActivity"
+        android:name="com.example.proyecto_2025.login.LoginActivity"
         android:label="Login"
-        tools:layout="@layout/activity_login_joaco">
+        tools:layout="@layout/activity_login">
         <action
             android:id="@+id/action_login_to_registro"
             app:destination="@id/registroActivity" />
@@ -21,9 +21,9 @@
 
     <activity
         android:id="@+id/registroActivity"
-        android:name="com.example.proyecto_2025.joaco.RegistroActivity"
+        android:name="com.example.proyecto_2025.login.RegistroActivity"
         android:label="Registro"
-        tools:layout="@layout/activity_registro_joaco">
+        tools:layout="@layout/activity_registro">
         <action
             android:id="@+id/action_registro_to_confirmacion"
             app:destination="@id/confirmacionActivity" />
@@ -31,7 +31,7 @@
 
     <activity
         android:id="@+id/confirmacionActivity"
-        android:name="com.example.proyecto_2025.joaco.ConfirmacionActivity"
+        android:name="com.example.proyecto_2025.login.ConfirmacionActivity"
         android:label="Confirmación"
         tools:layout="@layout/activity_confirmacion_joaco">
         <action
@@ -45,20 +45,20 @@
     <!-- Pantallas finales según rol -->
     <activity
         android:id="@+id/exitoClienteActivity"
-        android:name="com.example.proyecto_2025.joaco.ExitoClienteActivity"
+        android:name="com.example.proyecto_2025.login.ExitoClienteActivity"
         android:label="Cuenta Creada"
         tools:layout="@layout/activity_exito_cliente_joaco" />
 
     <activity
         android:id="@+id/pendienteGuiaActivity"
-        android:name="com.example.proyecto_2025.joaco.PendienteGuiaActivity"
+        android:name="com.example.proyecto_2025.login.PendienteGuiaActivity"
         android:label="Pendiente Aprobación"
         tools:layout="@layout/activity_pendiente_guia_joaco" />
 
     <!-- Flujo de recuperación de contraseña -->
     <activity
         android:id="@+id/recuperarPasswordActivity"
-        android:name="com.example.proyecto_2025.joaco.RecuperarPasswordActivity"
+        android:name="com.example.proyecto_2025.login.RecuperarPasswordActivity"
         android:label="Recuperar Contraseña"
         tools:layout="@layout/activity_recuperar_password_joaco">
         <action
@@ -68,7 +68,7 @@
 
     <activity
         android:id="@+id/confirmarEmailActivity"
-        android:name="com.example.proyecto_2025.joaco.ConfirmarEmailActivity"
+        android:name="com.example.proyecto_2025.login.ConfirmarEmailActivity"
         android:label="Confirmar Email"
         tools:layout="@layout/activity_confirmar_email_joaco">
         <action
@@ -78,7 +78,7 @@
 
     <activity
         android:id="@+id/codigoConfirmacionActivity"
-        android:name="com.example.proyecto_2025.joaco.CodigoConfirmacionActivity"
+        android:name="com.example.proyecto_2025.login.CodigoConfirmacionActivity"
         android:label="Código Confirmación"
         tools:layout="@layout/activity_codigo_confirmacion_joaco">
         <action
@@ -88,7 +88,7 @@
 
     <activity
         android:id="@+id/crearPasswordActivity"
-        android:name="com.example.proyecto_2025.joaco.CrearPasswordActivity"
+        android:name="com.example.proyecto_2025.login.CrearPasswordActivity"
         android:label="Crear Nueva Contraseña"
         tools:layout="@layout/activity_crear_password_joaco" />
 

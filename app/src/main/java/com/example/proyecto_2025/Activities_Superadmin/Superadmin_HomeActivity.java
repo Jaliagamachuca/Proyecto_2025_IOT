@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Bottom bar fija: Dashboard, Admins, Guías, Clientes, Registros, Perfil
  * FAB contextual sólo en Admins (Registrar Admin) y Guías (Registrar Guías).
  */
-public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
+public class Superadmin_HomeActivity extends AppCompatActivity {
 
     private ActivitySuperadminVistaInicialBinding binding;
 
@@ -220,28 +219,28 @@ public class Superadmin_Activity_VistaInicial extends AppCompatActivity {
                     // 🔹 Adapter para Admins
                     EmployeeAdapter adapterAdmins = new EmployeeAdapter();
                     adapterAdmins.setListaEmpleados(listaAdmins);
-                    adapterAdmins.setContext(Superadmin_Activity_VistaInicial.this);
+                    adapterAdmins.setContext(Superadmin_HomeActivity.this);
                     binding.scrAdmins.recyclerView.setAdapter(adapterAdmins);
                     binding.scrAdmins.recyclerView.setLayoutManager(
-                            new LinearLayoutManager(Superadmin_Activity_VistaInicial.this)
+                            new LinearLayoutManager(Superadmin_HomeActivity.this)
                     );
 
                     // 🔹 Adapter para Guias
                     EmployeeAdapter adapterGuias = new EmployeeAdapter();
                     adapterGuias.setListaEmpleados(listaGuias);
-                    adapterGuias.setContext(Superadmin_Activity_VistaInicial.this);
+                    adapterGuias.setContext(Superadmin_HomeActivity.this);
                     binding.scrGuias.recyclerView.setAdapter(adapterGuias);
                     binding.scrGuias.recyclerView.setLayoutManager(
-                            new LinearLayoutManager(Superadmin_Activity_VistaInicial.this)
+                            new LinearLayoutManager(Superadmin_HomeActivity.this)
                     );
 
                     // 🔹 Adapter para Clientes
                     EmployeeAdapter adapterClientes = new EmployeeAdapter();
                     adapterClientes.setListaEmpleados(listaClientes);
-                    adapterClientes.setContext(Superadmin_Activity_VistaInicial.this);
+                    adapterClientes.setContext(Superadmin_HomeActivity.this);
                     binding.scrClientes.recyclerView.setAdapter(adapterClientes);
                     binding.scrClientes.recyclerView.setLayoutManager(
-                            new LinearLayoutManager(Superadmin_Activity_VistaInicial.this)
+                            new LinearLayoutManager(Superadmin_HomeActivity.this)
                     );
 
                 } else {

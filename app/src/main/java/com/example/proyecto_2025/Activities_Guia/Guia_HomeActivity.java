@@ -13,7 +13,7 @@ import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivityGuiaVistaInicialBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-public class Guia_Activity_VistaInicial extends AppCompatActivity {
+public class Guia_HomeActivity extends AppCompatActivity {
 
     private ActivityGuiaVistaInicialBinding binding;
 

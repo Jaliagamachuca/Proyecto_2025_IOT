@@ -1,4 +1,4 @@
-package com.example.proyecto_2025.joaco;
+package com.example.proyecto_2025.login;
 
 import android.content.Intent;
 import android.os.Bundle;

@@ -16,7 +16,7 @@ import java.util.List;
 import com.google.android.material.tabs.TabLayout;
 
 
-public class Usuario_Activity_VistaInicial extends AppCompatActivity {
+public class Cliente_HomeActivity extends AppCompatActivity {
 
     private ActivityUsuarioVistaInicialBinding binding;
 
