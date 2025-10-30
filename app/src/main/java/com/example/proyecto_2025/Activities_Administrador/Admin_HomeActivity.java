@@ -1,4 +1,4 @@
-package com.example.proyecto_2025.Activities_Administrador;
+﻿package com.example.proyecto_2025.Activities_Administrador;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -16,59 +16,109 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.adapter.ImageUriAdapter;
+import com.example.proyecto_2025.adapter.GuideAdapter;
+import com.example.proyecto_2025.adapter.TourAdapter;
 import com.example.proyecto_2025.data.EmpresaRepository;
 import com.example.proyecto_2025.data.TourRepository;
-import com.example.proyecto_2025.databinding.ActivityAdministradorVistaInicialBinding;
-import com.example.proyecto_2025.model.Empresa;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.recyclerview.widget.RecyclerView;
-import com.example.proyecto_2025.adapter.GuideAdapter;
 import com.example.proyecto_2025.data.OfferRepository;
 import com.example.proyecto_2025.data.GuideRepository;
+import com.example.proyecto_2025.data.AdminRepository;
+import com.example.proyecto_2025.databinding.ActivityAdminHomeBinding;
+import com.example.proyecto_2025.model.Empresa;
 import com.example.proyecto_2025.model.Guide;
 import com.example.proyecto_2025.model.Offer;
+import com.example.proyecto_2025.model.Tour;
+import com.example.proyecto_2025.model.TourEstado;
+import com.example.proyecto_2025.model.Admin;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Activity principal del m├│dulo Administrador
+ * Gestiona 5 secciones: Empresa, Tours, Gu├¡as, Reportes, Perfil
+ */
 public class Admin_HomeActivity extends AppCompatActivity {
 
-    private ActivityAdministradorVistaInicialBinding binding;
+    // ===================== BINDING & CONSTANTS =====================
+    private ActivityAdminHomeBinding binding;
 
     private static final int SCR_EMPRESA  = R.id.scrEmpresa;
     private static final int SCR_TOURS    = R.id.scrTours;
     private static final int SCR_GUIAS    = R.id.scrGuias;
     private static final int SCR_REPORTES = R.id.scrReportes;
-    private static final int SCR_CHAT     = R.id.scrChat;
     private static final int SCR_PERFIL   = R.id.scrPerfil;
 
+    // ===================== REPOSITORIES =====================
     private EmpresaRepository empresaRepo;
-    private Empresa empresa;
-    private final List<Uri> galeriaUris = new ArrayList<>();
+    private AdminRepository adminRepo;
 
+    // ===================== DATA MODELS =====================
+    private Empresa empresa;
+    private Admin admin;
+    private final List<Uri> galeriaUris = new ArrayList<>();
+    private final List<Guide> sugeridos = new ArrayList<>();
+    private GuideAdapter guiasAdapter;
+
+    // ===================== LAUNCHERS =====================
     private ActivityResultLauncher<Intent> pickImagesLauncher;
     private ActivityResultLauncher<Intent> pickLocationLauncher;
 
+    // ===================== LIFECYCLE =====================
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityAdministradorVistaInicialBinding.inflate(getLayoutInflater());
+        binding = ActivityAdminHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        com.example.proyecto_2025.data.GuideRepository.get().seedIfEmpty(this);
 
+        // Configurar toolbar
+        setupToolbar();
+
+        // Inicializar repositorios y datos
+        initializeRepositories();
+
+        // Configurar launchers
+        setupLaunchers();
+
+        // Configurar bottom navigation
+        binding.bottomNav.setOnItemSelectedListener(this::onBottomItemSelected);
+
+        // Inicializar todas las secciones
+        initializeAllSections();
+
+        // Pantalla inicial
+        binding.bottomNav.setSelectedItemId(R.id.nav_empresa);
+        showScreen(SCR_EMPRESA);
+
+        // Datos de prueba (eliminar en producci├│n)
+        crearDatosDePruebaSiEsNecesario();
+    }
+
+    // ===================== SETUP METHODS =====================
+
+    private void setupToolbar() {
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
+    }
 
+    private void initializeRepositories() {
+        GuideRepository.get().seedIfEmpty(this);
         empresaRepo = new EmpresaRepository(this);
         empresa = empresaRepo.load();
+        adminRepo = new AdminRepository(this);
+        admin = adminRepo.load();
+    }
 
-        // Launchers
+    private void setupLaunchers() {
+        // Launcher para seleccionar im├ígenes
         pickImagesLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(), result -> {
                     if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) return;
@@ -79,7 +129,6 @@ public class Admin_HomeActivity extends AppCompatActivity {
                             int count = data.getClipData().getItemCount();
                             for (int i = 0; i < count; i++) {
                                 Uri u = data.getClipData().getItemAt(i).getUri();
-                                // Mantén acceso persistente a las imágenes elegidas
                                 getContentResolver().takePersistableUriPermission(
                                         u, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                                 galeriaUris.add(u);
@@ -91,7 +140,6 @@ public class Admin_HomeActivity extends AppCompatActivity {
                             galeriaUris.add(u);
                         }
                     } catch (SecurityException ignore) {
-                        // Si no se pudo persistir el permiso, igual añadimos la URI para esta sesión.
                         if (data.getData() != null) galeriaUris.add(data.getData());
                     }
 
@@ -101,6 +149,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
                     actualizarChecklistYEstado();
                 });
 
+        // Launcher para seleccionar ubicaci├│n
         pickLocationLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(), result -> {
                     if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) return;
@@ -110,112 +159,26 @@ public class Admin_HomeActivity extends AppCompatActivity {
                     empresa.lat = d.getDoubleExtra("lat", 0d);
                     empresa.lon = d.getDoubleExtra("lon", 0d);
 
-                    // Solo texto de dirección en la UI (las coords van a la pre-vista de mapa)
                     binding.scrEmpresa.tvDireccion.setText(
                             (empresa.direccion == null || empresa.direccion.isEmpty())
-                                    ? "Sin dirección"
+                                    ? "Sin direcci├│n"
                                     : empresa.direccion
                     );
 
-                    // 🔄 Actualiza la tarjeta de pre-vista del mapa
                     updateMapPreview();
-
                     actualizarChecklistYEstado();
                 });
+    }
 
-
-        // Bottom bar
-        binding.bottomNav.setOnItemSelectedListener(this::onBottomItemSelected);
-
-        // Estado inicial
-        binding.bottomNav.setSelectedItemId(R.id.nav_empresa);
-        showScreen(SCR_EMPRESA);
-
-        // Inicializa la sección Empresa
+    private void initializeAllSections() {
         initEmpresaSection();
         initToursSection();
         initGuiasSection();
-
-    }
-    private GuideAdapter guiasAdapter;
-    private final java.util.List<Guide> sugeridos = new java.util.ArrayList<>();
-
-    private void initGuiasSection() {
-        // Acciones rápidas
-        binding.scrGuias.btnExplorarGuias.setOnClickListener(v ->
-                startActivity(new Intent(this, GuideDirectoryActivity.class)));
-
-        binding.scrGuias.btnOfertasGuias.setOnClickListener(v ->
-                startActivity(new Intent(this, OfferInboxActivity.class)));
-
-        binding.scrGuias.btnCalendarioGuias.setOnClickListener(v -> {
-            // Si aún no tienes calendario, deja un placeholder o navega a una Activity vacía
-            Snackbar.make(binding.getRoot(), "Calendario de guías (próxima iteración)", Snackbar.LENGTH_SHORT).show();
-        });
-
-        // Carrusel horizontal de guías sugeridos
-        RecyclerView rv = binding.scrGuias.rvGuiasSugeridos;
-        rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-
-        // Usamos el mismo GuideAdapter, pero con layout simple (chip)
-        guiasAdapter = new GuideAdapter(this, sugeridos, new GuideAdapter.OnAction() {
-            @Override public void onProfile(Guide g) {
-                Intent i = new Intent(Admin_HomeActivity.this, GuideProfileActivity.class);
-                i.putExtra("guide", g);
-                startActivity(i);
-            }
-            @Override public void onOffer(Guide g) {
-                Intent i = new Intent(Admin_HomeActivity.this, OfferCreateActivity.class);
-                i.putExtra("guide", g);
-                startActivity(i);
-            }
-        });
-        rv.setAdapter(guiasAdapter);
-
-        // Primera carga
-        refreshGuiasDashboard();
+        initReportesSection();
+        initPerfilSection();
     }
 
-    /** Llama esto cuando regreses a la pestaña o tras enviar/aceptar ofertas */
-    private void refreshGuiasDashboard() {
-        // KPIs
-        int pend = OfferRepository.get().byStatus(Offer.Status.PENDIENTE).size();
-        int acep = OfferRepository.get().byStatus(Offer.Status.ACEPTADA).size();
-        binding.scrGuias.kpiOfertasPend.setText(String.valueOf(pend));
-        binding.scrGuias.kpiOfertasAcep.setText(String.valueOf(acep));
-
-        // Sugeridos: muestra algunos guías (podrías filtrar por zona/idioma más adelante)
-        sugeridos.clear();
-        java.util.List<Guide> all = GuideRepository.get().all();
-        for (int i = 0; i < Math.min(5, all.size()); i++) sugeridos.add(all.get(i));
-        guiasAdapter.notifyDataSetChanged();
-
-        binding.scrGuias.tvEmptyGuias.setVisibility(sugeridos.isEmpty() ? View.VISIBLE : View.GONE);
-    }
-    private void initToursSection() {
-        TourRepository repo = new TourRepository(this);
-        java.util.List<com.example.proyecto_2025.model.Tour> ultimos = repo.findLastN(3);
-
-        androidx.recyclerview.widget.LinearLayoutManager lm =
-                new androidx.recyclerview.widget.LinearLayoutManager(this,
-                        androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false);
-        binding.scrTours.rvUltimos.setLayoutManager(lm);
-
-        com.example.proyecto_2025.adapter.TourAdapter adapter =
-                new com.example.proyecto_2025.adapter.TourAdapter(
-                        ultimos,
-                        t -> {
-                            Intent i = new Intent(this, TourDetalleActivity.class);
-                            i.putExtra("id", t.id);
-                            startActivity(i);
-                        },
-                        (t, anchor) -> {}
-                );
-        binding.scrTours.rvUltimos.setAdapter(adapter);
-
-        binding.scrTours.btnVerTodosUltimos.setOnClickListener(v ->
-                startActivity(new Intent(this, TourListActivity.class)));
-    }
+    // ===================== NAVIGATION =====================
 
     private boolean onBottomItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -223,119 +186,55 @@ public class Admin_HomeActivity extends AppCompatActivity {
         else if (id == R.id.nav_tours) { showScreen(SCR_TOURS); return true; }
         else if (id == R.id.nav_guias) { showScreen(SCR_GUIAS); return true; }
         else if (id == R.id.nav_reportes) { showScreen(SCR_REPORTES); return true; }
-        else if (id == R.id.nav_chat) { showScreen(SCR_CHAT); return true; }
         else if (id == R.id.nav_perfil) { showScreen(SCR_PERFIL); return true; }
         return false;
     }
 
     private void showScreen(@IdRes int screenId) {
-        View vEmpresa  = binding.scrEmpresa.getRoot();
-        View vTours    = binding.scrTours.getRoot();
-        View vGuias    = binding.scrGuias.getRoot();
-        View vReportes = binding.scrReportes.getRoot();
-        View vChat     = binding.scrChat.getRoot();
-        View vPerfil   = binding.scrPerfil.getRoot();
+        // Ocultar todas las pantallas
+        binding.scrEmpresa.getRoot().setVisibility(View.GONE);
+        binding.scrTours.getRoot().setVisibility(View.GONE);
+        binding.scrGuias.getRoot().setVisibility(View.GONE);
+        binding.scrReportes.getRoot().setVisibility(View.GONE);
+        binding.scrPerfil.getRoot().setVisibility(View.GONE);
 
-        vEmpresa.setVisibility(View.GONE);
-        vTours.setVisibility(View.GONE);
-        vGuias.setVisibility(View.GONE);
-        vReportes.setVisibility(View.GONE);
-        vChat.setVisibility(View.GONE);
-        vPerfil.setVisibility(View.GONE);
-
+        // Mostrar pantalla seleccionada
         View target =
-                (screenId == SCR_EMPRESA)  ? vEmpresa  :
-                        (screenId == SCR_TOURS)    ? vTours    :
-                                (screenId == SCR_GUIAS)    ? vGuias    :
-                                        (screenId == SCR_REPORTES) ? vReportes :
-                                                (screenId == SCR_CHAT)     ? vChat     : vPerfil;
+                (screenId == SCR_EMPRESA)  ? binding.scrEmpresa.getRoot() :
+                        (screenId == SCR_TOURS)    ? binding.scrTours.getRoot() :
+                                (screenId == SCR_GUIAS)    ? binding.scrGuias.getRoot() :
+                                        (screenId == SCR_REPORTES) ? binding.scrReportes.getRoot() : binding.scrPerfil.getRoot();
 
         target.setVisibility(View.VISIBLE);
 
-        // FAB contextual (Tours/Guías)
-        if (screenId == SCR_TOURS) {
-            binding.fab.setVisibility(View.VISIBLE);
-            binding.fab.setImageResource(R.drawable.ic_add_24);
-            binding.fab.setOnClickListener(v -> {
-                // Guard de completitud de Empresa
-                if (!empresa.esCompleta()) {
-                    Snackbar.make(binding.getRoot(),
-                            "Completa tu Empresa (contacto, ubicación y 2 fotos) antes de crear tours.",
-                            Snackbar.LENGTH_LONG).show();
-                    showScreen(SCR_EMPRESA);
-                    binding.bottomNav.setSelectedItemId(R.id.nav_empresa);
-                    return;
-                }
-                startActivity(new Intent(this, TourFormActivity.class));
-            });
-        } else if (screenId == SCR_GUIAS) {
-            binding.fab.setVisibility(View.GONE);
-            binding.fab.setOnClickListener(null);
+        // FAB visible solo en ciertas pantallas
+        binding.fab.setVisibility(View.GONE);
+        binding.fab.setOnClickListener(null);
 
-            // Refresca KPIs/carrusel
+        // Actualizar datos si es necesario
+        if (screenId == SCR_GUIAS) {
             refreshGuiasDashboard();
-        } else {
-            binding.fab.setVisibility(View.GONE);
-            binding.fab.setOnClickListener(null);
         }
     }
-    // 1) Inicializa el MapView de la tarjeta (una sola vez)
-    private void setupMapPreview() {
-        org.osmdroid.config.Configuration.getInstance().setUserAgentValue(getPackageName());
-        binding.scrEmpresa.mapPreview.setMultiTouchControls(false); // pre-vista (no interactivo)
-        binding.scrEmpresa.mapPreview.setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK);
-        // Zoom moderado por defecto (si aún no hay ubicación guardada)
-        binding.scrEmpresa.mapPreview.getController().setZoom(4.0);
-        binding.scrEmpresa.mapPreview.getController().setCenter(new org.osmdroid.util.GeoPoint(-9.19, -75.02)); // Perú
-    }
 
-    // 2) Actualiza centro, zoom y pin con la dirección elegida
-    private void updateMapPreview() {
-        boolean hasLoc = empresa != null && empresa.lat != 0 && empresa.lon != 0 && empresa.direccion != null && !empresa.direccion.isEmpty();
-
-        if (!hasLoc) {
-            binding.scrEmpresa.tvDireccion.setText("Sin dirección");
-            binding.scrEmpresa.mapPreview.getOverlays().clear();
-            binding.scrEmpresa.mapPreview.getController().setZoom(4.0);
-            binding.scrEmpresa.mapPreview.getController().setCenter(new org.osmdroid.util.GeoPoint(-9.19, -75.02));
-            binding.scrEmpresa.mapPreview.invalidate();
-            return;
-        }
-
-        org.osmdroid.util.GeoPoint p = new org.osmdroid.util.GeoPoint(empresa.lat, empresa.lon);
-        binding.scrEmpresa.mapPreview.getOverlays().clear();
-
-        org.osmdroid.views.overlay.Marker m = new org.osmdroid.views.overlay.Marker(binding.scrEmpresa.mapPreview);
-        m.setPosition(p);
-        m.setAnchor(org.osmdroid.views.overlay.Marker.ANCHOR_CENTER, org.osmdroid.views.overlay.Marker.ANCHOR_BOTTOM);
-        m.setTitle("Ubicación seleccionada");
-        binding.scrEmpresa.mapPreview.getOverlays().add(m);
-
-        binding.scrEmpresa.mapPreview.getController().setZoom(15.0);
-        binding.scrEmpresa.mapPreview.getController().setCenter(p);
-        binding.scrEmpresa.tvDireccion.setText(empresa.direccion);
-        binding.scrEmpresa.mapPreview.invalidate();
-    }
-
-
-    // ===================== EMPRESA SECTION =====================
+    // ===================== SECTION 1: EMPRESA =====================
 
     private void initEmpresaSection() {
-
         setupMapPreview();
         updateMapPreview();
 
-        // Carga datos previos
+        // Cargar datos previos
         binding.scrEmpresa.etNombre.setText(empresa.nombre);
         binding.scrEmpresa.etCorreo.setText(empresa.correo);
         binding.scrEmpresa.etTelefono.setText(empresa.telefono);
         binding.scrEmpresa.etWeb.setText(empresa.web);
         binding.scrEmpresa.etDescripcion.setText(empresa.descripcion);
+
         if (empresa.direccion != null && !empresa.direccion.isEmpty()) {
-            binding.scrEmpresa.tvDireccion.setText(
-                    empresa.direccion + " (" + empresa.lat + ", " + empresa.lon + ")");
+            binding.scrEmpresa.tvDireccion.setText(empresa.direccion);
         }
-        // Galería
+
+        // Configurar galer├¡a
         for (String s : empresa.imagenUris) galeriaUris.add(Uri.parse(s));
         binding.scrEmpresa.rvGaleria.setLayoutManager(
                 new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -348,23 +247,51 @@ public class Admin_HomeActivity extends AppCompatActivity {
         // Botones
         binding.scrEmpresa.btnAgregarFotos.setOnClickListener(v -> abrirPickerImagenes());
         binding.scrEmpresa.btnElegirUbicacion.setOnClickListener(v -> abrirPickerUbicacion());
-        binding.scrEmpresa.btnGuardar.setOnClickListener(v -> {
-            if (!capturarFormulario(false)) return;
-            persistir();
-            Snackbar.make(binding.getRoot(), "Empresa guardada", Snackbar.LENGTH_SHORT).show();
-        });
-        binding.scrEmpresa.btnPublicar.setOnClickListener(v -> {
-            if (!capturarFormulario(true)) return;
-            if (!empresa.esCompleta()) {
-                Snackbar.make(binding.getRoot(),
-                        "Aún faltan requisitos para publicar.", Snackbar.LENGTH_LONG).show();
-                return;
-            }
-            persistir();
-            Snackbar.make(binding.getRoot(), "Perfil publicado ✅", Snackbar.LENGTH_LONG).show();
-        });
+        binding.scrEmpresa.btnGuardar.setOnClickListener(v -> guardarEmpresa(false));
+        binding.scrEmpresa.btnPublicar.setOnClickListener(v -> guardarEmpresa(true));
 
         actualizarChecklistYEstado();
+    }
+
+    private void setupMapPreview() {
+        org.osmdroid.config.Configuration.getInstance().setUserAgentValue(getPackageName());
+        binding.scrEmpresa.mapPreview.setMultiTouchControls(false);
+        binding.scrEmpresa.mapPreview.setTileSource(
+                org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK);
+        binding.scrEmpresa.mapPreview.getController().setZoom(4.0);
+        binding.scrEmpresa.mapPreview.getController().setCenter(
+                new org.osmdroid.util.GeoPoint(-9.19, -75.02)); // Per├║
+    }
+
+    private void updateMapPreview() {
+        boolean hasLoc = empresa != null && empresa.lat != 0 && empresa.lon != 0
+                && empresa.direccion != null && !empresa.direccion.isEmpty();
+
+        if (!hasLoc) {
+            binding.scrEmpresa.tvDireccion.setText("Sin direcci├│n");
+            binding.scrEmpresa.mapPreview.getOverlays().clear();
+            binding.scrEmpresa.mapPreview.getController().setZoom(4.0);
+            binding.scrEmpresa.mapPreview.getController().setCenter(
+                    new org.osmdroid.util.GeoPoint(-9.19, -75.02));
+            binding.scrEmpresa.mapPreview.invalidate();
+            return;
+        }
+
+        org.osmdroid.util.GeoPoint p = new org.osmdroid.util.GeoPoint(empresa.lat, empresa.lon);
+        binding.scrEmpresa.mapPreview.getOverlays().clear();
+
+        org.osmdroid.views.overlay.Marker m =
+                new org.osmdroid.views.overlay.Marker(binding.scrEmpresa.mapPreview);
+        m.setPosition(p);
+        m.setAnchor(org.osmdroid.views.overlay.Marker.ANCHOR_CENTER,
+                org.osmdroid.views.overlay.Marker.ANCHOR_BOTTOM);
+        m.setTitle("Ubicaci├│n seleccionada");
+        binding.scrEmpresa.mapPreview.getOverlays().add(m);
+
+        binding.scrEmpresa.mapPreview.getController().setZoom(15.0);
+        binding.scrEmpresa.mapPreview.getController().setCenter(p);
+        binding.scrEmpresa.tvDireccion.setText(empresa.direccion);
+        binding.scrEmpresa.mapPreview.invalidate();
     }
 
     private void abrirPickerImagenes() {
@@ -373,40 +300,66 @@ public class Admin_HomeActivity extends AppCompatActivity {
         i.setType("image/*");
         i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         i.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-        i.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        pickImagesLauncher.launch(Intent.createChooser(i, "Selecciona imágenes"));
+        i.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION |
+                Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        pickImagesLauncher.launch(Intent.createChooser(i, "Selecciona im├ígenes"));
     }
 
     private void abrirPickerUbicacion() {
         pickLocationLauncher.launch(new Intent(this, MapPickerActivity.class));
     }
 
+    private void guardarEmpresa(boolean publicar) {
+        if (!capturarFormulario(publicar)) return;
+
+        if (publicar && !empresa.esCompleta()) {
+            Snackbar.make(binding.getRoot(),
+                    "A├║n faltan requisitos para publicar.", Snackbar.LENGTH_LONG).show();
+            return;
+        }
+
+        persistir();
+        String msg = publicar ? "Perfil publicado Ô£à" : "Empresa guardada";
+        Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
+    }
+
     private boolean capturarFormulario(boolean validarTodo) {
         EditText etNombre = binding.scrEmpresa.etNombre;
         EditText etCorreo = binding.scrEmpresa.etCorreo;
         EditText etTelefono = binding.scrEmpresa.etTelefono;
-        EditText etWeb = binding.scrEmpresa.etWeb;
         EditText etDescripcion = binding.scrEmpresa.etDescripcion;
 
         empresa.nombre = etNombre.getText().toString().trim();
         empresa.correo = etCorreo.getText().toString().trim();
         empresa.telefono = etTelefono.getText().toString().trim();
-        empresa.web = etWeb.getText().toString().trim();
+        empresa.web = binding.scrEmpresa.etWeb.getText().toString().trim();
         empresa.descripcion = etDescripcion.getText().toString().trim();
 
-        // Validaciones mínimas
-        if (empresa.nombre.isEmpty()) { etNombre.setError("Requerido"); if (validarTodo) return false; }
-        if (empresa.correo.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(empresa.correo).matches()) {
-            etCorreo.setError("Correo inválido"); if (validarTodo) return false;
+        // Validaciones
+        if (empresa.nombre.isEmpty()) {
+            etNombre.setError("Requerido");
+            if (validarTodo) return false;
         }
-        if (empresa.telefono.isEmpty()) { etTelefono.setError("Requerido"); if (validarTodo) return false; }
 
-        // Sin validar web/descr si no hacen publicar
-        if (validarTodo && empresa.descripcion.isEmpty()) { etDescripcion.setError("Requerida"); return false; }
+        if (empresa.correo.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(empresa.correo).matches()) {
+            etCorreo.setError("Correo inv├ílido");
+            if (validarTodo) return false;
+        }
 
-        // Galería -> modelo
+        if (empresa.telefono.isEmpty()) {
+            etTelefono.setError("Requerido");
+            if (validarTodo) return false;
+        }
+
+        if (validarTodo && empresa.descripcion.isEmpty()) {
+            etDescripcion.setError("Requerida");
+            return false;
+        }
+
+        // Guardar URIs de galer├¡a
         empresa.imagenUris.clear();
         for (Uri u : galeriaUris) empresa.imagenUris.add(u.toString());
+
         return true;
     }
 
@@ -416,21 +369,356 @@ public class Admin_HomeActivity extends AppCompatActivity {
     }
 
     private void actualizarChecklistYEstado() {
-        // Checklist visual
-        setCheck(binding.scrEmpresa.chkContacto, !empresa.correo.isEmpty() && !empresa.telefono.isEmpty());
-        setCheck(binding.scrEmpresa.chkUbicacion, empresa.direccion != null && !empresa.direccion.isEmpty());
+        setCheck(binding.scrEmpresa.chkContacto,
+                !empresa.correo.isEmpty() && !empresa.telefono.isEmpty());
+        setCheck(binding.scrEmpresa.chkUbicacion,
+                empresa.direccion != null && !empresa.direccion.isEmpty());
         setCheck(binding.scrEmpresa.chkFotos, galeriaUris.size() >= 2);
         setCheck(binding.scrEmpresa.chkDescripcion, !empresa.descripcion.isEmpty());
 
         TextView tvEstado = binding.scrEmpresa.tvEstado;
         boolean completa = empresa.esCompleta();
-        tvEstado.setText(completa ? "Estado: Completo" : "Estado: Borrador");
+        tvEstado.setText(completa ? "Ô£à Perfil completo" : "ÔÜá´©Å Perfil incompleto");
 
         Button btnPublicar = binding.scrEmpresa.btnPublicar;
         btnPublicar.setEnabled(completa);
     }
 
     private void setCheck(TextView tv, boolean ok) {
-        tv.setText((ok ? "✓ " : "• ") + tv.getText().toString().replaceFirst("^[✓•]\\s*", ""));
+        tv.setText((ok ? "Ô£ô " : "ÔÇó ") + tv.getText().toString().replaceFirst("^[Ô£ôÔÇó]\\s*", ""));
+    }
+
+    // ===================== SECTION 2: TOURS =====================
+
+    private void initToursSection() {
+        TourRepository repo = new TourRepository(this);
+        List<Tour> ultimos = repo.findLastN(3);
+        List<Tour> todosTours = repo.findAll();
+
+        // Configurar RecyclerView horizontal
+        LinearLayoutManager lm = new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false);
+        binding.scrTours.rvUltimos.setLayoutManager(lm);
+
+        TourAdapter adapter = new TourAdapter(
+                ultimos,
+                t -> {
+                    Intent i = new Intent(this, TourDetalleActivity.class);
+                    i.putExtra("id", t.id);
+                    startActivity(i);
+                },
+                (t, anchor) -> {}
+        );
+        binding.scrTours.rvUltimos.setAdapter(adapter);
+
+        // Actualizar KPIs
+        actualizarKPIsTours(todosTours);
+
+        // Botones
+        binding.scrTours.btnVerTodosUltimos.setOnClickListener(v ->
+                startActivity(new Intent(this, TourListActivity.class)));
+
+        binding.scrTours.fabNuevoTour.setVisibility(View.VISIBLE);
+        binding.scrTours.fabNuevoTour.setOnClickListener(v -> {
+            if (empresa == null || !empresa.esCompleta()) {
+                Snackbar.make(binding.getRoot(),
+                        "Primero completa el perfil de tu empresa",
+                        Snackbar.LENGTH_LONG).show();
+                binding.bottomNav.setSelectedItemId(R.id.nav_empresa);
+                return;
+            }
+            startActivity(new Intent(this, TourFormActivity.class));
+        });
+    }
+
+    private void actualizarKPIsTours(List<Tour> tours) {
+        int publicados = 0, pendientes = 0, borradores = 0;
+
+        for (Tour tour : tours) {
+            if (tour.estado == null) continue;
+            switch (tour.estado) {
+                case PUBLICADO:
+                    publicados++;
+                    break;
+                case PENDIENTE_GUIA:
+                    pendientes++;
+                    break;
+                case BORRADOR:
+                    borradores++;
+                    break;
+            }
+        }
+
+        binding.scrTours.tvCountPublicados.setText(String.valueOf(publicados));
+        binding.scrTours.tvCountPendientes.setText(String.valueOf(pendientes));
+        binding.scrTours.tvCountBorradores.setText(String.valueOf(borradores));
+    }
+
+    // ===================== SECTION 3: GU├ìAS =====================
+
+    private void initGuiasSection() {
+        // Acciones r├ípidas
+        binding.scrGuias.btnExplorarGuias.setOnClickListener(v ->
+                startActivity(new Intent(this, GuideDirectoryActivity.class)));
+
+        binding.scrGuias.btnOfertasGuias.setOnClickListener(v ->
+                startActivity(new Intent(this, OfferInboxActivity.class)));
+
+        // Carrusel horizontal de gu├¡as sugeridos
+        RecyclerView rv = binding.scrGuias.rvGuiasSugeridos;
+        rv.setLayoutManager(new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false));
+
+        guiasAdapter = new GuideAdapter(this, sugeridos, new GuideAdapter.OnAction() {
+            @Override
+            public void onProfile(Guide g) {
+                Intent i = new Intent(Admin_HomeActivity.this,
+                        GuideProfileActivity.class);
+                i.putExtra("guide", g);
+                startActivity(i);
+            }
+
+            @Override
+            public void onOffer(Guide g) {
+                Intent i = new Intent(Admin_HomeActivity.this,
+                        OfferCreateActivity.class);
+                i.putExtra("guide", g);
+                startActivity(i);
+            }
+        });
+        rv.setAdapter(guiasAdapter);
+
+        refreshGuiasDashboard();
+    }
+
+    private void refreshGuiasDashboard() {
+        // Actualizar KPIs
+        int pend = OfferRepository.get().byStatus(Offer.Status.PENDIENTE).size();
+        int acep = OfferRepository.get().byStatus(Offer.Status.ACEPTADA).size();
+        int activos = GuideRepository.get().all().size();
+
+        binding.scrGuias.kpiOfertasPendientes.setText(String.valueOf(pend));
+        binding.scrGuias.kpiOfertasAceptadas.setText(String.valueOf(acep));
+        binding.scrGuias.kpiGuiasActivos.setText(String.valueOf(activos));
+
+        // Actualizar gu├¡as sugeridos
+        sugeridos.clear();
+        List<Guide> all = GuideRepository.get().all();
+        for (int i = 0; i < Math.min(5, all.size()); i++) {
+            sugeridos.add(all.get(i));
+        }
+        guiasAdapter.notifyDataSetChanged();
+
+        binding.scrGuias.emptyStateGuias.setVisibility(
+                sugeridos.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    // ===================== SECTION 4: REPORTES =====================
+
+    private void initReportesSection() {
+        // Filtros de per├¡odo
+        binding.scrReportes.chipSemana.setOnClickListener(v -> cargarReportes("SEMANA"));
+        binding.scrReportes.chipMes.setOnClickListener(v -> cargarReportes("MES"));
+        binding.scrReportes.chipAnio.setOnClickListener(v -> cargarReportes("ANIO"));
+
+        // Ver todas las transacciones
+        binding.scrReportes.btnVerTodasTransacciones.setOnClickListener(v -> {
+            Snackbar.make(binding.getRoot(),
+                    "Funcionalidad en desarrollo", Snackbar.LENGTH_SHORT).show();
+        });
+
+        // Cargar datos iniciales (mes)
+        cargarReportes("MES");
+    }
+
+    private void cargarReportes(String periodo) {
+        // KPIs principales (datos de ejemplo - reemplazar con BD real)
+        switch (periodo) {
+            case "SEMANA":
+                binding.scrReportes.tvIngresosTotales.setText("S/ 2,850");
+                binding.scrReportes.tvIngresosCambio.setText("Ôåæ +12% vs anterior");
+                binding.scrReportes.tvReservasTotales.setText("12");
+                binding.scrReportes.tvReservasCambio.setText("Ôåæ +3 vs anterior");
+                break;
+            case "MES":
+                binding.scrReportes.tvIngresosTotales.setText("S/ 12,450");
+                binding.scrReportes.tvIngresosCambio.setText("Ôåæ +15% vs anterior");
+                binding.scrReportes.tvReservasTotales.setText("48");
+                binding.scrReportes.tvReservasCambio.setText("Ôåæ +8 vs anterior");
+                break;
+            case "ANIO":
+                binding.scrReportes.tvIngresosTotales.setText("S/ 148,900");
+                binding.scrReportes.tvIngresosCambio.setText("Ôåæ +23% vs anterior");
+                binding.scrReportes.tvReservasTotales.setText("567");
+                binding.scrReportes.tvReservasCambio.setText("Ôåæ +89 vs anterior");
+                break;
+        }
+
+        // KPIs secundarios
+        TourRepository tourRepo = new TourRepository(this);
+        int toursActivos = 0;
+        for (Tour t : tourRepo.findAll()) {
+            if (t.estado == TourEstado.PUBLICADO) toursActivos++;
+        }
+
+        binding.scrReportes.tvToursActivos.setText(String.valueOf(toursActivos));
+        binding.scrReportes.tvGuiasContratados.setText(
+                String.valueOf(GuideRepository.get().all().size()));
+        binding.scrReportes.tvSatisfaccion.setText("4.7");
+    }
+
+    // ===================== SECTION 5: PERFIL =====================
+
+    private void initPerfilSection() {
+        // Cargar datos del admin
+        binding.scrPerfil.tvNombre.setText(admin.getNombre());
+        binding.scrPerfil.tvEmail.setText(admin.getEmail());
+        binding.scrPerfil.tvTelefono.setText("+51 " + admin.getTelefono());
+
+        // Datos de empresa
+        binding.scrPerfil.tvEmpresaNombre.setText(empresa.nombre);
+        binding.scrPerfil.tvRuc.setText("20123456789");
+
+        // Botones
+        binding.scrPerfil.btnEditarPerfil.setOnClickListener(v -> mostrarDialogEditarPerfil());
+
+        binding.scrPerfil.btnCambiarFoto.setOnClickListener(v -> {
+            Snackbar.make(binding.getRoot(),
+                    "Funcionalidad en desarrollo", Snackbar.LENGTH_SHORT).show();
+        });
+
+        binding.scrPerfil.btnVerEmpresa.setOnClickListener(v -> {
+            binding.bottomNav.setSelectedItemId(R.id.nav_empresa);
+        });
+
+        // Switches
+        binding.scrPerfil.switchNotificaciones.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            String msg = isChecked ? "Notificaciones activadas" : "Notificaciones desactivadas";
+            Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
+        });
+
+        binding.scrPerfil.switchModoOscuro.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            String msg = isChecked ? "Modo oscuro activado" : "Modo oscuro desactivado";
+            Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
+        });
+
+        binding.scrPerfil.btnIdioma.setOnClickListener(v -> {
+            Snackbar.make(binding.getRoot(),
+                    "Funcionalidad en desarrollo", Snackbar.LENGTH_SHORT).show();
+        });
+
+        // Cerrar sesi├│n
+        binding.scrPerfil.btnCerrarSesion.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Cerrar sesi├│n")
+                    .setMessage("┬┐Est├ís seguro de que deseas cerrar sesi├│n?")
+                    .setPositiveButton("S├¡", (dialog, which) -> {
+                        adminRepo.clear();
+                        Snackbar.make(binding.getRoot(),
+                                "Sesi├│n cerrada", Snackbar.LENGTH_LONG).show();
+                        // TODO: Redirigir al login cuando est├® implementado
+                        // startActivity(new Intent(this, LoginActivity.class));
+                        // finish();
+                    })
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+        });
+    }
+
+    private void mostrarDialogEditarPerfil() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_editar_perfil, null);
+
+        com.google.android.material.textfield.TextInputEditText etNombre =
+                dialogView.findViewById(R.id.etNombre);
+        com.google.android.material.textfield.TextInputEditText etEmail =
+                dialogView.findViewById(R.id.etEmail);
+        com.google.android.material.textfield.TextInputEditText etTelefono =
+                dialogView.findViewById(R.id.etTelefono);
+
+        // Llenar con datos actuales
+        etNombre.setText(admin.getNombre());
+        etEmail.setText(admin.getEmail());
+        etTelefono.setText(admin.getTelefono());
+
+        androidx.appcompat.app.AlertDialog dialog =
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setView(dialogView)
+                        .create();
+
+        // Bot├│n cancelar
+        dialogView.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
+
+        // Bot├│n guardar
+        dialogView.findViewById(R.id.btnGuardar).setOnClickListener(v -> {
+            String nombre = etNombre.getText().toString().trim();
+            String telefono = etTelefono.getText().toString().trim();
+
+            // Validaciones
+            if (nombre.isEmpty()) {
+                etNombre.setError("El nombre es requerido");
+                return;
+            }
+
+            if (telefono.isEmpty() || telefono.length() < 9) {
+                etTelefono.setError("Tel├®fono inv├ílido (m├¡nimo 9 d├¡gitos)");
+                return;
+            }
+
+            // Actualizar admin (email NO cambia)
+            admin.setNombre(nombre);
+            admin.setTelefono(telefono);
+            adminRepo.save(admin);
+
+            // Actualizar UI
+            binding.scrPerfil.tvNombre.setText(admin.getNombre());
+            binding.scrPerfil.tvTelefono.setText("+51 " + admin.getTelefono());
+
+            dialog.dismiss();
+            Snackbar.make(binding.getRoot(),
+                    "Perfil actualizado Ô£ô", Snackbar.LENGTH_SHORT).show();
+        });
+
+        dialog.show();
+    }
+
+    // ===================== DATA SEEDING (DEVELOPMENT ONLY) =====================
+
+    /**
+     * Crea tours de prueba si la BD est├í vac├¡a
+     * ELIMINAR en producci├│n
+     */
+    private void crearDatosDePruebaSiEsNecesario() {
+        TourRepository repo = new TourRepository(this);
+        if (!repo.findAll().isEmpty()) return;
+
+        // Tour 1
+        Tour t1 = new Tour();
+        t1.id = "1";
+        t1.titulo = "City Tour Lima Centro";
+        t1.descripcionCorta = "Conoce el centro hist├│rico de Lima";
+        t1.precioPorPersona = 50.0;
+        t1.cupos = 15;
+        t1.estado = TourEstado.PUBLICADO;
+        repo.upsert(t1);
+
+        // Tour 2
+        Tour t2 = new Tour();
+        t2.id = "2";
+        t2.titulo = "Tour Gastron├│mico Miraflores";
+        t2.descripcionCorta = "Degusta los mejores platos peruanos";
+        t2.precioPorPersona = 80.0;
+        t2.cupos = 10;
+        t2.estado = TourEstado.PUBLICADO;
+        repo.upsert(t2);
+
+        // Tour 3
+        Tour t3 = new Tour();
+        t3.id = "3";
+        t3.titulo = "Huacachina Aventura";
+        t3.descripcionCorta = "Sandboarding en el desierto";
+        t3.precioPorPersona = 120.0;
+        t3.cupos = 8;
+        t3.estado = TourEstado.EN_CURSO;
+        repo.upsert(t3);
     }
 }

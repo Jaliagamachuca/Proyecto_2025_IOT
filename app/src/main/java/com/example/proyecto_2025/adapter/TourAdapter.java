@@ -37,7 +37,28 @@ public class TourAdapter extends RecyclerView.Adapter<TourAdapter.VH> {
         Tour t = data.get(i);
         h.tvTitulo.setText(t.titulo == null ? "(Sin título)" : t.titulo);
         h.tvPrecio.setText(t.precioTexto());
-        h.tvEstado.setText(t.estado.name().replace("_"," "));
+        if (h.chipEstado != null && t.estado != null) {
+            h.chipEstado.setText(t.estado.name().replace("_", " "));
+
+            // Cambiar color según el estado
+            int colorRes;
+            switch (t.estado) {
+                case PUBLICADO:
+                    colorRes = R.color.estado_publicado;
+                    break;
+                case EN_CURSO:
+                    colorRes = R.color.estado_en_curso;
+                    break;
+                case BORRADOR:
+                    colorRes = R.color.estado_borrador;
+                    break;
+                default:
+                    colorRes = R.color.estado_pendiente;
+                    break;
+            }
+            h.chipEstado.setChipBackgroundColorResource(colorRes);
+        }
+
         h.tvCupos.setText("Cupos: " + t.cupos);
 
         // portada simple: primera imagen si existe
@@ -53,12 +74,14 @@ public class TourAdapter extends RecyclerView.Adapter<TourAdapter.VH> {
     static class VH extends RecyclerView.ViewHolder {
         ImageView ivPortada, btnMore;
         TextView tvTitulo, tvPrecio, tvEstado, tvCupos;
+        com.google.android.material.chip.Chip chipEstado;
+
         VH(@NonNull View v){
             super(v);
             ivPortada = v.findViewById(R.id.ivPortada);
             tvTitulo  = v.findViewById(R.id.tvTitulo);
             tvPrecio  = v.findViewById(R.id.tvPrecio);
-            tvEstado  = v.findViewById(R.id.tvEstado);
+            chipEstado = v.findViewById(R.id.chipEstado);
             tvCupos   = v.findViewById(R.id.tvCupos);
             btnMore   = v.findViewById(R.id.btnMore);
         }

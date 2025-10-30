@@ -18,5 +18,22 @@ public class OfferRepository {
         return res;
     }
     public Offer byId(String id){ for(Offer o:offers) if(o.getId().equals(id)) return o; return null; }
+
+    public Offer findById(String id) {
+        for (Offer o : offers) {
+            if (o.getId().equals(id)) return o;
+        }
+        return null;
+    }
+
+    public void update(Offer offer) {
+        for (int i = 0; i < offers.size(); i++) {
+            if (offers.get(i).getId().equals(offer.getId())) {
+                offers.set(i, offer);
+                return;
+            }
+        }
+    }
+
     public List<Offer> all(){ return new ArrayList<>(offers); }
 }

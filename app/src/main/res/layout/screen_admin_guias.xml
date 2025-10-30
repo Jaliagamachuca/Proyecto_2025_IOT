@@ -1,108 +1,266 @@
-<!-- res/layout/screen_admin_guias.xml -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
-
+    android:fillViewport="true">
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_width="match_parent" android:layout_height="wrap_content">
+        android:padding="16dp"
+        android:paddingBottom="80dp">
 
-        <!-- Título -->
+        <!-- Header -->
         <TextView
             android:id="@+id/tvHeaderGuias"
-            android:text="@string/tab_guias"
-            android:textStyle="bold"
-            android:textSize="18sp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="Guías de turismo"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:layout_marginBottom="16dp"/>
 
-        <!-- KPIs -->
+        <!-- KPIs - Estilo similar a Tours -->
         <LinearLayout
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal" android:weightSum="2">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="20dp"
+            android:weightSum="3">
 
+            <!-- Guías activos -->
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp" android:layout_height="96dp"
-                android:layout_marginEnd="8dp" android:layout_weight="1"
-                app:cardCornerRadius="16dp">
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="2dp"
+                app:strokeColor="#4CAF50">
+
                 <LinearLayout
-                    android:padding="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_width="match_parent" android:layout_height="match_parent">
-                    <TextView android:text="Ofertas pendientes" android:textStyle="bold"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                    <TextView android:id="@+id/kpiOfertasPend"
-                        android:text="0" android:textSize="28sp"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    android:padding="12dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/kpiGuiasActivos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="8"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Activos"
+                        android:textSize="12sp"
+                        android:textColor="#757575"
+                        android:layout_marginTop="4dp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Ofertas pendientes -->
             <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp" android:layout_height="96dp"
-                android:layout_marginStart="8dp" android:layout_weight="1"
-                app:cardCornerRadius="16dp">
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="2dp"
+                app:strokeColor="#FFC107">
+
                 <LinearLayout
-                    android:padding="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_width="match_parent" android:layout_height="match_parent">
-                    <TextView android:text="Ofertas aceptadas" android:textStyle="bold"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                    <TextView android:id="@+id/kpiOfertasAcep"
-                        android:text="0" android:textSize="28sp"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    android:padding="12dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/kpiOfertasPendientes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFC107"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pendientes"
+                        android:textSize="12sp"
+                        android:textColor="#757575"
+                        android:layout_marginTop="4dp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Ofertas aceptadas -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="2dp"
+                app:strokeColor="#9E9E9E">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/kpiOfertasAceptadas"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="28sp"
+                        android:textStyle="bold"
+                        android:textColor="#9E9E9E"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Aceptadas"
+                        android:textSize="12sp"
+                        android:textColor="#757575"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
 
         <!-- Acciones rápidas -->
-        <LinearLayout
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal" android:weightSum="3">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Acciones rápidas"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp">
+
+            <!-- Botón Explorar guías -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExplorarGuias"
-                android:text="Explorar guías"
-                android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="👥 Buscar guías disponibles"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"
+                android:layout_marginBottom="8dp"
+                style="@style/Widget.Material3.Button.OutlinedButton"/>
 
+            <!-- Botón Ver mis ofertas enviadas -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnOfertasGuias"
-                android:text="Bandeja de ofertas"
-                android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp" android:layout_marginEnd="8dp"/>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📨 Ver ofertas enviadas"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"
+                style="@style/Widget.Material3.Button.OutlinedButton"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCalendarioGuias"
-                android:text="Calendario"
-                android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1"/>
         </LinearLayout>
 
-        <!-- Sugeridos (horizontal) -->
-        <TextView
-            android:text="Sugeridos para tus tours"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <!-- Guías recomendados -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
 
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Guías recomendados"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                />
+
+            <TextView
+                android:id="@+id/tvContadorGuiasSugeridos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5 guías"
+                android:textSize="14sp"
+                />
+        </LinearLayout>
+
+        <!-- RecyclerView de guías sugeridos (horizontal) -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvGuiasSugeridos"
-            android:layout_width="match_parent" android:layout_height="120dp"
-            android:layout_marginTop="8dp"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"/>
 
-        <!-- Estado/ayuda -->
-        <TextView
-            android:id="@+id/tvEmptyGuias"
-            android:text="No hay guías sugeridos con tus filtros actuales."
-            android:visibility="gone"
-            android:textColor="#666"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"/>
+        <!-- Empty state -->
+        <LinearLayout
+            android:id="@+id/emptyStateGuias"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="48dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:text="👤"
+                android:textSize="80sp"
+                android:gravity="center"
+                android:alpha="0.3"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="No hay guías disponibles"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#212121"
+                android:gravity="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Explora el directorio para\nencontrar guías para tus tours"
+                android:textSize="14sp"
+                android:textColor="#757575"
+                android:gravity="center"/>
+
+        </LinearLayout>
+
     </LinearLayout>
-</ScrollView>
+
+</androidx.core.widget.NestedScrollView>

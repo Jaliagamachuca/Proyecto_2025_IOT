@@ -140,7 +140,7 @@
                 android:text="Guardar"/>
             <Button
                 android:id="@+id/btnPublicar" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Publicar perfil" android:layout_marginStart="8dp"/>
+                android:text="Guardar perfil" android:layout_marginStart="8dp"/>
         </LinearLayout>
 
     </LinearLayout>

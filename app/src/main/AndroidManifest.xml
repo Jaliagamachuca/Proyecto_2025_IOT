@@ -46,6 +46,7 @@
         <activity android:name=".Activities_Administrador.GuideProfileActivity" android:exported="false"/>
         <activity android:name=".Activities_Administrador.OfferCreateActivity" android:exported="false"/>
         <activity android:name=".Activities_Administrador.OfferInboxActivity" android:exported="false"/>
+        <activity android:name=".Activities_Administrador.OfferDetailActivity" android:exported="false"/>
         <activity android:name=".Activities_Administrador.AssignGuideActivity" android:exported="false"/>
 
 

@@ -28,7 +28,6 @@
                 android:text="Tus tours"
                 android:textStyle="bold"
                 android:textSize="22sp"
-                android:textColor="@color/text_primary"
                 android:paddingBottom="16dp"/>
 
             <!-- Barra de búsqueda -->
@@ -82,12 +81,6 @@
                     android:text="Pendientes"
                     style="@style/Widget.Material3.Chip.Filter" />
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipFiltroBorradores"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Borradores"
-                    style="@style/Widget.Material3.Chip.Filter" />
 
             </com.google.android.material.chip.ChipGroup>
 
@@ -260,32 +253,6 @@
                     android:layout_marginBottom="16dp"/>
             </LinearLayout>
 
-            <!-- DESTACADOS -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Destacados"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:paddingBottom="8dp"/>
-
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/vpPasarela"
-                android:layout_width="match_parent"
-                android:layout_height="220dp"
-                android:clipToPadding="false"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"/>
-
-            <LinearLayout
-                android:id="@+id/indicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_gravity="center_horizontal"
-                android:paddingTop="8dp"
-                android:paddingBottom="16dp"/>
 
             <!-- Últimos tours -->
             <LinearLayout
