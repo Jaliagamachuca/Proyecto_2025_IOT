@@ -47,5 +47,46 @@ public class AuthRepository {
                 .addOnFailureListener(cb::onError);
     }
 
+    // Buscar usuario por email (para promoción)
+    public void findUserByEmail(String email, Callback<QuerySnapshot> cb){
+        db.collection("users")
+                .whereEqualTo("email", email).limit(1)
+                .get()
+                .addOnSuccessListener(cb::onSuccess)
+                .addOnFailureListener(cb::onError);
+    }
+
+    // Promover a admin (cambia role + companyId)
+    public void promoteToAdmin(String uid, String companyId, Callback<Void> cb){
+        Map<String,Object> m = new HashMap<>();
+        m.put("role","admin");
+        m.put("companyId", companyId);
+        m.put("updatedAt", FieldValue.serverTimestamp());
+        db.collection("users").document(uid).update(m)
+                .addOnSuccessListener(v -> cb.onSuccess(null))
+                .addOnFailureListener(cb::onError);
+    }
+
+    // (Opcional) Crear admin desde cero (Auth + Firestore)
+    public void createAdminFromScratch(String name, String email, String pass, String companyId, Callback<Void> cb){
+        auth.createUserWithEmailAndPassword(email, pass)
+                .addOnSuccessListener(r -> {
+                    String uid = r.getUser().getUid();
+                    Map<String,Object> u = new HashMap<>();
+                    u.put("uid", uid);
+                    u.put("email", email);
+                    u.put("displayName", name);
+                    u.put("role", "admin");
+                    u.put("status", "active");
+                    u.put("companyId", companyId);
+                    u.put("createdAt", FieldValue.serverTimestamp());
+                    u.put("updatedAt", FieldValue.serverTimestamp());
+                    db.collection("users").document(uid).set(u)
+                            .addOnSuccessListener(x -> cb.onSuccess(null))
+                            .addOnFailureListener(cb::onError);
+                })
+                .addOnFailureListener(cb::onError);
+    }
+
     public void logout(){ auth.signOut(); }
 }
