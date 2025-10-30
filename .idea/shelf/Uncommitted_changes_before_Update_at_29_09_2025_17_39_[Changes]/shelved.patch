@@ -1,0 +1,56 @@
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\">\r\n\r\n    <uses-permission android:name=\"android.permission.INTERNET\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\r\n    <uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\" />\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\r\n        android:fullBackupContent=\"@xml/backup_rules\"\r\n        android:icon=\"@mipmap/ic_launcher\"\r\n        android:label=\"@string/app_name\"\r\n        android:localeConfig=\"@xml/locales_config\"\r\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/Theme.Proyecto_2025\"\r\n        android:usesCleartextTraffic=\"true\"\r\n        tools:targetApi=\"33\">\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Registrar_Progreso\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Registrar_CheckOut\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Registrar_CheckIn\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Login.Login_Activity_VistaInicial\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".MenuActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Usuario.Usuario_Activity_VistaInicial\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Administrador.EmpresaFormPruebaActivity\"\r\n            android:exported=\"false\" />\r\n        <activity android:name=\".Activities_Administrador.TourListActivity\" />\r\n        <activity android:name=\".Activities_Administrador.TourFormActivity\" />\r\n        <activity android:name=\".Activities_Administrador.TourDetalleActivity\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.EmployeeDetailActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Administradores_Sede\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Clientes\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Clientes1\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Guias_Turismo\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Rechazar_Guia_Turismo\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Registrar_Administrador\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Registrar_Guia_Turismo\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Registrar_Guias_Turismo\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Ver_Administrador\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Ver_Cliente\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Ver_Guia_Turismo\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Activity_VistaInicial\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Superadmin.Superadmin_Activity_VistaInicial\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Historial_Tours\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Solictar_Nuevo_Tour\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Tour_en_Proceso\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Guia_Tours_Pendientes\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Vista_Detalles_Tour\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Guia.Vista_Detalles_Tour_Sin_Botones\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Administrador.Administrador_Activity_VistaInicial\"\r\n            android:exported=\"true\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n        <activity\r\n            android:name=\".joaco.RegistroActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".Activities_Administrador.MapPickerActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.ConfirmacionActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.ExitoClienteActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.PendienteGuiaActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.RecuperarPasswordActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.ConfirmarEmailActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.CodigoConfirmacionActivity\"\r\n            android:exported=\"false\" />\r\n        <activity\r\n            android:name=\".joaco.CrearPasswordActivity\"\r\n            android:exported=\"false\" />\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	(revision f3372e82c2cdcd12b92b6d1a5ce3b6f8c4bc2dd9)
++++ b/app/src/main/AndroidManifest.xml	(date 1759184586767)
+@@ -80,12 +80,6 @@
+             android:name=".Activities_Superadmin.Superadmin_Ver_Guia_Turismo"
+             android:exported="false" />
+         <activity
+-            android:name=".Activities_Guia.Guia_Activity_VistaInicial"
+-            android:exported="false" />
+-        <activity
+-            android:name=".Activities_Superadmin.Superadmin_Activity_VistaInicial"
+-            android:exported="false" />
+-        <activity
+             android:name=".Activities_Guia.Guia_Historial_Tours"
+             android:exported="false" />
+         <activity
+@@ -104,7 +98,10 @@
+             android:name=".Activities_Guia.Vista_Detalles_Tour_Sin_Botones"
+             android:exported="false" />
+         <activity
+-            android:name=".Activities_Administrador.Administrador_Activity_VistaInicial"
++            android:name=".Activities_Guia.Guia_Activity_VistaInicial"
++            android:exported="false" />
++        <activity
++            android:name=".Activities_Superadmin.Superadmin_Activity_VistaInicial"
+             android:exported="true">
+             <intent-filter>
+                 <action android:name="android.intent.action.MAIN" />
+Index: .idea/deploymentTargetSelector.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"deploymentTargetSelector\">\r\n    <selectionStates>\r\n      <SelectionState runConfigName=\"App\">\r\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\r\n        <DropdownSelection timestamp=\"2025-09-29T21:27:19.467683300Z\">\r\n          <Target type=\"DEFAULT_BOOT\">\r\n            <handle>\r\n              <DeviceId pluginId=\"LocalEmulator\" identifier=\"path=C:\\Users\\Julio César\\.android\\avd\\Pixel_4A1.avd\" />\r\n            </handle>\r\n          </Target>\r\n        </DropdownSelection>\r\n        <DialogSelection />\r\n      </SelectionState>\r\n    </selectionStates>\r\n  </component>\r\n</project>
+===================================================================
+diff --git a/.idea/deploymentTargetSelector.xml b/.idea/deploymentTargetSelector.xml
+--- a/.idea/deploymentTargetSelector.xml	(revision f3372e82c2cdcd12b92b6d1a5ce3b6f8c4bc2dd9)
++++ b/.idea/deploymentTargetSelector.xml	(date 1759182641629)
+@@ -4,10 +4,10 @@
+     <selectionStates>
+       <SelectionState runConfigName="App">
+         <option name="selectionMode" value="DROPDOWN" />
+-        <DropdownSelection timestamp="2025-09-29T21:27:19.467683300Z">
++        <DropdownSelection timestamp="2025-09-29T21:49:51.450290700Z">
+           <Target type="DEFAULT_BOOT">
+             <handle>
+-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Julio César\.android\avd\Pixel_4A1.avd" />
++              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Julio César\.android\avd\Pixel_4Julio.avd" />
+             </handle>
+           </Target>
+         </DropdownSelection>

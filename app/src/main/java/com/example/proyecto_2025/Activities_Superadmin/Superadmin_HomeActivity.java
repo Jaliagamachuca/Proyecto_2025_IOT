@@ -1,6 +1,7 @@
 package com.example.proyecto_2025.Activities_Superadmin;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -8,6 +9,7 @@ import android.view.View;
 
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_2025.R;
@@ -59,6 +61,17 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
         // Estado inicial: Dashboard
         binding.bottomNav.setSelectedItemId(R.id.nav_dashboard);
         showScreen(SCR_DASHBOARD);
+
+        // 🔹 Acción del botón "Registrar Admin" en el Dashboard
+        binding.scrDashboard.btnRegistrarAdmin.setOnClickListener(v -> {
+            Intent intent = new Intent(this, Superadmin_Registrar_Administrador.class);
+            startActivity(intent);
+        });
+        // 🔹 Acción del botón "Registrar Admin" en el Dashboard
+        binding.scrDashboard.btnRegistrarGuias.setOnClickListener(v -> {
+            Intent intent = new Intent(this, Superadmin_Registrar_Guias_Turismo.class);
+            startActivity(intent);
+        });
 
         // ⚡️ Llamamos aquí siempre, así la lista llega a Admins, Guias y Clientes
         createRetrofitService();
@@ -113,7 +126,17 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
         if (screenId == SCR_ADMINS) {
 
             binding.fab.setVisibility(View.VISIBLE);
-            binding.fab.setImageResource(R.drawable.ic_add_24);
+            binding.fab.setImageResource(R.drawable.ic_person_add_24);
+
+            // 🔹 Hace que el fondo del botón sea más oscuro (por ejemplo, azul oscuro)
+            binding.fab.setBackgroundTintList(
+                    ContextCompat.getColorStateList(this, R.color.teal_700));
+
+            // 🔹 Cambia el color del ícono (por ejemplo, blanco para que resalte)
+            binding.fab.setImageTintList(
+                    ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)));
+
+            // 🔹 Acción del botón
             binding.fab.setOnClickListener(v ->
                     startActivity(new Intent(this,
                             com.example.proyecto_2025.Activities_Superadmin.Superadmin_Registrar_Administrador.class)));

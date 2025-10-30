@@ -34,6 +34,10 @@ public class Guia_HomeActivity extends AppCompatActivity {
         binding = ActivityGuiaVistaInicialBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // 🔹 Ocultar los botones "Clientes" y "Registros" del menú inferior
+        binding.bottomNav.getMenu().findItem(R.id.nav_clientes).setVisible(false);
+        binding.bottomNav.getMenu().findItem(R.id.nav_registros).setVisible(false);
+
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
