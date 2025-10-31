@@ -13,7 +13,9 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_2025.R;
+import com.example.proyecto_2025.data.GuideRepository;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;
+import com.example.proyecto_2025.model.Guide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -216,65 +218,35 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
     }
 
     public void cargarListaWebService() {
-        employeeService.obtenerLista().enqueue(new Callback<EmployeeDto>() {
-            @Override
-            public void onResponse(Call<EmployeeDto> call, Response<EmployeeDto> response) {
-                if (response.isSuccessful()) {
-                    EmployeeDto body = response.body();
-                    List<Employee> employeeList = body.getLista();
+        // 1️⃣ Obtener data local del nuevo repositorio
+        UserRepository repo = UserRepository.get();
+        repo.seedIfEmpty(this); // Carga los datos de ejemplo si están vacíos
 
-                    // 🔹 Dividir la lista en 3 sublistas según salario
-                    List<Employee> listaAdmins = new ArrayList<>();
-                    List<Employee> listaGuias = new ArrayList<>();
-                    List<Employee> listaClientes = new ArrayList<>();
+        // 2️⃣ Obtener listas separadas por rol
+        List<User> listaAdmins = repo.allAdmins();
+        List<User> listaGuias = repo.allGuias();
+        List<User> listaClientes = repo.allClientes();
 
-                    for (Employee e : employeeList) {
-                        double salario = e.getSalary();
-                        if (salario <= 8000) {
-                            listaAdmins.add(e);
-                        } else if (salario <= 10000) {
-                            listaGuias.add(e);
-                        } else {
-                            listaClientes.add(e);
-                        }
-                    }
+        // 3️⃣ Cargar adapters para cada tipo de usuario
+        EmployeeAdapter adapterAdmins = new EmployeeAdapter();
+        adapterAdmins.setListaEmpleados(listaAdmins);
+        adapterAdmins.setContext(this);
+        binding.scrAdmins.recyclerView.setAdapter(adapterAdmins);
+        binding.scrAdmins.recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-                    // 🔹 Adapter para Admins
-                    EmployeeAdapter adapterAdmins = new EmployeeAdapter();
-                    adapterAdmins.setListaEmpleados(listaAdmins);
-                    adapterAdmins.setContext(Superadmin_HomeActivity.this);
-                    binding.scrAdmins.recyclerView.setAdapter(adapterAdmins);
-                    binding.scrAdmins.recyclerView.setLayoutManager(
-                            new LinearLayoutManager(Superadmin_HomeActivity.this)
-                    );
+        EmployeeAdapter adapterGuias = new EmployeeAdapter();
+        adapterGuias.setListaEmpleados(listaGuias);
+        adapterGuias.setContext(this);
+        binding.scrGuias.recyclerView.setAdapter(adapterGuias);
+        binding.scrGuias.recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-                    // 🔹 Adapter para Guias
-                    EmployeeAdapter adapterGuias = new EmployeeAdapter();
-                    adapterGuias.setListaEmpleados(listaGuias);
-                    adapterGuias.setContext(Superadmin_HomeActivity.this);
-                    binding.scrGuias.recyclerView.setAdapter(adapterGuias);
-                    binding.scrGuias.recyclerView.setLayoutManager(
-                            new LinearLayoutManager(Superadmin_HomeActivity.this)
-                    );
+        EmployeeAdapter adapterClientes = new EmployeeAdapter();
+        adapterClientes.setListaEmpleados(listaClientes);
+        adapterClientes.setContext(this);
+        binding.scrClientes.recyclerView.setAdapter(adapterClientes);
+        binding.scrClientes.recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-                    // 🔹 Adapter para Clientes
-                    EmployeeAdapter adapterClientes = new EmployeeAdapter();
-                    adapterClientes.setListaEmpleados(listaClientes);
-                    adapterClientes.setContext(Superadmin_HomeActivity.this);
-                    binding.scrClientes.recyclerView.setAdapter(adapterClientes);
-                    binding.scrClientes.recyclerView.setLayoutManager(
-                            new LinearLayoutManager(Superadmin_HomeActivity.this)
-                    );
-
-                } else {
-                    Log.d("msg-superadmin", "response unsuccessful");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<EmployeeDto> call, Throwable t) {
-                Log.e("msg-superadmin", "error: " + t.getMessage());
-            }
-        });
+        Log.d("msg-superadmin", "Lista cargada desde UserRepository: " +
+                (listaAdmins.size() + listaGuias.size() + listaClientes.size()));
     }
 }

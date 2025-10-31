@@ -4,22 +4,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import com.example.proyecto_2025.BaseActivity;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVerClientesBinding;
-import com.example.proyecto_2025.databinding.ActivitySuperadminVerGuiaTurismoBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class Superadmin_Ver_Cliente extends AppCompatActivity {
 
     private ActivitySuperadminVerClientesBinding binding;
+    private User user;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,57 +22,69 @@ public class Superadmin_Ver_Cliente extends AppCompatActivity {
         binding = ActivitySuperadminVerClientesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // ✅ Recuperar el usuario enviado
         Intent intent = getIntent();
-        Employee employee = (Employee) intent.getSerializableExtra("employee");
+        user = (User) intent.getSerializableExtra("user");
 
-        if (employee != null) {
-            // 🔹 Asignar valores dinámicos
-            binding.inputNombre.setText(employee.getFirstName());
-            binding.inputApellidos.setText(employee.getLastName());
-            binding.inputDni.setText(employee.getJobId()); // ajusta a tu modelo real
-            // binding.inputFechaNacimiento.setText(employee.getBirthDate()); // idem si tienes campo
-            binding.inputCorreo.setText(employee.getEmail());
-            binding.inputTelefono.setText(employee.getPhoneNumber());
-            binding.inputDomicilio.setText(String.valueOf(employee.getSalary()));
-        }
+        if (user != null) {
+            // 🔹 Mostrar los datos del usuario
+            binding.inputNombre.setText(user.getNombre());
+            binding.inputApellidos.setText(user.getApellidos());
+            binding.inputDni.setText(user.getDni());
+            binding.inputCorreo.setText(user.getCorreo());
+            binding.inputTelefono.setText(user.getTelefono());
+            binding.inputDomicilio.setText(user.getDomicilio());
+            binding.inputFechaNacimiento.setText(user.getFechaNacimiento());
 
-        // 🔹 Configurar el botón según condición
-        if (employee != null) {
-            if (employee.getSalary() >= 10000) {
-                binding.btnActivarCliente.setText("DESACTIVAR");
-                binding.btnActivarCliente.setBackgroundTintList(
-                        getResources().getColorStateList(android.R.color.holo_red_dark)
-                );
-                binding.btnActivarCliente.setOnClickListener(v -> mostrarDialogDesactivar(employee));
-            } else {
-                binding.btnActivarCliente.setText("ACTIVAR");
-                binding.btnActivarCliente.setBackgroundTintList(
-                        getResources().getColorStateList(android.R.color.holo_green_dark)
-                );
-                binding.btnActivarCliente.setOnClickListener(v -> mostrarDialogActivar(employee));
-            }
+            // 🔹 Mostrar el estado actual
+            actualizarBotonEstado();
+        } else {
+            Log.e("Superadmin_Ver_Cliente", "El objeto User es null — revisa el putExtra()");
         }
     }
 
-    private void mostrarDialogActivar(Employee empleado) {
+    /** 🔹 Cambia el texto y color del botón según si el usuario está activo o no */
+    private void actualizarBotonEstado() {
+        if (user.isActivo()) {
+            binding.btnActivarCliente.setText("DESACTIVAR");
+            binding.btnActivarCliente.setBackgroundTintList(
+                    getResources().getColorStateList(android.R.color.holo_red_dark)
+            );
+            binding.btnActivarCliente.setOnClickListener(v -> mostrarDialogDesactivar(user));
+        } else {
+            binding.btnActivarCliente.setText("ACTIVAR");
+            binding.btnActivarCliente.setBackgroundTintList(
+                    getResources().getColorStateList(android.R.color.holo_green_dark)
+            );
+            binding.btnActivarCliente.setOnClickListener(v -> mostrarDialogActivar(user));
+        }
+    }
+
+    /** 🔹 Dialogo para activar */
+    private void mostrarDialogActivar(User user) {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Activar Cliente")
-                .setMessage("¿Está seguro de activar al usuario " + empleado.getFirstName() + "?")
-                .setNeutralButton(R.string.cancel, (dialog, i) ->
-                        Log.d("msg-test", "cancelado"))
-                .setPositiveButton(R.string.ok, (dialog, i) ->
-                        Log.d("msg-test", "Usuario activado: " + empleado.getFirstName()))
+                .setMessage("¿Está seguro de activar al usuario " + user.getNombre() + "?")
+                .setNeutralButton(R.string.cancel, (dialog, i) -> Log.d("msg-test", "cancelado"))
+                .setPositiveButton(R.string.ok, (dialog, i) -> {
+                    user.setActivo(true);
+                    actualizarBotonEstado();
+                    Log.d("msg-test", "Usuario activado: " + user.getNombre());
+                })
                 .show();
     }
 
-    private void mostrarDialogDesactivar(Employee empleado) {
+    /** 🔹 Dialogo para desactivar */
+    private void mostrarDialogDesactivar(User user) {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Desactivar Cliente")
-                .setMessage("¿Está seguro de desactivar al usuario " + empleado.getFirstName() + "?")
-                .setNeutralButton(R.string.cancel, (dialog, i) ->
-                        Log.d("msg-test", "cancelado"))
-                .setPositiveButton(R.string.ok, (dialog, i) ->
-                        Log.d("msg-test", "Usuario desactivado: " + empleado.getFirstName()))
+                .setMessage("¿Está seguro de desactivar al usuario " + user.getNombre() + "?")
+                .setNeutralButton(R.string.cancel, (dialog, i) -> Log.d("msg-test", "cancelado"))
+                .setPositiveButton(R.string.ok, (dialog, i) -> {
+                    user.setActivo(false);
+                    actualizarBotonEstado();
+                    Log.d("msg-test", "Usuario desactivado: " + user.getNombre());
+                })
                 .show();
     }
 }

@@ -4,16 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import com.example.proyecto_2025.BaseActivity;
 import com.example.proyecto_2025.R;
-import com.example.proyecto_2025.databinding.ActivitySuperadminVerAdministradorBinding;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVerGuiaTurismoBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -27,57 +21,65 @@ public class Superadmin_Ver_Guia_Turismo extends AppCompatActivity {
         binding = ActivitySuperadminVerGuiaTurismoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // 🟢 Recibir objeto User desde el intent
         Intent intent = getIntent();
-        Employee employee = (Employee) intent.getSerializableExtra("employee");
+        User guia = (User) intent.getSerializableExtra("user");
 
-        if (employee != null) {
-            // 🔹 Asignar valores dinámicos
-            binding.inputNombre.setText(employee.getFirstName());
-            binding.inputApellidos.setText(employee.getLastName());
-            binding.inputDni.setText(employee.getJobId()); // ajusta a tu modelo real
-            // binding.inputFechaNacimiento.setText(employee.getBirthDate()); // idem si tienes campo
-            binding.inputCorreo.setText(employee.getEmail());
-            binding.inputTelefono.setText(employee.getPhoneNumber());
-            binding.inputDomicilio.setText(String.valueOf(employee.getSalary()));
+        if (guia != null) {
+            // 🟢 Mostrar la información del guía en los campos
+            binding.inputNombre.setText(guia.getNombre());
+            binding.inputApellidos.setText(guia.getApellidos());
+            binding.inputDni.setText(guia.getDni());
+            binding.inputCorreo.setText(guia.getCorreo());
+            binding.inputTelefono.setText(guia.getTelefono());
+            binding.inputDomicilio.setText(guia.getDomicilio());
+            binding.inputFechaNacimiento.setText(guia.getFechaNacimiento());
+            if (guia.getIdiomas() != null && !guia.getIdiomas().isEmpty()) {
+                binding.inputIdiomas.setText(String.join(", ", guia.getIdiomas()));
+            } else {
+                binding.inputIdiomas.setText("—");
+            }
         }
 
-        // 🔹 Configurar el botón según condición
-        if (employee != null) {
-            if (employee.getSalary() >= 10000) {
+        // 🟢 Configurar botón de activación/desactivación
+        if (guia != null) {
+            if (guia.isActivo()) {
                 binding.btnActivarGuia.setText("DESACTIVAR");
                 binding.btnActivarGuia.setBackgroundTintList(
                         getResources().getColorStateList(android.R.color.holo_red_dark)
                 );
-                binding.btnActivarGuia.setOnClickListener(v -> mostrarDialogDesactivar(employee));
+                binding.btnActivarGuia.setOnClickListener(v -> mostrarDialogDesactivar(guia));
             } else {
                 binding.btnActivarGuia.setText("ACTIVAR");
                 binding.btnActivarGuia.setBackgroundTintList(
                         getResources().getColorStateList(android.R.color.holo_green_dark)
                 );
-                binding.btnActivarGuia.setOnClickListener(v -> mostrarDialogActivar(employee));
+                binding.btnActivarGuia.setOnClickListener(v -> mostrarDialogActivar(guia));
             }
         }
     }
 
-    private void mostrarDialogActivar(Employee empleado) {
+    // 🟢 Diálogo para activar guía
+    private void mostrarDialogActivar(User guia) {
         new MaterialAlertDialogBuilder(this)
-                .setTitle("Activar Administrador")
-                .setMessage("¿Está seguro de activar al usuario " + empleado.getFirstName() + "?")
+                .setTitle("Activar Guía de Turismo")
+                .setMessage("¿Está seguro de activar al guía " + guia.getNombre() + "?")
                 .setNeutralButton(R.string.cancel, (dialog, i) ->
                         Log.d("msg-test", "cancelado"))
                 .setPositiveButton(R.string.ok, (dialog, i) ->
-                        Log.d("msg-test", "Usuario activado: " + empleado.getFirstName()))
+                        Log.d("msg-test", "Guía activado: " + guia.getNombre()))
                 .show();
     }
 
-    private void mostrarDialogDesactivar(Employee empleado) {
+    // 🟢 Diálogo para desactivar guía
+    private void mostrarDialogDesactivar(User guia) {
         new MaterialAlertDialogBuilder(this)
-                .setTitle("Desactivar Administrador")
-                .setMessage("¿Está seguro de desactivar al usuario " + empleado.getFirstName() + "?")
+                .setTitle("Desactivar Guía de Turismo")
+                .setMessage("¿Está seguro de desactivar al guía " + guia.getNombre() + "?")
                 .setNeutralButton(R.string.cancel, (dialog, i) ->
                         Log.d("msg-test", "cancelado"))
                 .setPositiveButton(R.string.ok, (dialog, i) ->
-                        Log.d("msg-test", "Usuario desactivado: " + empleado.getFirstName()))
+                        Log.d("msg-test", "Guía desactivado: " + guia.getNombre()))
                 .show();
     }
 }

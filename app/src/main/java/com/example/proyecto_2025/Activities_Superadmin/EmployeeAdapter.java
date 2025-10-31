@@ -2,11 +2,9 @@ package com.example.proyecto_2025.Activities_Superadmin;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,74 +15,83 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.List;
 
-public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.EmployeeViewHolder> {
+/**
+ * Adaptador que muestra información de los usuarios (Admins, Guías y Clientes)
+ */
+public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.UserViewHolder> {
 
-    private List<Employee> listaEmpleados;
+    private List<User> listaUsuarios;
     private Context context;
 
-    private static String TAG = "msg-test-EmployeeViewHolder";
+    private static final String TAG = "msg-test-UserAdapter";
 
     @NonNull
     @Override
-    public EmployeeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
         IrvEmployeeBinding binding = IrvEmployeeBinding.inflate(inflater, parent, false);
-        return new EmployeeViewHolder(binding);
+        return new UserViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull EmployeeViewHolder holder, int position) {
-        Employee employee = listaEmpleados.get(position);
-        holder.employee = employee;
+    public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
+        User user = listaUsuarios.get(position);
+        holder.user = user;
 
-        // Mostrar nombre completo
-        String fullName = employee.getFirstName() + " " + employee.getLastName();
+        // 🔹 Mostrar nombre completo
+        String fullName = user.getNombre() + " " + user.getApellidos();
         holder.binding.textViewFullName.setText(fullName);
 
         // 🔹 Botón "Ver información"
         holder.binding.buttonInformacion.setOnClickListener(view -> {
             Intent intent;
 
-            double salario = employee.getSalary();
-            if (salario <= 8000) {
-                intent = new Intent(context, Superadmin_Ver_Administrador.class);
-            } else if (salario <= 10000) {
-                intent = new Intent(context, Superadmin_Ver_Guia_Turismo.class);
-            } else {
-                intent = new Intent(context, Superadmin_Ver_Cliente.class);
+            // Dependiendo del rol, abre diferentes pantallas
+            switch (user.getRol()) {
+                case "Administrador":
+                    intent = new Intent(context, Superadmin_Ver_Administrador.class);
+                    break;
+                case "Guía":
+                    intent = new Intent(context, Superadmin_Ver_Guia_Turismo.class);
+                    break;
+                case "Cliente":
+                default:
+                    intent = new Intent(context, Superadmin_Ver_Cliente.class);
+                    break;
             }
 
-            intent.putExtra("employee", employee);
+            intent.putExtra("user", user);
             context.startActivity(intent);
         });
 
-        // 🔹 Lógica del botón según salario
-        if (employee.getSalary() >= 10000) {
+        // 🔹 Lógica del botón según si el usuario está activo o no
+        if (user.isActivo()) {
             holder.binding.buttonActivar.setText("DESACTIVAR");
             holder.binding.buttonActivar.setBackgroundTintList(
                     context.getResources().getColorStateList(android.R.color.holo_red_dark)
             );
-            holder.binding.buttonActivar.setOnClickListener(v -> mostrarDialogDesactivar(employee));
+            holder.binding.buttonActivar.setOnClickListener(v -> mostrarDialogDesactivar(user));
         } else {
             holder.binding.buttonActivar.setText("ACTIVAR");
             holder.binding.buttonActivar.setBackgroundTintList(
                     context.getResources().getColorStateList(android.R.color.holo_green_dark)
             );
-            holder.binding.buttonActivar.setOnClickListener(v -> mostrarDialogActivar(employee));
+            holder.binding.buttonActivar.setOnClickListener(v -> mostrarDialogActivar(user));
         }
     }
 
     @Override
     public int getItemCount() {
-        return listaEmpleados.size();
+        return listaUsuarios != null ? listaUsuarios.size() : 0;
     }
 
-    public List<Employee> getListaEmpleados() {
-        return listaEmpleados;
+    // Getters y Setters
+    public List<User> getListaUsuarios() {
+        return listaUsuarios;
     }
 
-    public void setListaEmpleados(List<Employee> listaEmpleados) {
-        this.listaEmpleados = listaEmpleados;
+    public void setListaEmpleados(List<User> listaUsuarios) { // mantiene el mismo nombre del método
+        this.listaUsuarios = listaUsuarios;
     }
 
     public Context getContext() {
@@ -95,38 +102,41 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         this.context = context;
     }
 
-    public static class EmployeeViewHolder extends RecyclerView.ViewHolder {
-
+    // 🔹 ViewHolder adaptado
+    public static class UserViewHolder extends RecyclerView.ViewHolder {
         IrvEmployeeBinding binding;
-        Employee employee;
+        User user;
 
-        public EmployeeViewHolder(IrvEmployeeBinding binding) {
+        public UserViewHolder(IrvEmployeeBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }
     }
-    private void mostrarDialogActivar(Employee empleado) {
+
+    // 🔹 Diálogo de activación
+    private void mostrarDialogActivar(User usuario) {
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(context);
-        dialogBuilder.setTitle("Activar Administrador");
-        dialogBuilder.setMessage("¿Está seguro de activar al usuario " + empleado.getFirstName() + "?");
+        dialogBuilder.setTitle("Activar usuario");
+        dialogBuilder.setMessage("¿Está seguro de activar al usuario " + usuario.getNombre() + "?");
         dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) ->
-                Log.d("msg-test", "btn neutral")
+                Log.d(TAG, "btn neutral")
         );
         dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) ->
-                Log.d("msg-test", "Usuario activado: " + empleado.getFirstName())
+                Log.d(TAG, "Usuario activado: " + usuario.getNombre())
         );
         dialogBuilder.show();
     }
 
-    private void mostrarDialogDesactivar(Employee empleado) {
+    // 🔹 Diálogo de desactivación
+    private void mostrarDialogDesactivar(User usuario) {
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(context);
-        dialogBuilder.setTitle("Desactivar Administrador");
-        dialogBuilder.setMessage("¿Está seguro de desactivar al usuario " + empleado.getFirstName() + "?");
+        dialogBuilder.setTitle("Desactivar usuario");
+        dialogBuilder.setMessage("¿Está seguro de desactivar al usuario " + usuario.getNombre() + "?");
         dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) ->
-                Log.d("msg-test", "btn neutral")
+                Log.d(TAG, "btn neutral")
         );
         dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) ->
-                Log.d("msg-test", "Usuario desactivado: " + empleado.getFirstName())
+                Log.d(TAG, "Usuario desactivado: " + usuario.getNombre())
         );
         dialogBuilder.show();
     }
