@@ -1,5 +1,4 @@
-﻿package com.example.proyecto_2025.Activities_Administrador;
-
+package com.example.proyecto_2025.Activities_Administrador;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -39,10 +38,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Activity principal del m├│dulo Administrador
- * Gestiona 5 secciones: Empresa, Tours, Gu├¡as, Reportes, Perfil
- */
+
 public class Admin_HomeActivity extends AppCompatActivity {
 
     // ===================== BINDING & CONSTANTS =====================
