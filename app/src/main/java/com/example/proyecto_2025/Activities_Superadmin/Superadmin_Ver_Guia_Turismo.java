@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVerGuiaTurismoBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -39,6 +40,22 @@ public class Superadmin_Ver_Guia_Turismo extends AppCompatActivity {
             } else {
                 binding.inputIdiomas.setText("—");
             }
+        }
+
+        // 🟢 Mostrar la imagen del guía
+        if (guia.getFotoUrl() != null && !guia.getFotoUrl().isEmpty()) {
+            try {
+                Glide.with(this)
+                        .load(guia.getFotoUrl())
+                        .placeholder(R.drawable.ic_person) // mientras carga
+                        .error(R.drawable.ic_person) // si falla la carga
+                        .circleCrop() // hace la imagen redonda
+                        .into(binding.imgGuia);
+            } catch (Exception e) {
+                Log.e("Superadmin_Ver_Guia", "Error al cargar imagen: " + e.getMessage());
+            }
+        } else {
+            binding.imgGuia.setImageResource(R.drawable.ic_person);
         }
 
         // 🟢 Configurar botón de activación/desactivación

@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.IrvEmployeeBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -41,6 +42,17 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.UserVi
         // 🔹 Mostrar nombre completo
         String fullName = user.getNombre() + " " + user.getApellidos();
         holder.binding.textViewFullName.setText(fullName);
+
+        // 🔹 Cargar imagen del usuario
+        if (user.getFotoUrl() != null && !user.getFotoUrl().isEmpty()) {
+            Glide.with(context)
+                    .load(user.getFotoUrl())
+                    .placeholder(R.drawable.ic_person) // imagen temporal mientras carga
+                    .error(R.drawable.ic_person)       // imagen por defecto si falla
+                    .into(holder.binding.imgUser);
+        } else {
+            holder.binding.imgUser.setImageResource(R.drawable.ic_person);
+        }
 
         // 🔹 Botón "Ver información"
         holder.binding.buttonInformacion.setOnClickListener(view -> {

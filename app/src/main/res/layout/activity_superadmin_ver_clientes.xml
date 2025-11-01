@@ -1,149 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#F9FAFB"
     tools:context=".Activities_Superadmin.Superadmin_Ver_Cliente">
 
-    <!-- Título -->
-    <TextView
-        android:id="@+id/tituloCliente"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Cliente"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Contenedor de campos -->
     <LinearLayout
-        android:id="@+id/contenedorCampos"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/tituloCliente"
-        app:layout_constraintBottom_toTopOf="@id/btnActivarCliente"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:padding="16dp">
+        android:gravity="center_horizontal">
 
-        <!-- Campo Nombre -->
+        <!-- Imagen del Cliente -->
+        <ImageView
+            android:id="@+id/imgCliente"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="12dp"
+            android:src="@drawable/ic_person"
+            android:background="@drawable/bg_image_circle"
+            android:scaleType="centerCrop" />
+
+        <!-- Título -->
         <TextView
+            android:id="@+id/tituloCliente"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nombre"
-            android:textStyle="bold"
-            android:textColor="#000000" />
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/inputNombre"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName" />
-
-        <!-- Campo Apellidos -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Apellidos"
-            android:textStyle="bold"
+            android:text="Cliente"
             android:textColor="#000000"
-            android:layout_marginTop="12dp" />
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/inputApellidos"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName" />
-
-        <!-- Campo DNI -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Número de Documento de Identidad"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="#000000"
-            android:layout_marginTop="12dp" />
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/inputDni"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number" />
+            android:layout_marginBottom="16dp" />
 
-        <!-- Campo Fecha de Nacimiento -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Fecha de Nacimiento"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:layout_marginTop="12dp" />
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/inputFechaNacimiento"
+        <!-- Tarjeta de datos -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="date" />
+            android:layout_marginBottom="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FFFFFF">
 
-        <!-- Campo Correo -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Correo Electrónico"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:layout_marginTop="12dp" />
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/inputCorreo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textEmailAddress" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
 
-        <!-- Campo Teléfono -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Teléfono"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:layout_marginTop="12dp" />
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/inputTelefono"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="phone" />
+                <!-- Campo Nombre -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nombre"
+                    android:textStyle="bold"
+                    android:textColor="#000000" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputNombre"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:enabled="false" />
 
-        <!-- Campo Domicilio -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Domicilio"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:layout_marginTop="12dp" />
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/inputDomicilio"
+                <!-- Campo Apellidos -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Apellidos"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:layout_marginTop="12dp" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputApellidos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:enabled="false" />
+
+                <!-- Campo DNI -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DNI"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:layout_marginTop="12dp" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputDni"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:enabled="false" />
+
+                <!-- Campo Fecha de Nacimiento -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fecha de Nacimiento"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:layout_marginTop="12dp" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputFechaNacimiento"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:enabled="false" />
+
+                <!-- Campo Correo -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Correo Electrónico"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:layout_marginTop="12dp" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputCorreo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:enabled="false" />
+
+                <!-- Campo Teléfono -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Teléfono"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:layout_marginTop="12dp" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputTelefono"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:enabled="false" />
+
+                <!-- Campo Domicilio -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Domicilio"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:layout_marginTop="12dp" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputDomicilio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:enabled="false" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Botón Activar/Desactivar -->
+        <Button
+            android:id="@+id/btnActivarCliente"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPostalAddress" />
+            android:backgroundTint="#007AFF"
+            android:text="ACTIVAR"
+            android:textColor="#FFFFFF"
+            android:textAllCaps="false"
+            android:layout_marginBottom="16dp" />
 
     </LinearLayout>
-
-    <!-- Botón -->
-    <Button
-        android:id="@+id/btnActivarCliente"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#007AFF"
-        android:text="ACTIVAR"
-        android:textColor="#FFFFFF"
-        android:textAllCaps="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="16dp" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVerAdministradorBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -35,6 +36,22 @@ public class Superadmin_Ver_Administrador extends AppCompatActivity {
             binding.inputCorreo.setText(user.getCorreo());
             binding.inputTelefono.setText(user.getTelefono());
             binding.inputDomicilio.setText(user.getDomicilio());
+
+            // 🟢 Mostrar la imagen del guía
+            if (user.getFotoUrl() != null && !user.getFotoUrl().isEmpty()) {
+                try {
+                    Glide.with(this)
+                            .load(user.getFotoUrl())
+                            .placeholder(R.drawable.ic_person) // mientras carga
+                            .error(R.drawable.ic_person) // si falla la carga
+                            .circleCrop() // hace la imagen redonda
+                            .into(binding.imgAdministrador);
+                } catch (Exception e) {
+                    Log.e("Superadmin_Ver_Guia", "Error al cargar imagen: " + e.getMessage());
+                }
+            } else {
+                binding.imgAdministrador.setImageResource(R.drawable.ic_person);
+            }
 
             // 🔹 Mostrar el estado actual
             actualizarBotonEstado();

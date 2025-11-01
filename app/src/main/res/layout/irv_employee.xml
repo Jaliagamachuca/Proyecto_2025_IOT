@@ -1,51 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="80dp" >
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
 
-    <!-- Nombre completo -->
-    <TextView
-        android:id="@+id/textViewFullName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Empleado X"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <!-- Botón link: Ver información -->
-    <Button
-        android:id="@+id/buttonInformacion"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:minWidth="0dp"
-        android:minHeight="0dp"
-        android:padding="0dp"
-        android:text="Ver información del usuario"
-        android:textAllCaps="false"
-        android:textColor="#007AFF"
-        app:layout_constraintTop_toBottomOf="@id/textViewFullName"
-        app:layout_constraintStart_toStartOf="parent" />
+        <!-- Imagen del usuario -->
+        <ImageView
+            android:id="@+id/imgUser"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_person" />
 
-    <!-- Botón ACTIVAR -->
-    <Button
-        android:id="@+id/buttonActivar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#007AFF"
-        android:minHeight="40dp"
-        android:paddingHorizontal="16dp"
-        android:text="ACTIVAR"
-        android:textAllCaps="false"
-        android:textColor="#FFFFFF"
-        app:layout_constraintTop_toTopOf="@id/textViewFullName"
-        app:layout_constraintBottom_toBottomOf="@id/buttonInformacion"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- Nombre del usuario -->
+            <TextView
+                android:id="@+id/textViewFullName"
+                android:text="Empleado X"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <!-- Botón: Ver información -->
+            <Button
+                android:id="@+id/buttonInformacion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:text="Ver información del usuario"
+                android:textAllCaps="false"
+                android:textColor="#007AFF" />
+        </LinearLayout>
+
+        <!-- Botón ACTIVAR / DESACTIVAR -->
+        <Button
+            android:id="@+id/buttonActivar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#007AFF"
+            android:minHeight="40dp"
+            android:paddingHorizontal="16dp"
+            android:text="ACTIVAR"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
