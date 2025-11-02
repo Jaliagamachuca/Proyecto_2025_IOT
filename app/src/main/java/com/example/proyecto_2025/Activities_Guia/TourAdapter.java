@@ -36,10 +36,10 @@ public class TourAdapter extends RecyclerView.Adapter<TourAdapter.TourViewHolder
     public void onBindViewHolder(@NonNull TourViewHolder holder, int position) {
         Tour tour = tourList.get(position);
 
-        // 🔹 Mostrar nombre del tour
+        // 🔹 Nombre
         holder.binding.textNombreTour.setText(tour.getNombreTour());
 
-        // 🔹 Cargar imagen
+        // 🔹 Imagen
         if (tour.getFotoUrl() != null && !tour.getFotoUrl().isEmpty()) {
             Glide.with(context)
                     .load(tour.getFotoUrl())
@@ -49,14 +49,42 @@ public class TourAdapter extends RecyclerView.Adapter<TourAdapter.TourViewHolder
             holder.binding.imageTour.setImageResource(R.drawable.ic_person);
         }
 
+        // 🔹 Botón "Ver información"
         holder.binding.buttonVerInformacion.setOnClickListener(v -> {
             Intent intent = new Intent(context, Vista_Detalles_Tour.class);
-            intent.putExtra("tour_seleccionado", tour); // usa esta clave
+            intent.putExtra("tour_seleccionado", tour);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         });
 
-        // 🔹 Botón principal según subEstado
+        // 🔹 Lógica según estado general
+        String estadoGeneral = tour.getEstadoGeneral() != null ? tour.getEstadoGeneral().toLowerCase() : "";
+
+        switch (estadoGeneral) {
+            case "disponible":
+                configurarBotonDisponible(holder, tour, position);
+                break;
+
+            case "pendiente":
+                configurarBotonPendiente(holder, tour, position);
+                break;
+
+            case "finalizado":
+                configurarBotonFinalizado(holder, tour);
+                break;
+
+            default:
+                holder.binding.buttonAccionTour.setText("Desconocido");
+                holder.binding.buttonAccionTour.setBackgroundTintList(
+                        context.getResources().getColorStateList(android.R.color.darker_gray)
+                );
+                holder.binding.buttonAccionTour.setOnClickListener(null);
+                break;
+        }
+    }
+
+    // 🔹 Tours DISPONIBLES → Solicitar / Rechazar
+    private void configurarBotonDisponible(@NonNull TourViewHolder holder, Tour tour, int position) {
         if ("solicitado".equalsIgnoreCase(tour.getSubEstado())) {
             holder.binding.buttonAccionTour.setText("Rechazar");
             holder.binding.buttonAccionTour.setBackgroundTintList(
@@ -80,6 +108,44 @@ public class TourAdapter extends RecyclerView.Adapter<TourAdapter.TourViewHolder
         }
     }
 
+    // 🔹 Tours PENDIENTES → En Proceso / Iniciar
+    private void configurarBotonPendiente(@NonNull TourViewHolder holder, Tour tour, int position) {
+        if ("iniciado".equalsIgnoreCase(tour.getSubEstado())) {
+            holder.binding.buttonAccionTour.setText("En Proceso");
+            holder.binding.buttonAccionTour.setBackgroundTintList(
+                    context.getResources().getColorStateList(android.R.color.holo_orange_dark)
+            );
+            holder.binding.buttonAccionTour.setOnClickListener(v ->
+                    Toast.makeText(context, "El tour ya está en proceso", Toast.LENGTH_SHORT).show()
+            );
+        } else {
+            holder.binding.buttonAccionTour.setText("Iniciar");
+            holder.binding.buttonAccionTour.setBackgroundTintList(
+                    context.getResources().getColorStateList(android.R.color.holo_green_dark)
+            );
+            holder.binding.buttonAccionTour.setOnClickListener(v -> {
+                // 🔹 Aquí abre la nueva lista o actividad que tú decidirás
+                Intent intent = new Intent(context, Guia_Tour_en_Proceso.class);
+                intent.putExtra("tour", tour);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+
+                // 🔹 Opcional: actualizar estado local
+                tour.setSubEstado("iniciado");
+                notifyItemChanged(position);
+            });
+        }
+    }
+
+    // 🔹 Tours FINALIZADOS → Mostrar pago
+    private void configurarBotonFinalizado(@NonNull TourViewHolder holder, Tour tour) {
+        holder.binding.buttonAccionTour.setEnabled(false);
+        holder.binding.buttonAccionTour.setText(String.format("Pago: S/ %.2f", tour.getPagoOfrecido()));
+        holder.binding.buttonAccionTour.setBackgroundTintList(
+                context.getResources().getColorStateList(android.R.color.holo_blue_dark)
+        );
+    }
+
     @Override
     public int getItemCount() {
         return tourList.size();
@@ -87,7 +153,6 @@ public class TourAdapter extends RecyclerView.Adapter<TourAdapter.TourViewHolder
 
     public static class TourViewHolder extends RecyclerView.ViewHolder {
         ItemTourBinding binding;
-
         public TourViewHolder(@NonNull ItemTourBinding binding) {
             super(binding.getRoot());
             this.binding = binding;

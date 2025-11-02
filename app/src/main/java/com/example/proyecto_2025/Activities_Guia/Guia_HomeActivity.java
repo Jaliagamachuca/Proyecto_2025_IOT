@@ -76,7 +76,15 @@ public class Guia_HomeActivity extends AppCompatActivity {
         // 🔹 Configurar RecyclerView en “Solicitar Tour”
         configurarRecyclerToursDisponibles();
 
+        // 🔹 Configurar RecyclerView en “Pendietes Tour”
+        configurarRecyclerToursPendientes();
+
+        // 🔹 Configurar RecyclerView en “Historial Tour”
+        configurarRecyclerToursHistorial();
+
+
         // 🔸 Tours Pendientes
+        /*
         binding.scrMisTours.subPendientes.btn1.setOnClickListener(v -> {
             Intent intent = new Intent(this, Guia_Tour_en_Proceso.class);
             startActivity(intent);
@@ -93,7 +101,9 @@ public class Guia_HomeActivity extends AppCompatActivity {
             Intent intent = new Intent(this, Vista_Detalles_Tour_Sin_Botones.class);
             startActivity(intent);
         });
+        */
 
+        /*
         // 🔸 Historial de Tours
         binding.scrMisTours.subHistorial.InfoTour1.setOnClickListener(v -> {
             Intent intent = new Intent(this, Vista_Detalles_Tour_Sin_Botones.class);
@@ -104,7 +114,7 @@ public class Guia_HomeActivity extends AppCompatActivity {
             Intent intent = new Intent(this, Vista_Detalles_Tour_Sin_Botones.class);
             startActivity(intent);
         });
-
+        */
         binding.scrMisTours.subHistorial.btnDescargarPDF.setOnClickListener(view -> descargarTour());
 
         // 🔸 Botones de atajo en Dashboard → abren "Mis tours"
@@ -148,6 +158,38 @@ public class Guia_HomeActivity extends AppCompatActivity {
         tourAdapter = new TourAdapter(this, tourList);
         binding.scrMisTours.subSolicitar.recyclerViewToursDisponibles.setLayoutManager(new LinearLayoutManager(this));
         binding.scrMisTours.subSolicitar.recyclerViewToursDisponibles.setAdapter(tourAdapter);
+    }
+
+    // 🔸 Configurar RecyclerView de Tours Pendientes
+    private void configurarRecyclerToursPendientes() {
+        // Inicializar repositorio y cargar data demo si está vacío
+        TourRepository repo = TourRepository.get();
+        repo.seedIfEmpty(this);
+
+        // Obtenemos únicamente los tours con estado "disponible"
+        tourList = repo.byEstado("pendiente");
+        tourListOriginal = new ArrayList<>(tourList);
+
+        // Configuramos el adaptador
+        tourAdapter = new TourAdapter(this, tourList);
+        binding.scrMisTours.subPendientes.recyclerViewToursPendientes.setLayoutManager(new LinearLayoutManager(this));
+        binding.scrMisTours.subPendientes.recyclerViewToursPendientes.setAdapter(tourAdapter);
+    }
+
+    // 🔸 Configurar RecyclerView de Tours Pendientes
+    private void configurarRecyclerToursHistorial() {
+        // Inicializar repositorio y cargar data demo si está vacío
+        TourRepository repo = TourRepository.get();
+        repo.seedIfEmpty(this);
+
+        // Obtenemos únicamente los tours con estado "disponible"
+        tourList = repo.byEstado("finalizado");
+        tourListOriginal = new ArrayList<>(tourList);
+
+        // Configuramos el adaptador
+        tourAdapter = new TourAdapter(this, tourList);
+        binding.scrMisTours.subHistorial.recyclerViewToursHistorial.setLayoutManager(new LinearLayoutManager(this));
+        binding.scrMisTours.subHistorial.recyclerViewToursHistorial.setAdapter(tourAdapter);
     }
 
     // 🔹 Filtrar tours por texto
