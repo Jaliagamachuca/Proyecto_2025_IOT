@@ -2,16 +2,23 @@ package com.example.proyecto_2025.Activities_Guia;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivityGuiaVistaInicialBinding;
+import com.example.proyecto_2025.Activities_Guia.TourRepository;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Guia_HomeActivity extends AppCompatActivity {
 
@@ -29,7 +36,13 @@ public class Guia_HomeActivity extends AppCompatActivity {
     private static final int SUB_PENDIENTES = R.id.subPendientes;
     private static final int SUB_HISTORIAL  = R.id.subHistorial;
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    // 🔹 Variables para los tours disponibles
+    private TourAdapter tourAdapter;
+    private List<Tour> tourList;
+    private List<Tour> tourListOriginal;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityGuiaVistaInicialBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -44,7 +57,7 @@ public class Guia_HomeActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        // Bottom bar → navegación (if/else para evitar "constant expression required")
+        // Bottom bar → navegación
         binding.bottomNav.setOnItemSelectedListener(this::onBottomItemSelected);
 
         // Toggle interno de "Mis tours": Solicitar / Pendientes / Historial
@@ -60,81 +73,41 @@ public class Guia_HomeActivity extends AppCompatActivity {
             }
         });
 
-        // Solicitar Tour
-        binding.scrMisTours.subSolicitar.btn1.setOnClickListener(view ->
-                solicitarTour());
+        // 🔹 Configurar RecyclerView en “Solicitar Tour”
+        configurarRecyclerToursDisponibles();
 
-        binding.scrMisTours.subSolicitar.btn2.setOnClickListener(view ->
-                rechazarTour());
-
-        binding.scrMisTours.subSolicitar.btn3.setOnClickListener(view ->
-                errorSolicitar());
-
-        binding.scrMisTours.subSolicitar.btn4.setOnClickListener(view ->
-                errorCancelar());
-
-        binding.scrMisTours.subSolicitar.InfoTour1.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Vista_Detalles_Tour.class);
-            startActivity(intent);
-        });
-
-        binding.scrMisTours.subSolicitar.InfoTour2.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Vista_Detalles_Tour.class);
-            startActivity(intent);
-        });
-
-        binding.scrMisTours.subSolicitar.InfoTour3.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Vista_Detalles_Tour.class);
-            startActivity(intent);
-        });
-
-        binding.scrMisTours.subSolicitar.InfoTour4.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Vista_Detalles_Tour.class);
-            startActivity(intent);
-        });
-
-        // Tours Pendientes
+        // 🔸 Tours Pendientes
         binding.scrMisTours.subPendientes.btn1.setOnClickListener(v -> {
             Intent intent = new Intent(this, Guia_Tour_en_Proceso.class);
             startActivity(intent);
         });
 
-        binding.scrMisTours.subPendientes.btn2.setOnClickListener(view ->
-                iniciarTour());
+        binding.scrMisTours.subPendientes.btn2.setOnClickListener(view -> iniciarTour());
 
         binding.scrMisTours.subPendientes.InfoTour1.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
             Intent intent = new Intent(this, Vista_Detalles_Tour_Sin_Botones.class);
             startActivity(intent);
         });
 
         binding.scrMisTours.subPendientes.InfoTour2.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
             Intent intent = new Intent(this, Vista_Detalles_Tour_Sin_Botones.class);
             startActivity(intent);
         });
 
-        // Historial de Tours
+        // 🔸 Historial de Tours
         binding.scrMisTours.subHistorial.InfoTour1.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
             Intent intent = new Intent(this, Vista_Detalles_Tour_Sin_Botones.class);
             startActivity(intent);
         });
 
         binding.scrMisTours.subHistorial.InfoTour2.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
             Intent intent = new Intent(this, Vista_Detalles_Tour_Sin_Botones.class);
             startActivity(intent);
         });
 
-        binding.scrMisTours.subHistorial.btnDescargarPDF.setOnClickListener(view ->
-                descargarTour());
+        binding.scrMisTours.subHistorial.btnDescargarPDF.setOnClickListener(view -> descargarTour());
 
-        // Botones de atajo en Dashboard → abren "Mis tours" con la subpantalla correspondiente
+        // 🔸 Botones de atajo en Dashboard → abren "Mis tours"
         binding.scrDashboard.btnIrSolicitar.setOnClickListener(v -> {
             binding.bottomNav.setSelectedItemId(R.id.nav_mistours);
             binding.scrMisTours.toggleGroup.check(R.id.btnSolicitar);
@@ -161,6 +134,39 @@ public class Guia_HomeActivity extends AppCompatActivity {
         showSubScreen(SUB_SOLICITAR);
     }
 
+    // 🔸 Configurar RecyclerView de Tours Disponibles
+    private void configurarRecyclerToursDisponibles() {
+        // Inicializar repositorio y cargar data demo si está vacío
+        TourRepository repo = TourRepository.get();
+        repo.seedIfEmpty(this);
+
+        // Obtenemos únicamente los tours con estado "disponible"
+        tourList = repo.byEstado("disponible");
+        tourListOriginal = new ArrayList<>(tourList);
+
+        // Configuramos el adaptador
+        tourAdapter = new TourAdapter(this, tourList);
+        binding.scrMisTours.subSolicitar.recyclerViewToursDisponibles.setLayoutManager(new LinearLayoutManager(this));
+        binding.scrMisTours.subSolicitar.recyclerViewToursDisponibles.setAdapter(tourAdapter);
+    }
+
+    // 🔹 Filtrar tours por texto
+    private void filtrarTours(String texto) {
+        tourList.clear();
+        if (texto.isEmpty()) {
+            tourList.addAll(tourListOriginal);
+        } else {
+            for (Tour t : tourListOriginal) {
+                if (t.getNombreTour().toLowerCase().contains(texto.toLowerCase()) ||
+                        t.getDescripcion().toLowerCase().contains(texto.toLowerCase())) {
+                    tourList.add(t);
+                }
+            }
+        }
+        tourAdapter.notifyDataSetChanged();
+    }
+
+    // 🔹 Mostrar pantallas principales
     private boolean onBottomItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_dashboard) { showScreen(SCR_DASHBOARD); return true; }
@@ -208,12 +214,12 @@ public class Guia_HomeActivity extends AppCompatActivity {
         } else if (subId == SUB_HISTORIAL) {
             target = vHistorial;
         } else {
-            // fallback para que nunca quede en blanco
             target = vSolicitar;
         }
         target.setVisibility(View.VISIBLE);
     }
 
+    // 🔹 Diálogos
     public void solicitarTour() {
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
         dialogBuilder.setTitle("Solicitar Tour");
@@ -222,6 +228,7 @@ public class Guia_HomeActivity extends AppCompatActivity {
         dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
         dialogBuilder.show();
     }
+
     public void rechazarTour() {
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
         dialogBuilder.setTitle("Cancelar Tour");
