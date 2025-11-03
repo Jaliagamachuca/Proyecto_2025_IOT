@@ -51,6 +51,8 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
         binding = ActivitySuperadminVistaInicialBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        binding.bottomNav.getMenu().findItem(R.id.nav_registros).setVisible(false);
+
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");

@@ -111,31 +111,36 @@ public class TourAdapter extends RecyclerView.Adapter<TourAdapter.TourViewHolder
     // 🔹 Tours PENDIENTES → En Proceso / Iniciar
     private void configurarBotonPendiente(@NonNull TourViewHolder holder, Tour tour, int position) {
         if ("iniciado".equalsIgnoreCase(tour.getSubEstado())) {
+            // 🔸 Si ya está iniciado, muestra "En Proceso"
             holder.binding.buttonAccionTour.setText("En Proceso");
             holder.binding.buttonAccionTour.setBackgroundTintList(
                     context.getResources().getColorStateList(android.R.color.holo_orange_dark)
             );
-            holder.binding.buttonAccionTour.setOnClickListener(v ->
-                    Toast.makeText(context, "El tour ya está en proceso", Toast.LENGTH_SHORT).show()
-            );
-        } else {
-            holder.binding.buttonAccionTour.setText("Iniciar");
-            holder.binding.buttonAccionTour.setBackgroundTintList(
-                    context.getResources().getColorStateList(android.R.color.holo_green_dark)
-            );
+
+            // 🔸 Al hacer clic, abre la vista del tour en proceso
             holder.binding.buttonAccionTour.setOnClickListener(v -> {
-                // 🔹 Aquí abre la nueva lista o actividad que tú decidirás
                 Intent intent = new Intent(context, Guia_Tour_en_Proceso.class);
                 intent.putExtra("tour", tour);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
+            });
 
-                // 🔹 Opcional: actualizar estado local
+        } else {
+            // 🔹 Si aún no ha iniciado, muestra "Iniciar"
+            holder.binding.buttonAccionTour.setText("Iniciar");
+            holder.binding.buttonAccionTour.setBackgroundTintList(
+                    context.getResources().getColorStateList(android.R.color.holo_green_dark)
+            );
+
+            // 🔹 Al hacer clic, cambia el estado a "iniciado" y actualiza el botón
+            holder.binding.buttonAccionTour.setOnClickListener(v -> {
                 tour.setSubEstado("iniciado");
-                notifyItemChanged(position);
+                notifyItemChanged(position); // refresca el item
+                Toast.makeText(context, "Tour iniciado", Toast.LENGTH_SHORT).show();
             });
         }
     }
+
 
     // 🔹 Tours FINALIZADOS → Mostrar pago
     private void configurarBotonFinalizado(@NonNull TourViewHolder holder, Tour tour) {

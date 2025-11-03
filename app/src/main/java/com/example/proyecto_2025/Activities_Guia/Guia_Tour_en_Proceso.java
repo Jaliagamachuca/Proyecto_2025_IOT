@@ -2,60 +2,74 @@ package com.example.proyecto_2025.Activities_Guia;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.Nullable;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import com.example.proyecto_2025.BaseActivity;
+import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivityGuiaTourEnProcesoBinding;
-import com.example.proyecto_2025.databinding.ActivityGuiaVistaInicialBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class Guia_Tour_en_Proceso extends AppCompatActivity {
 
     private ActivityGuiaTourEnProcesoBinding binding;
+    private Tour tour;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityGuiaTourEnProcesoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.button2.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Guia_Registrar_CheckIn.class);
-            startActivity(intent);
-        });
+        // 🔹 Recibir objeto Tour
+        tour = (Tour) getIntent().getSerializableExtra("tour");
 
-        binding.button3.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Guia_Registrar_Progreso.class);
-            startActivity(intent);
-        });
+        if (tour == null) {
+            Toast.makeText(this, "No se recibió información del tour", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        binding.button4.setOnClickListener(v -> {
-            // Creamos un Intent para ir a OtraActivity
-            Intent intent = new Intent(this, Guia_Registrar_CheckOut.class);
-            startActivity(intent);
-        });
+        // 🔹 Mostrar datos
+        binding.txtNombreTour.setText(tour.getNombreTour());
+        binding.txtEmpresa.setText("Empresa: " + tour.getNombreEmpresa());
+        binding.txtFecha.setText("Fecha: " + tour.getFechaTour());
+        binding.txtDescripcion.setText(tour.getDescripcion());
 
-        binding.btnFinaliarTour.setOnClickListener(view ->
-                FinalizarTour());
+        // 🔹 Cargar imagen principal del tour
+        Glide.with(this)
+                .load(tour.getFotoUrl())
+                .placeholder(R.drawable.ic_launcher_background)
+                .into(binding.imgTourPrincipal);
 
+        // 🔹 Cargar imágenes bonitas de internet para los botones
+        Glide.with(this)
+                .load("https://cdn-icons-png.flaticon.com/512/190/190411.png") // Check-in
+                .into(binding.imgCheckIn);
+
+        Glide.with(this)
+                .load("https://cdn-icons-png.flaticon.com/512/1055/1055646.png") // Progreso
+                .into(binding.imgProgreso);
+
+        Glide.with(this)
+                .load("https://cdn-icons-png.flaticon.com/512/1828/1828490.png") // Check-out
+                .into(binding.imgCheckOut);
+
+        // 🔹 Botones
+        binding.btnCheckIn.setOnClickListener(v -> startActivity(new Intent(this, Guia_Registrar_CheckIn.class)));
+        binding.btnProgreso.setOnClickListener(v -> startActivity(new Intent(this, Guia_Registrar_Progreso.class)));
+        binding.btnCheckOut.setOnClickListener(v -> startActivity(new Intent(this, Guia_Registrar_CheckOut.class)));
+
+        // 🔹 Finalizar tour
+        binding.btnFinaliarTour.setOnClickListener(view -> finalizarTour());
     }
 
-    public void FinalizarTour() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Finalizar Tour");
-        dialogBuilder.setMessage("¿Está seguro de finalizar este tour?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
+    private void finalizarTour() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Finalizar Tour")
+                .setMessage("¿Estás seguro de finalizar este tour?")
+                .setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss())
+                .setPositiveButton("Aceptar", (dialog, which) ->
+                        Toast.makeText(this, "Tour finalizado correctamente", Toast.LENGTH_SHORT).show())
+                .show();
     }
 }
