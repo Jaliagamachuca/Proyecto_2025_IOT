@@ -1,25 +1,208 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
-    <LinearLayout android:orientation="vertical" android:padding="16dp"
-        android:layout_width="match_parent" android:layout_height="wrap_content">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-        <TextView android:text="@string/tab_dashboard" android:textStyle="bold" android:textSize="18sp"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <!-- KPIs mínimos -->
-        <TextView android:id="@+id/kpiPendientes" android:text="Pendientes hoy: 0"
-            android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingTop="8dp"/>
-        <TextView android:id="@+id/kpiEnCurso" android:text="En curso: 0"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/kpiCompletados" android:text="Completados (30d): 0"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <!-- 🔹 Título -->
+        <TextView
+            android:text="@string/tab_dashboard"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-        <!-- Atajos -->
-        <Button android:id="@+id/btnIrSolicitar"  android:text="@string/guia_solicitar_tour"
-            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"/>
-        <Button android:id="@+id/btnIrPendientes" android:text="@string/guia_tours_pendientes"
-            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
-        <Button android:id="@+id/btnIrHistorial"  android:text="@string/guia_historial_tours"
-            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+        <!-- 🔸 Sección de gráficos -->
+        <TextView
+            android:text="Gráficos de Tours"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:paddingTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- 📊 Gráfico 1: Tours Disponibles -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/chartDisponibles"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- 📊 Gráfico 2: Tours Pendientes -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/chartPendientes"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- 📊 Gráfico 3: Tours Finalizados -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/chartFinalizados"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </androidx.cardview.widget.CardView>
+
+
+        <!-- 🔹 Atajos visuales -->
+        <TextView
+            android:text="Acciones Rápidas"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:paddingTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- 🔹 Solicitar Tour -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSolicitarTour"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgSolicitarTour"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:text="Solicitar nuevo tour"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp" />
+
+                <Button
+                    android:id="@+id/btnIrSolicitar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Abrir"
+                    android:textAllCaps="false"
+                    android:backgroundTint="@color/teal_700"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 🔹 Tours Pendientes -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardPendientes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgPendientes"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:text="Ver tours pendientes"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp" />
+
+                <Button
+                    android:id="@+id/btnIrPendientes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Abrir"
+                    android:textAllCaps="false"
+                    android:backgroundTint="@color/teal_700"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 🔹 Historial -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardHistorial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgHistorial"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:text="Historial de tours"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp" />
+
+                <Button
+                    android:id="@+id/btnIrHistorial"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Abrir"
+                    android:textAllCaps="false"
+                    android:backgroundTint="@color/teal_700"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
 </ScrollView>

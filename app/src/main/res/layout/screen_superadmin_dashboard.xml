@@ -6,41 +6,237 @@
         <TextView android:text="@string/tab_dashboard" android:textStyle="bold"
             android:textSize="18sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 
-        <!-- KPIs (placeholders) -->
-        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:weightSum="2" android:paddingTop="12dp">
-            <TextView android:id="@+id/kpiAdmins" android:text="Admins: 0 / 0 / 0"
-                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
-            <TextView android:id="@+id/kpiGuias" android:text="Guías: 0 / 0 / 0"
-                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
-        </LinearLayout>
+        <!-- Gráficos de roles -->
+        <TextView
+            android:text="Gráficos de Roles"
+            android:textStyle="bold"
+            android:paddingTop="16dp"
+            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
-        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:weightSum="2" android:paddingTop="8dp">
-            <TextView android:id="@+id/kpiClientes" android:text="Clientes: 0 / 0 / +0"
-                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
-            <TextView android:id="@+id/kpiRegistros" android:text="Exportes hoy: 0"
-                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
-        </LinearLayout>
+        <!-- Admins -->
+        <androidx.cardview.widget.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
-        <TextView android:text="Pendientes" android:textStyle="bold"
-            android:paddingTop="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <TextView android:id="@+id/listaPendientes" android:text="(Guías por habilitar aquí)"
-            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/chartAdmins"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </androidx.cardview.widget.CardView>
 
-        <TextView android:text="Atajos" android:textStyle="bold"
-            android:paddingTop="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:weightSum="2">
-            <Button android:id="@+id/btnRegistrarAdmin" android:text="Registrar Admin"
-                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
-            <Button android:id="@+id/btnRegistrarGuias" android:text="Registrar Guías"
-                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"/>
-        </LinearLayout>
+        <!-- Guías -->
+        <androidx.cardview.widget.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
-        <Button android:id="@+id/btnDescargarCSV" android:text="Descargar CSV"
-            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
-        <Button android:id="@+id/btnDescargarPDF" android:text="Descargar PDF"
-            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"/>
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/chartGuias"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Clientes -->
+        <androidx.cardview.widget.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/chartClientes"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 🔹 Registrar Admin -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardRegistrarAdmin"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgRegistrarAdmin"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:text="Registrar Administrador"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp" />
+
+                <Button
+                    android:id="@+id/btnRegistrarAdmin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Abrir"
+                    android:textAllCaps="false"
+                    android:backgroundTint="@color/teal_700"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 🔹 Registrar Guía -->
+        <com.google.android.material.card.MaterialCardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/cardRegistrarGuias"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgRegistrarGuias"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:text="Registrar Guías"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp" />
+
+                <Button
+                    android:id="@+id/btnRegistrarGuias"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Abrir"
+                    android:textAllCaps="false"
+                    android:backgroundTint="@color/teal_700"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 🔹 Descargar CSV -->
+        <com.google.android.material.card.MaterialCardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/cardDescargarCSV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgDescargarCSV"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:text="Descargar CSV"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp" />
+
+                <Button
+                    android:id="@+id/btnDescargarCSV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Descargar"
+                    android:textAllCaps="false"
+                    android:backgroundTint="@color/teal_700"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 🔹 Descargar PDF -->
+        <com.google.android.material.card.MaterialCardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/cardDescargarPDF"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgDescargarPDF"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:text="Descargar PDF"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp" />
+
+                <Button
+                    android:id="@+id/btnDescargarPDF"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Descargar"
+                    android:textAllCaps="false"
+                    android:backgroundTint="@color/teal_700"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
 </ScrollView>

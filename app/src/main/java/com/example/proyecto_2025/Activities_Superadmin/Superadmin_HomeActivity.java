@@ -12,10 +12,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.data.GuideRepository;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;
 import com.example.proyecto_2025.model.Guide;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +80,23 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
             Intent intent = new Intent(this, Superadmin_Registrar_Guias_Turismo.class);
             startActivity(intent);
         });
+
+        // 🔹 Cargar imágenes bonitas para las tarjetas del Dashboard
+        Glide.with(this)
+                .load("https://cdn-icons-png.flaticon.com/512/190/190411.png") // Admin
+                .into(binding.scrDashboard.imgRegistrarAdmin);
+
+        Glide.with(this)
+                .load("https://cdn-icons-png.flaticon.com/512/2922/2922510.png") // Guía
+                .into(binding.scrDashboard.imgRegistrarGuias);
+
+        Glide.with(this)
+                .load("https://cdn-icons-png.flaticon.com/512/29/29302.png") // CSV
+                .into(binding.scrDashboard.imgDescargarCSV);
+
+        Glide.with(this)
+                .load("https://cdn-icons-png.flaticon.com/512/337/337946.png") // PDF
+                .into(binding.scrDashboard.imgDescargarPDF);
 
         // ⚡️ Llamamos aquí siempre, así la lista llega a Admins, Guias y Clientes
         createRetrofitService();
@@ -229,6 +250,11 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
         List<User> listaGuias = repo.allGuias();
         List<User> listaClientes = repo.allClientes();
 
+        // ================== GRÁFICOS CIRCULARES ==================
+        configurarGrafico(binding.scrDashboard.chartAdmins, "Administradores", listaAdmins);
+        configurarGrafico(binding.scrDashboard.chartGuias, "Guías", listaGuias);
+        configurarGrafico(binding.scrDashboard.chartClientes, "Clientes", listaClientes);
+
         // 3️⃣ Cargar adapters para cada tipo de usuario
         EmployeeAdapter adapterAdmins = new EmployeeAdapter();
         adapterAdmins.setListaEmpleados(listaAdmins);
@@ -250,5 +276,34 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
 
         Log.d("msg-superadmin", "Lista cargada desde UserRepository: " +
                 (listaAdmins.size() + listaGuias.size() + listaClientes.size()));
+    }
+    private void configurarGrafico(com.github.mikephil.charting.charts.PieChart chart,
+                                   String titulo, List<User> lista) {
+
+        // Contar activos e inactivos
+        long activos = lista.stream().filter(User::isActivo).count();
+        long inactivos = lista.size() - activos;
+
+        List<PieEntry> entries = new ArrayList<>();
+        entries.add(new PieEntry(activos, "Activos"));
+        entries.add(new PieEntry(inactivos, "Inactivos"));
+
+        PieDataSet dataSet = new PieDataSet(entries, titulo);
+        dataSet.setColors(
+                ContextCompat.getColor(this, R.color.teal_700),
+                ContextCompat.getColor(this, R.color.gray)
+        );
+
+        PieData data = new PieData(dataSet);
+        data.setValueTextSize(14f);
+        data.setValueTextColor(ContextCompat.getColor(this, R.color.black));
+
+        chart.setData(data);
+        chart.setCenterText(titulo);
+        chart.setCenterTextSize(16f);
+        chart.getDescription().setEnabled(false);
+        chart.getLegend().setEnabled(true);
+        chart.animateY(1000);
+        chart.invalidate(); // refrescar
     }
 }

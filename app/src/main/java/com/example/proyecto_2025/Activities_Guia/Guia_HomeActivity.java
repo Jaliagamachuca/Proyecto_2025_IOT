@@ -12,9 +12,15 @@ import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivityGuiaVistaInicialBinding;
 import com.example.proyecto_2025.Activities_Guia.TourRepository;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
@@ -50,6 +56,19 @@ public class Guia_HomeActivity extends AppCompatActivity {
         // 🔹 Ocultar los botones "Clientes" y "Registros" del menú inferior
         binding.bottomNav.getMenu().findItem(R.id.nav_clientes).setVisible(false);
         binding.bottomNav.getMenu().findItem(R.id.nav_registros).setVisible(false);
+
+        // 🔹 Cargar imágenes bonitas para las tarjetas del Dashboard del Guía
+        Glide.with(this)
+                .load("https://cdn-icons-png.flaticon.com/512/1828/1828919.png") // 📅 Solicitar nuevo tour
+                .into(binding.scrDashboard.imgSolicitarTour);
+
+        Glide.with(this)
+                .load("https://cdn-icons-png.flaticon.com/512/3209/3209265.png") // ⏳ Tours pendientes
+                .into(binding.scrDashboard.imgPendientes);
+
+        Glide.with(this)
+                .load("https://cdn-icons-png.flaticon.com/512/1484/1484569.png") // 📖 Historial de tours
+                .into(binding.scrDashboard.imgHistorial);
 
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
@@ -142,7 +161,95 @@ public class Guia_HomeActivity extends AppCompatActivity {
         showScreen(SCR_DASHBOARD);
         binding.scrMisTours.toggleGroup.check(R.id.btnSolicitar);
         showSubScreen(SUB_SOLICITAR);
+
+        configurarGraficoDisponibles(binding.scrDashboard.chartDisponibles);
+        configurarGraficoPendientes(binding.scrDashboard.chartPendientes);
+        configurarGraficoFinalizados(binding.scrDashboard.chartFinalizados);
     }
+
+    // 🔹 Configurar gráfico principal del Dashboard (tours por estado)
+    private void configurarGraficoDisponibles(PieChart chart) {
+        TourRepository repo = TourRepository.get();
+        repo.seedIfEmpty(this);
+
+        int solicitados = 0, noSolicitados = 0;
+        for (Tour t : repo.byEstado("disponible")) {
+            if ("solicitado".equalsIgnoreCase(t.getSubEstado())) solicitados++;
+            else noSolicitados++;
+        }
+
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        if (solicitados > 0) entries.add(new PieEntry(solicitados, "Solicitados"));
+        if (noSolicitados > 0) entries.add(new PieEntry(noSolicitados, "No solicitados"));
+
+        PieDataSet dataSet = new PieDataSet(entries, "Tours Disponibles");
+        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        dataSet.setValueTextSize(14f);
+
+        PieData data = new PieData(dataSet);
+        chart.setData(data);
+        chart.setUsePercentValues(false);
+        chart.setDrawHoleEnabled(true);
+        chart.setHoleRadius(35f);
+        chart.getDescription().setEnabled(false);
+        chart.animateY(1000);
+        chart.invalidate();
+    }
+    private void configurarGraficoPendientes(PieChart chart) {
+        TourRepository repo = TourRepository.get();
+        repo.seedIfEmpty(this);
+
+        int iniciados = 0, noIniciados = 0;
+        for (Tour t : repo.byEstado("pendiente")) {
+            if ("iniciado".equalsIgnoreCase(t.getSubEstado())) iniciados++;
+            else noIniciados++;
+        }
+
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        if (iniciados > 0) entries.add(new PieEntry(iniciados, "Iniciados"));
+        if (noIniciados > 0) entries.add(new PieEntry(noIniciados, "No iniciados"));
+
+        PieDataSet dataSet = new PieDataSet(entries, "Tours Pendientes");
+        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        dataSet.setValueTextSize(14f);
+
+        PieData data = new PieData(dataSet);
+        chart.setData(data);
+        chart.setDrawHoleEnabled(true);
+        chart.setHoleRadius(35f);
+        chart.getDescription().setEnabled(false);
+        chart.animateY(1000);
+        chart.invalidate();
+    }
+    private void configurarGraficoFinalizados(PieChart chart) {
+        TourRepository repo = TourRepository.get();
+        repo.seedIfEmpty(this);
+
+        int mas200 = 0, menosIgual200 = 0;
+        for (Tour t : repo.byEstado("finalizado")) {
+            if (t.getPagoOfrecido() > 200) mas200++;
+            else menosIgual200++;
+        }
+
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        if (mas200 > 0) entries.add(new PieEntry(mas200, "> 200 soles"));
+        if (menosIgual200 > 0) entries.add(new PieEntry(menosIgual200, "≤ 200 soles"));
+
+        PieDataSet dataSet = new PieDataSet(entries, "Tours Finalizados");
+        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        dataSet.setValueTextSize(14f);
+
+        PieData data = new PieData(dataSet);
+        chart.setData(data);
+        chart.setDrawHoleEnabled(true);
+        chart.setHoleRadius(35f);
+        chart.getDescription().setEnabled(false);
+        chart.animateY(1000);
+        chart.invalidate();
+    }
+
+
+
 
     // 🔸 Configurar RecyclerView de Tours Disponibles
     private void configurarRecyclerToursDisponibles() {
