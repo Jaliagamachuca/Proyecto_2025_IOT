@@ -47,13 +47,13 @@
         android:id="@+id/exitoClienteActivity"
         android:name="com.example.proyecto_2025.login.ExitoClienteActivity"
         android:label="Cuenta Creada"
-        tools:layout="@layout/activity_exito_cliente_joaco" />
+        tools:layout="@layout/activity_exito_cliente" />
 
     <activity
         android:id="@+id/pendienteGuiaActivity"
         android:name="com.example.proyecto_2025.login.PendienteGuiaActivity"
         android:label="Pendiente Aprobación"
-        tools:layout="@layout/activity_pendiente_guia_joaco" />
+        tools:layout="@layout/activity_pendiente_guia" />
 
     <!-- Flujo de recuperación de contraseña -->
     <activity
@@ -70,7 +70,7 @@
         android:id="@+id/confirmarEmailActivity"
         android:name="com.example.proyecto_2025.login.ConfirmarEmailActivity"
         android:label="Confirmar Email"
-        tools:layout="@layout/activity_confirmar_email_joaco">
+        tools:layout="@layout/activity_confirmar_email">
         <action
             android:id="@+id/action_confirmar_email_to_codigo"
             app:destination="@id/codigoConfirmacionActivity" />
@@ -80,7 +80,7 @@
         android:id="@+id/codigoConfirmacionActivity"
         android:name="com.example.proyecto_2025.login.CodigoConfirmacionActivity"
         android:label="Código Confirmación"
-        tools:layout="@layout/activity_codigo_confirmacion_joaco">
+        tools:layout="@layout/activity_codigo_confirmacion">
         <action
             android:id="@+id/action_codigo_to_crear_password"
             app:destination="@id/crearPasswordActivity" />
@@ -90,6 +90,6 @@
         android:id="@+id/crearPasswordActivity"
         android:name="com.example.proyecto_2025.login.CrearPasswordActivity"
         android:label="Crear Nueva Contraseña"
-        tools:layout="@layout/activity_crear_password_joaco" />
+        tools:layout="@layout/activity_crear_password" />
 
 </navigation>

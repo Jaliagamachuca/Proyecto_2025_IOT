@@ -77,6 +77,24 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- DNI (solo guias) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:boxStrokeColor="#1976D2"
+            app:boxStrokeWidth="2dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_dni"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="DNI"
+                android:inputType="number"
+                android:visibility="gone"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+
         <!-- Campo Correo electrónico -->
         <TextView
             android:layout_width="wrap_content"

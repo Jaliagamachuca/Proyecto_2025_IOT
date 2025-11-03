@@ -1,0 +1,1395 @@
+Index: app/src/main/java/com/example/proyecto_2025/login/ExitoClienteActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.login;\r\n\r\nimport android.os.Bundle;\r\nimport android.widget.Button;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport com.example.proyecto_2025.R;\r\n\r\npublic class ExitoClienteActivity extends AppCompatActivity {\r\n\r\n    private Button btnIrInicio;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_exito_cliente_joaco);\r\n\r\n        initViews();\r\n        setupListeners();\r\n    }\r\n\r\n    private void initViews() {\r\n        btnIrInicio = findViewById(R.id.btn_ir_inicio);\r\n    }\r\n\r\n    private void setupListeners() {\r\n        btnIrInicio.setOnClickListener(v -> {\r\n            // Volver al login o ir a pantalla principal\r\n            finish();\r\n        });\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/login/ExitoClienteActivity.java b/app/src/main/java/com/example/proyecto_2025/login/ExitoClienteActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/login/ExitoClienteActivity.java	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/java/com/example/proyecto_2025/login/ExitoClienteActivity.java	(date 1762104287178)
+@@ -1,9 +1,13 @@
+ package com.example.proyecto_2025.login;
+ 
++import android.content.Intent;
+ import android.os.Bundle;
+ import android.widget.Button;
++
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import com.example.proyecto_2025.R;
++import com.google.firebase.auth.FirebaseAuth;
+ 
+ public class ExitoClienteActivity extends AppCompatActivity {
+ 
+@@ -12,19 +16,17 @@
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-        setContentView(R.layout.activity_exito_cliente_joaco);
++        setContentView(R.layout.activity_exito_cliente);
+ 
+-        initViews();
+-        setupListeners();
+-    }
+-
+-    private void initViews() {
+         btnIrInicio = findViewById(R.id.btn_ir_inicio);
+-    }
+ 
+-    private void setupListeners() {
+         btnIrInicio.setOnClickListener(v -> {
+-            // Volver al login o ir a pantalla principal
++            // por si el usuario quedó logueado tras el registro
++            FirebaseAuth.getInstance().signOut();
++
++            Intent i = new Intent(this, LoginActivity.class);
++            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
++            startActivity(i);
+             finish();
+         });
+     }
+Index: app/src/main/java/com/example/proyecto_2025/data/auth/AuthRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.data.auth;\r\n\r\nimport com.google.firebase.auth.*;\r\nimport com.google.firebase.firestore.*;\r\nimport java.util.*;\r\nimport static com.google.firebase.firestore.FieldValue.serverTimestamp;\r\n\r\npublic class AuthRepository {\r\n    private final FirebaseAuth auth = FirebaseAuth.getInstance();\r\n    private final FirebaseFirestore db = FirebaseFirestore.getInstance();\r\n\r\n    public interface Callback<T> { void onSuccess(T t); void onError(Exception e); }\r\n\r\n    // LOGIN\r\n    public void login(String email, String pass, Callback<DocumentSnapshot> cb) {\r\n        auth.signInWithEmailAndPassword(email, pass)\r\n                .addOnSuccessListener(r ->\r\n                        db.collection(\"users\").document(r.getUser().getUid()).get()\r\n                                .addOnSuccessListener(snap -> {\r\n                                    if (!snap.exists()) { cb.onError(new Exception(\"Perfil no encontrado.\")); return; }\r\n                                    String status = snap.getString(\"status\");\r\n                                    if (!\"active\".equals(status)) { cb.onError(new Exception(\"Usuario deshabilitado.\")); return; }\r\n                                    cb.onSuccess(snap);\r\n                                })\r\n                                .addOnFailureListener(cb::onError)\r\n                )\r\n                .addOnFailureListener(cb::onError);\r\n    }\r\n\r\n    public void signUp(String name, String email, String pass, String role, Callback<Void> cb) {\r\n        auth.createUserWithEmailAndPassword(email, pass)\r\n                .addOnSuccessListener(r -> {\r\n                    String uid = r.getUser().getUid();\r\n                    Map<String,Object> m = new HashMap<>();\r\n                    m.put(\"uid\", uid);\r\n                    m.put(\"email\", email);\r\n                    m.put(\"displayName\", name);\r\n                    m.put(\"role\", role.toLowerCase());\r\n                    m.put(\"status\", \"active\");\r\n                    m.put(\"companyId\", null);\r\n                    m.put(\"createdAt\", serverTimestamp());\r\n                    m.put(\"updatedAt\", serverTimestamp());\r\n                    db.collection(\"users\").document(uid).set(m)\r\n                            .addOnSuccessListener(v -> cb.onSuccess(null))\r\n                            .addOnFailureListener(cb::onError);\r\n                })\r\n                .addOnFailureListener(cb::onError);\r\n    }\r\n\r\n    // Buscar usuario por email (para promoción)\r\n    public void findUserByEmail(String email, Callback<QuerySnapshot> cb){\r\n        db.collection(\"users\")\r\n                .whereEqualTo(\"email\", email).limit(1)\r\n                .get()\r\n                .addOnSuccessListener(cb::onSuccess)\r\n                .addOnFailureListener(cb::onError);\r\n    }\r\n\r\n    // Promover a admin (cambia role + companyId)\r\n    public void promoteToAdmin(String uid, String companyId, Callback<Void> cb){\r\n        Map<String,Object> m = new HashMap<>();\r\n        m.put(\"role\",\"admin\");\r\n        m.put(\"companyId\", companyId);\r\n        m.put(\"updatedAt\", FieldValue.serverTimestamp());\r\n        db.collection(\"users\").document(uid).update(m)\r\n                .addOnSuccessListener(v -> cb.onSuccess(null))\r\n                .addOnFailureListener(cb::onError);\r\n    }\r\n\r\n    // (Opcional) Crear admin desde cero (Auth + Firestore)\r\n    public void createAdminFromScratch(String name, String email, String pass, String companyId, Callback<Void> cb){\r\n        auth.createUserWithEmailAndPassword(email, pass)\r\n                .addOnSuccessListener(r -> {\r\n                    String uid = r.getUser().getUid();\r\n                    Map<String,Object> u = new HashMap<>();\r\n                    u.put(\"uid\", uid);\r\n                    u.put(\"email\", email);\r\n                    u.put(\"displayName\", name);\r\n                    u.put(\"role\", \"admin\");\r\n                    u.put(\"status\", \"active\");\r\n                    u.put(\"companyId\", companyId);\r\n                    u.put(\"createdAt\", FieldValue.serverTimestamp());\r\n                    u.put(\"updatedAt\", FieldValue.serverTimestamp());\r\n                    db.collection(\"users\").document(uid).set(u)\r\n                            .addOnSuccessListener(x -> cb.onSuccess(null))\r\n                            .addOnFailureListener(cb::onError);\r\n                })\r\n                .addOnFailureListener(cb::onError);\r\n    }\r\n\r\n    public void logout(){ auth.signOut(); }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/data/auth/AuthRepository.java b/app/src/main/java/com/example/proyecto_2025/data/auth/AuthRepository.java
+--- a/app/src/main/java/com/example/proyecto_2025/data/auth/AuthRepository.java	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/java/com/example/proyecto_2025/data/auth/AuthRepository.java	(date 1762146378781)
+@@ -1,86 +1,80 @@
+ package com.example.proyecto_2025.data.auth;
+ 
+-import com.google.firebase.auth.*;
+-import com.google.firebase.firestore.*;
+-import java.util.*;
+-import static com.google.firebase.firestore.FieldValue.serverTimestamp;
++import com.google.firebase.auth.AuthResult;
++import com.google.firebase.auth.FirebaseAuth;
++import com.google.firebase.auth.FirebaseUser;
++import com.google.firebase.firestore.FieldValue;
++import com.google.firebase.firestore.FirebaseFirestore;
++import com.google.firebase.firestore.DocumentSnapshot;
++
++import java.util.HashMap;
++import java.util.Map;
++import java.util.Random;
+ 
+ public class AuthRepository {
++
+     private final FirebaseAuth auth = FirebaseAuth.getInstance();
+     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+ 
+-    public interface Callback<T> { void onSuccess(T t); void onError(Exception e); }
+-
+-    // LOGIN
+-    public void login(String email, String pass, Callback<DocumentSnapshot> cb) {
+-        auth.signInWithEmailAndPassword(email, pass)
+-                .addOnSuccessListener(r ->
+-                        db.collection("users").document(r.getUser().getUid()).get()
+-                                .addOnSuccessListener(snap -> {
+-                                    if (!snap.exists()) { cb.onError(new Exception("Perfil no encontrado.")); return; }
+-                                    String status = snap.getString("status");
+-                                    if (!"active".equals(status)) { cb.onError(new Exception("Usuario deshabilitado.")); return; }
+-                                    cb.onSuccess(snap);
+-                                })
+-                                .addOnFailureListener(cb::onError)
+-                )
+-                .addOnFailureListener(cb::onError);
+-    }
+-
+-    public void signUp(String name, String email, String pass, String role, Callback<Void> cb) {
+-        auth.createUserWithEmailAndPassword(email, pass)
+-                .addOnSuccessListener(r -> {
+-                    String uid = r.getUser().getUid();
+-                    Map<String,Object> m = new HashMap<>();
+-                    m.put("uid", uid);
+-                    m.put("email", email);
+-                    m.put("displayName", name);
+-                    m.put("role", role.toLowerCase());
+-                    m.put("status", "active");
+-                    m.put("companyId", null);
+-                    m.put("createdAt", serverTimestamp());
+-                    m.put("updatedAt", serverTimestamp());
+-                    db.collection("users").document(uid).set(m)
+-                            .addOnSuccessListener(v -> cb.onSuccess(null))
+-                            .addOnFailureListener(cb::onError);
+-                })
+-                .addOnFailureListener(cb::onError);
++    public interface Callback<T> {
++        void onSuccess(T t);
++        void onError(Exception e);
+     }
+ 
+-    // Buscar usuario por email (para promoción)
+-    public void findUserByEmail(String email, Callback<QuerySnapshot> cb){
+-        db.collection("users")
+-                .whereEqualTo("email", email).limit(1)
+-                .get()
+-                .addOnSuccessListener(cb::onSuccess)
+-                .addOnFailureListener(cb::onError);
++    // 🔸 si luego quieres volver al código, ya tienes este generador
++    private String genCode() {
++        int n = new Random().nextInt(900000) + 100000; // 100000..999999
++        return String.valueOf(n);
+     }
+ 
+-    // Promover a admin (cambia role + companyId)
+-    public void promoteToAdmin(String uid, String companyId, Callback<Void> cb){
+-        Map<String,Object> m = new HashMap<>();
+-        m.put("role","admin");
+-        m.put("companyId", companyId);
+-        m.put("updatedAt", FieldValue.serverTimestamp());
+-        db.collection("users").document(uid).update(m)
+-                .addOnSuccessListener(v -> cb.onSuccess(null))
+-                .addOnFailureListener(cb::onError);
+-    }
++    /**
++     * REGISTRO de cliente/guia
++     * Versión SIMPLE: crea el usuario en Auth y en Firestore, y queda listo para loguear.
++     * - cliente: status=active
++     * - guia:    status=pending (hasta que lo apruebe un admin/superadmin)
++     */
++    public void signUp(String name,
++                       String email,
++                       String pass,
++                       String role,
++                       Callback<Void> cb) {
+ 
+-    // (Opcional) Crear admin desde cero (Auth + Firestore)
+-    public void createAdminFromScratch(String name, String email, String pass, String companyId, Callback<Void> cb){
+         auth.createUserWithEmailAndPassword(email, pass)
+-                .addOnSuccessListener(r -> {
+-                    String uid = r.getUser().getUid();
+-                    Map<String,Object> u = new HashMap<>();
++                .addOnSuccessListener((AuthResult r) -> {
++                    FirebaseUser fUser = r.getUser();
++                    if (fUser == null) {
++                        cb.onError(new Exception("No se pudo crear el usuario."));
++                        return;
++                    }
++                    String uid = fUser.getUid();
++
++                    // status según rol
++                    String status = "active";
++                    if ("guia".equalsIgnoreCase(role)) {
++                        status = "pending";
++                    }
++
++                    Map<String, Object> u = new HashMap<>();
+                     u.put("uid", uid);
+-                    u.put("email", email);
+                     u.put("displayName", name);
+-                    u.put("role", "admin");
+-                    u.put("status", "active");
+-                    u.put("companyId", companyId);
++                    u.put("email", email);
++                    u.put("role", role.toLowerCase());
++                    u.put("status", status);
++                    u.put("dni", null);
++                    u.put("phone", null);
++                    u.put("photoUrl", "https://example.com/default-user.png");
++                    u.put("companyId", null);
+                     u.put("createdAt", FieldValue.serverTimestamp());
+                     u.put("updatedAt", FieldValue.serverTimestamp());
++
++                    // 🔻🔻🔻 FLUJO REAL CON CÓDIGO / EMAIL (COMENTADO)
++                    // String code = genCode();
++                    // u.put("emailVerified", false);
++                    // u.put("verificationCode", code);
++                    // u.put("verificationRequired", true);
++                    // fUser.sendEmailVerification(); // correo de Firebase (link)
++                    // 🔺🔺🔺
++
+                     db.collection("users").document(uid).set(u)
+                             .addOnSuccessListener(x -> cb.onSuccess(null))
+                             .addOnFailureListener(cb::onError);
+@@ -88,5 +82,30 @@
+                 .addOnFailureListener(cb::onError);
+     }
+ 
+-    public void logout(){ auth.signOut(); }
++    /**
++     * LOGIN → devuelve el doc de Firestore del usuario
++     */
++    public void login(String email, String pass, Callback<DocumentSnapshot> cb) {
++        auth.signInWithEmailAndPassword(email, pass)
++                .addOnSuccessListener((AuthResult r) -> {
++                    FirebaseUser fUser = auth.getCurrentUser();
++                    if (fUser == null) {
++                        cb.onError(new Exception("No se encontró el usuario."));
++                        return;
++                    }
++                    String uid = fUser.getUid();
++                    db.collection("users").document(uid).get()
++                            .addOnSuccessListener(cb::onSuccess)
++                            .addOnFailureListener(cb::onError);
++                })
++                .addOnFailureListener(cb::onError);
++    }
++
++    public FirebaseUser getCurrentUser() {
++        return auth.getCurrentUser();
++    }
++
++    public void signOut() {
++        auth.signOut();
++    }
+ }
+Index: app/src/main/java/com/example/proyecto_2025/login/PendienteGuiaActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.login;\r\n\r\nimport android.os.Bundle;\r\nimport android.widget.Button;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport com.example.proyecto_2025.R;\r\n\r\npublic class PendienteGuiaActivity extends AppCompatActivity {\r\n\r\n    private Button btnCerrarSesion;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_pendiente_guia_joaco);\r\n\r\n        initViews();\r\n        setupListeners();\r\n    }\r\n\r\n    private void initViews() {\r\n        btnCerrarSesion = findViewById(R.id.btn_cerrar_sesion);\r\n    }\r\n\r\n    private void setupListeners() {\r\n        btnCerrarSesion.setOnClickListener(v -> {\r\n            finish();\r\n        });\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/login/PendienteGuiaActivity.java b/app/src/main/java/com/example/proyecto_2025/login/PendienteGuiaActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/login/PendienteGuiaActivity.java	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/java/com/example/proyecto_2025/login/PendienteGuiaActivity.java	(date 1762105004305)
+@@ -1,9 +1,13 @@
+ package com.example.proyecto_2025.login;
+ 
++import android.content.Intent;
+ import android.os.Bundle;
+ import android.widget.Button;
++
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import com.example.proyecto_2025.R;
++import com.google.firebase.auth.FirebaseAuth;
+ 
+ public class PendienteGuiaActivity extends AppCompatActivity {
+ 
+@@ -12,19 +16,18 @@
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-        setContentView(R.layout.activity_pendiente_guia_joaco);
++        setContentView(R.layout.activity_pendiente_guia);
+ 
+-        initViews();
+-        setupListeners();
+-    }
+-
+-    private void initViews() {
+         btnCerrarSesion = findViewById(R.id.btn_cerrar_sesion);
+-    }
+ 
+-    private void setupListeners() {
+         btnCerrarSesion.setOnClickListener(v -> {
++            // 1. cerrar sesión
++            FirebaseAuth.getInstance().signOut();
++            // 2. ir al login y limpiar activities
++            Intent i = new Intent(PendienteGuiaActivity.this, LoginActivity.class);
++            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
++            startActivity(i);
+             finish();
+         });
+     }
+-}
+\ No newline at end of file
++}
+Index: app/src/main/java/com/example/proyecto_2025/login/RecuperarPasswordActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.login;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.Button;\r\nimport android.widget.ImageButton;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport com.example.proyecto_2025.R;\r\n\r\npublic class RecuperarPasswordActivity extends AppCompatActivity {\r\n\r\n    private Button btnContinuar;\r\n    private ImageButton btnVolver;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_recuperar_password_joaco);\r\n\r\n        initViews();\r\n        setupListeners();\r\n    }\r\n\r\n    private void initViews() {\r\n        btnContinuar = findViewById(R.id.btn_continuar);\r\n        btnVolver = findViewById(R.id.btn_volver);\r\n    }\r\n\r\n    private void setupListeners() {\r\n        btnVolver.setOnClickListener(v -> {\r\n            finish(); // Volver al login\r\n        });\r\n\r\n        btnContinuar.setOnClickListener(v -> {\r\n            Intent intent = new Intent(this, ConfirmarEmailActivity.class);\r\n            startActivity(intent);\r\n        });\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/login/RecuperarPasswordActivity.java b/app/src/main/java/com/example/proyecto_2025/login/RecuperarPasswordActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/login/RecuperarPasswordActivity.java	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/java/com/example/proyecto_2025/login/RecuperarPasswordActivity.java	(date 1762110595403)
+@@ -4,36 +4,63 @@
+ import android.os.Bundle;
+ import android.widget.Button;
+ import android.widget.ImageButton;
++import android.widget.Toast;
++
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import com.example.proyecto_2025.R;
++import com.google.android.material.textfield.TextInputEditText;
++import com.google.firebase.auth.FirebaseAuth;
+ 
+ public class RecuperarPasswordActivity extends AppCompatActivity {
+ 
+     private Button btnContinuar;
+     private ImageButton btnVolver;
++    private TextInputEditText etCorreo;
++
++    private FirebaseAuth auth;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+         setContentView(R.layout.activity_recuperar_password_joaco);
+ 
++        auth = FirebaseAuth.getInstance();
+         initViews();
+         setupListeners();
+     }
+ 
+     private void initViews() {
+         btnContinuar = findViewById(R.id.btn_continuar);
+-        btnVolver = findViewById(R.id.btn_volver);
++        btnVolver    = findViewById(R.id.btn_volver);
++        etCorreo     = findViewById(R.id.et_correo);
+     }
+ 
+     private void setupListeners() {
+-        btnVolver.setOnClickListener(v -> {
+-            finish(); // Volver al login
+-        });
++        btnVolver.setOnClickListener(v -> finish()); // volver al login
+ 
+         btnContinuar.setOnClickListener(v -> {
+-            Intent intent = new Intent(this, ConfirmarEmailActivity.class);
+-            startActivity(intent);
++            String email = etCorreo.getText() == null ? "" : etCorreo.getText().toString().trim();
++
++            if (email.isEmpty()) {
++                Toast.makeText(this, "Ingresa tu correo electrónico.", Toast.LENGTH_LONG).show();
++                return;
++            }
++
++            // enviar correo de recuperación real
++            auth.sendPasswordResetEmail(email)
++                    .addOnSuccessListener(unused -> {
++                        Toast.makeText(this, "Te enviamos un correo para restablecer tu contraseña.", Toast.LENGTH_LONG).show();
++
++                        // volver al login limpio
++                        Intent intent = new Intent(this, LoginActivity.class);
++                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
++                        startActivity(intent);
++                        finish();
++                    })
++                    .addOnFailureListener(e -> {
++                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
++                    });
+         });
+     }
+-}
+\ No newline at end of file
++}
+Index: app/src/main/java/com/example/proyecto_2025/login/ConfirmarEmailActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.login;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.Button;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport com.example.proyecto_2025.R;\r\n\r\npublic class ConfirmarEmailActivity extends AppCompatActivity {\r\n\r\n    private Button btnContinuar;\r\n    private Button btnReenviar;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_confirmar_email_joaco);\r\n\r\n        initViews();\r\n        setupListeners();\r\n    }\r\n\r\n    private void initViews() {\r\n        btnContinuar = findViewById(R.id.btn_continuar);\r\n        btnReenviar = findViewById(R.id.btn_reenviar);\r\n    }\r\n\r\n    private void setupListeners() {\r\n        btnContinuar.setOnClickListener(v -> {\r\n            Intent intent = new Intent(this, CodigoConfirmacionActivity.class);\r\n            startActivity(intent);\r\n        });\r\n\r\n        btnReenviar.setOnClickListener(v -> {\r\n            // Simular reenvío de código\r\n            android.widget.Toast.makeText(this, \"Código reenviado\", android.widget.Toast.LENGTH_SHORT).show();\r\n        });\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/login/ConfirmarEmailActivity.java b/app/src/main/java/com/example/proyecto_2025/login/ConfirmarEmailActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/login/ConfirmarEmailActivity.java	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/java/com/example/proyecto_2025/login/ConfirmarEmailActivity.java	(date 1762013485612)
+@@ -3,37 +3,110 @@
+ import android.content.Intent;
+ import android.os.Bundle;
+ import android.widget.Button;
++import android.widget.TextView;
++import android.widget.Toast;
++
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import com.example.proyecto_2025.R;
++import com.google.firebase.auth.FirebaseAuth;
++import com.google.firebase.auth.FirebaseUser;
++import com.google.firebase.firestore.FieldValue;
++import com.google.firebase.firestore.FirebaseFirestore;
++
++import java.util.HashMap;
++import java.util.Map;
++import java.util.Random;
+ 
+ public class ConfirmarEmailActivity extends AppCompatActivity {
+ 
+     private Button btnContinuar;
+     private Button btnReenviar;
++    private TextView txtEmailUsuario;
++
++    private FirebaseAuth auth;
++    private FirebaseFirestore db;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-        setContentView(R.layout.activity_confirmar_email_joaco);
++        setContentView(R.layout.activity_confirmar_email);
++
++        auth = FirebaseAuth.getInstance();
++        db   = FirebaseFirestore.getInstance();
+ 
+         initViews();
++        fillEmail();
+         setupListeners();
+     }
+ 
+     private void initViews() {
+-        btnContinuar = findViewById(R.id.btn_continuar);
+-        btnReenviar = findViewById(R.id.btn_reenviar);
++        btnContinuar    = findViewById(R.id.btn_continuar);
++        btnReenviar     = findViewById(R.id.btn_reenviar);
++        txtEmailUsuario = findViewById(R.id.txt_email_usuario);
++    }
++
++    private void fillEmail() {
++        // 1) si vino por intent, úsalo
++        String email = getIntent().getStringExtra("email");
++
++        // 2) si no vino, usa el del usuario logueado
++        if (email == null) {
++            FirebaseUser u = auth.getCurrentUser();
++            if (u != null) {
++                email = u.getEmail();
++            }
++        }
++
++        if (email != null) {
++            txtEmailUsuario.setText(email);
++        }
+     }
+ 
+     private void setupListeners() {
+         btnContinuar.setOnClickListener(v -> {
++            // pasamos el email para mostrarlo en la pantalla de 4 dígitos
++            String email = txtEmailUsuario.getText().toString();
+             Intent intent = new Intent(this, CodigoConfirmacionActivity.class);
++            intent.putExtra("email", email);
+             startActivity(intent);
+         });
+ 
+-        btnReenviar.setOnClickListener(v -> {
+-            // Simular reenvío de código
+-            android.widget.Toast.makeText(this, "Código reenviado", android.widget.Toast.LENGTH_SHORT).show();
+-        });
++        btnReenviar.setOnClickListener(v -> reenviarCodigo());
+     }
+-}
+\ No newline at end of file
++
++    private void reenviarCodigo() {
++        FirebaseUser u = auth.getCurrentUser();
++        if (u == null) {
++            Toast.makeText(this, "Vuelve a iniciar sesión para reenviar.", Toast.LENGTH_LONG).show();
++            return;
++        }
++
++        String uid = u.getUid();
++
++        // 1. generar nuevo código (4 dígitos)
++        String newCode = gen4Code();
++
++        // 2. actualizar en Firestore
++        Map<String, Object> updates = new HashMap<>();
++        updates.put("verificationCode", newCode);
++        updates.put("verificationRequired", true);
++        updates.put("updatedAt", FieldValue.serverTimestamp());
++
++        db.collection("users").document(uid).update(updates)
++                .addOnSuccessListener(x -> {
++                    // 3. enviar correo de verificación de Firebase (el link)
++                    u.sendEmailVerification();
++
++                    Toast.makeText(this, "Te reenviamos el código al correo.", Toast.LENGTH_LONG).show();
++                })
++                .addOnFailureListener(e ->
++                        Toast.makeText(this, "Error al reenviar: " + e.getMessage(), Toast.LENGTH_LONG).show()
++                );
++    }
++
++    private String gen4Code() {
++        int n = new Random().nextInt(9000) + 1000; // 1000..9999
++        return String.valueOf(n);
++    }
++}
+Index: app/src/main/java/com/example/proyecto_2025/login/CrearPasswordActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.login;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.Button;\r\nimport android.widget.ImageButton;\r\nimport android.widget.Toast;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport com.example.proyecto_2025.R;\r\n\r\npublic class CrearPasswordActivity extends AppCompatActivity {\r\n\r\n    private Button btnConfirmar;\r\n    private ImageButton btnVolver;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_crear_password_joaco);\r\n\r\n        initViews();\r\n        setupListeners();\r\n    }\r\n\r\n    private void initViews() {\r\n        btnConfirmar = findViewById(R.id.btn_confirmar);\r\n        btnVolver = findViewById(R.id.btn_volver);\r\n    }\r\n\r\n    private void setupListeners() {\r\n        btnVolver.setOnClickListener(v -> {\r\n            finish(); // Volver a la pantalla anterior\r\n        });\r\n\r\n        btnConfirmar.setOnClickListener(v -> {\r\n            // Mostrar mensaje de éxito y volver al login\r\n            Toast.makeText(this, \"Contraseña actualizada correctamente\", Toast.LENGTH_LONG).show();\r\n\r\n            // Navegar al login y limpiar stack de activities\r\n            Intent intent = new Intent(this, LoginActivity.class);\r\n            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);\r\n            startActivity(intent);\r\n        });\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/login/CrearPasswordActivity.java b/app/src/main/java/com/example/proyecto_2025/login/CrearPasswordActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/login/CrearPasswordActivity.java	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/java/com/example/proyecto_2025/login/CrearPasswordActivity.java	(date 1762103618595)
+@@ -5,41 +5,101 @@
+ import android.widget.Button;
+ import android.widget.ImageButton;
+ import android.widget.Toast;
++
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import com.example.proyecto_2025.R;
++import com.google.android.material.textfield.TextInputEditText;
++import com.google.firebase.auth.FirebaseAuth;
++import com.google.firebase.auth.FirebaseUser;
++import com.google.firebase.firestore.FieldValue;
++import com.google.firebase.firestore.FirebaseFirestore;
++
++import java.util.HashMap;
++import java.util.Map;
+ 
+ public class CrearPasswordActivity extends AppCompatActivity {
+ 
+     private Button btnConfirmar;
+     private ImageButton btnVolver;
++    private TextInputEditText etPassword, etConfirmPassword;
++
++    private FirebaseAuth auth;
++    private FirebaseFirestore db;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-        setContentView(R.layout.activity_crear_password_joaco);
++        setContentView(R.layout.activity_crear_password);
++
++        auth = FirebaseAuth.getInstance();
++        db   = FirebaseFirestore.getInstance();
+ 
+         initViews();
+         setupListeners();
+     }
+ 
+     private void initViews() {
+-        btnConfirmar = findViewById(R.id.btn_confirmar);
+-        btnVolver = findViewById(R.id.btn_volver);
++        btnConfirmar       = findViewById(R.id.btn_confirmar);
++        btnVolver          = findViewById(R.id.btn_volver);
++        etPassword         = findViewById(R.id.et_password);
++        etConfirmPassword  = findViewById(R.id.et_confirm_password);
+     }
+ 
+     private void setupListeners() {
+-        btnVolver.setOnClickListener(v -> {
+-            finish(); // Volver a la pantalla anterior
+-        });
++        btnVolver.setOnClickListener(v -> finish());
+ 
+         btnConfirmar.setOnClickListener(v -> {
+-            // Mostrar mensaje de éxito y volver al login
+-            Toast.makeText(this, "Contraseña actualizada correctamente", Toast.LENGTH_LONG).show();
++            String pass  = etPassword.getText() == null ? "" : etPassword.getText().toString().trim();
++            String pass2 = etConfirmPassword.getText() == null ? "" : etConfirmPassword.getText().toString().trim();
++
++            if (pass.isEmpty() || pass2.isEmpty()) {
++                Toast.makeText(this, "Completa ambas contraseñas.", Toast.LENGTH_LONG).show();
++                return;
++            }
++            if (!pass.equals(pass2)) {
++                Toast.makeText(this, "Las contraseñas no coinciden.", Toast.LENGTH_LONG).show();
++                return;
++            }
++            if (pass.length() < 6) {
++                Toast.makeText(this, "La contraseña debe tener al menos 6 caracteres.", Toast.LENGTH_LONG).show();
++                return;
++            }
++
++            FirebaseUser u = auth.getCurrentUser();
++            if (u == null) {
++                Toast.makeText(this, "Tu sesión expiró. Vuelve a iniciar sesión.", Toast.LENGTH_LONG).show();
++                goLogin();
++                return;
++            }
++
++            // 1) actualizar password en Auth
++            u.updatePassword(pass)
++                    .addOnSuccessListener(x -> {
++                        // 2) actualizar doc en Firestore (opcional, pero útil)
++                        Map<String, Object> updates = new HashMap<>();
++                        updates.put("updatedAt", FieldValue.serverTimestamp());
++                        updates.put("passwordSet", true); // por si quieres saber si ya la cambió
++
++                        db.collection("users").document(u.getUid()).update(updates)
++                                .addOnCompleteListener(t -> {
++                                    Toast.makeText(this, "Contraseña actualizada correctamente", Toast.LENGTH_LONG).show();
++                                    // cerrar sesión y mandar al login
++                                    auth.signOut();
++                                    goLogin();
++                                });
++                    })
++                    .addOnFailureListener(e -> {
++                        // puede fallar si requiere re-autenticación
++                        Toast.makeText(this, "No se pudo actualizar la contraseña: " + e.getMessage(), Toast.LENGTH_LONG).show();
++                    });
++        });
++    }
+ 
+-            // Navegar al login y limpiar stack de activities
+-            Intent intent = new Intent(this, LoginActivity.class);
+-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+-            startActivity(intent);
+-        });
++    private void goLogin() {
++        Intent intent = new Intent(this, LoginActivity.class);
++        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
++        startActivity(intent);
++        finish();
+     }
+-}
+\ No newline at end of file
++}
+Index: app/src/main/java/com/example/proyecto_2025/login/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.login;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.Toast;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport com.example.proyecto_2025.Activities_Administrador.Admin_HomeActivity;\r\nimport com.example.proyecto_2025.Activities_Guia.Guia_HomeActivity;\r\nimport com.example.proyecto_2025.Activities_Superadmin.Superadmin_HomeActivity;\r\nimport com.example.proyecto_2025.Activities_Usuario.Cliente_HomeActivity;\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.data.auth.AuthRepository;\r\nimport com.google.android.material.textfield.TextInputEditText;\r\nimport com.google.firebase.firestore.DocumentSnapshot;\r\n\r\npublic class LoginActivity extends AppCompatActivity {\r\n    private AuthRepository repo;\r\n    private TextInputEditText etCorreo, etPassword;\r\n\r\n    @Override protected void onCreate(Bundle b) {\r\n        super.onCreate(b);\r\n        setContentView(R.layout.activity_login);\r\n\r\n        repo = new AuthRepository();\r\n        etCorreo   = findViewById(R.id.et_correo);\r\n        etPassword = findViewById(R.id.et_password);\r\n\r\n        findViewById(R.id.btn_acceder).setOnClickListener(v -> {\r\n            String email = etCorreo.getText() == null ? \"\" : etCorreo.getText().toString().trim();\r\n            String pass  = etPassword.getText() == null ? \"\" : etPassword.getText().toString();\r\n\r\n            if (email.isEmpty() || pass.isEmpty()) {\r\n                Toast.makeText(this,\"Ingresa correo y contraseña.\",Toast.LENGTH_SHORT).show();\r\n                return;\r\n            }\r\n\r\n            repo.login(email, pass, new AuthRepository.Callback<DocumentSnapshot>() {\r\n                @Override public void onSuccess(DocumentSnapshot snap) {\r\n                    routeByRole(snap.getString(\"role\"));\r\n                }\r\n                @Override public void onError(Exception e) {\r\n                    Toast.makeText(LoginActivity.this, \"Error: \"+e.getMessage(), Toast.LENGTH_LONG).show();\r\n                }\r\n            });\r\n        });\r\n\r\n        // (Opcional) listeners de “olvidaste contraseña” y “registrarse”\r\n        findViewById(R.id.txt_olvidaste_password).setOnClickListener(v -> {\r\n            String email = etCorreo.getText()==null? \"\" : etCorreo.getText().toString().trim();\r\n            if (email.isEmpty()) { Toast.makeText(this,\"Escribe tu correo arriba.\",Toast.LENGTH_SHORT).show(); return; }\r\n            com.google.firebase.auth.FirebaseAuth.getInstance()\r\n                    .sendPasswordResetEmail(email)\r\n                    .addOnSuccessListener(x -> Toast.makeText(this,\"Te enviamos un correo de recuperación.\",Toast.LENGTH_LONG).show())\r\n                    .addOnFailureListener(err -> Toast.makeText(this,err.getMessage(),Toast.LENGTH_LONG).show());\r\n        });\r\n\r\n        findViewById(R.id.txt_registrarse).setOnClickListener(v ->\r\n                startActivity(new Intent(this, RegistroActivity.class)));\r\n    }\r\n\r\n    private void routeByRole(String role){\r\n        Class<?> next = Cliente_HomeActivity.class;\r\n        if (\"superadmin\".equals(role)) next = Superadmin_HomeActivity.class;\r\n        else if (\"admin\".equals(role)) next = Admin_HomeActivity.class;\r\n        else if (\"guia\".equals(role))  next = Guia_HomeActivity.class;\r\n        startActivity(new Intent(this, next));\r\n        finish();\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/login/LoginActivity.java b/app/src/main/java/com/example/proyecto_2025/login/LoginActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/login/LoginActivity.java	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/java/com/example/proyecto_2025/login/LoginActivity.java	(date 1762146389749)
+@@ -3,6 +3,7 @@
+ import android.content.Intent;
+ import android.os.Bundle;
+ import android.widget.Toast;
++
+ import androidx.appcompat.app.AppCompatActivity;
+ 
+ import com.example.proyecto_2025.Activities_Administrador.Admin_HomeActivity;
+@@ -15,10 +16,12 @@
+ import com.google.firebase.firestore.DocumentSnapshot;
+ 
+ public class LoginActivity extends AppCompatActivity {
++
+     private AuthRepository repo;
+     private TextInputEditText etCorreo, etPassword;
+ 
+-    @Override protected void onCreate(Bundle b) {
++    @Override
++    protected void onCreate(Bundle b) {
+         super.onCreate(b);
+         setContentView(R.layout.activity_login);
+ 
+@@ -26,6 +29,7 @@
+         etCorreo   = findViewById(R.id.et_correo);
+         etPassword = findViewById(R.id.et_password);
+ 
++        // botón ACCEDER
+         findViewById(R.id.btn_acceder).setOnClickListener(v -> {
+             String email = etCorreo.getText() == null ? "" : etCorreo.getText().toString().trim();
+             String pass  = etPassword.getText() == null ? "" : etPassword.getText().toString();
+@@ -37,33 +41,78 @@
+ 
+             repo.login(email, pass, new AuthRepository.Callback<DocumentSnapshot>() {
+                 @Override public void onSuccess(DocumentSnapshot snap) {
+-                    routeByRole(snap.getString("role"));
++                    if (!snap.exists()) {
++                        Toast.makeText(LoginActivity.this, "Perfil no encontrado.", Toast.LENGTH_LONG).show();
++                        return;
++                    }
++
++                    String role   = snap.getString("role");
++                    String status = snap.getString("status");
++                    if (status == null) status = "active";
++
++                    // 🔻🔻🔻 FLUJO REAL DE VERIFICACIÓN (COMENTADO)
++                    // Boolean verReq  = snap.getBoolean("verificationRequired");
++                    // Boolean emailOk = snap.getBoolean("emailVerified");
++                    // if (verReq == null) verReq = false;
++                    // if (emailOk == null) emailOk = false;
++                    // if (verReq && !emailOk) {
++                    //     Intent i = new Intent(LoginActivity.this, CodigoConfirmacionActivity.class);
++                    //     i.putExtra("email", snap.getString("email"));
++                    //     startActivity(i);
++                    //     return;
++                    // }
++                    // 🔺🔺🔺
++
++                    // guía pendiente → lo mandamos a la pantalla de "espera aprobación"
++                    if ("guia".equalsIgnoreCase(role) && "pending".equalsIgnoreCase(status)) {
++                        startActivity(new Intent(LoginActivity.this, PendienteGuiaActivity.class));
++                        finish();
++                        return;
++                    }
++
++                    // usuario deshabilitado (excepto superadmin)
++                    if (!"active".equalsIgnoreCase(status) && !"superadmin".equalsIgnoreCase(role)) {
++                        Toast.makeText(LoginActivity.this, "Tu cuenta está deshabilitada.", Toast.LENGTH_LONG).show();
++                        repo.signOut();
++                        return;
++                    }
++
++                    routeByRole(role);
+                 }
++
+                 @Override public void onError(Exception e) {
+                     Toast.makeText(LoginActivity.this, "Error: "+e.getMessage(), Toast.LENGTH_LONG).show();
+                 }
+             });
+         });
+ 
+-        // (Opcional) listeners de “olvidaste contraseña” y “registrarse”
++        // recuperar password
+         findViewById(R.id.txt_olvidaste_password).setOnClickListener(v -> {
+             String email = etCorreo.getText()==null? "" : etCorreo.getText().toString().trim();
+-            if (email.isEmpty()) { Toast.makeText(this,"Escribe tu correo arriba.",Toast.LENGTH_SHORT).show(); return; }
++            if (email.isEmpty()) {
++                Toast.makeText(this,"Escribe tu correo arriba.",Toast.LENGTH_SHORT).show();
++                return;
++            }
+             com.google.firebase.auth.FirebaseAuth.getInstance()
+                     .sendPasswordResetEmail(email)
+                     .addOnSuccessListener(x -> Toast.makeText(this,"Te enviamos un correo de recuperación.",Toast.LENGTH_LONG).show())
+                     .addOnFailureListener(err -> Toast.makeText(this,err.getMessage(),Toast.LENGTH_LONG).show());
+         });
+ 
++        // ir a registro
+         findViewById(R.id.txt_registrarse).setOnClickListener(v ->
+                 startActivity(new Intent(this, RegistroActivity.class)));
+     }
+ 
+     private void routeByRole(String role){
+         Class<?> next = Cliente_HomeActivity.class;
+-        if ("superadmin".equals(role)) next = Superadmin_HomeActivity.class;
+-        else if ("admin".equals(role)) next = Admin_HomeActivity.class;
+-        else if ("guia".equals(role))  next = Guia_HomeActivity.class;
++        if ("superadmin".equalsIgnoreCase(role)) {
++            next = Superadmin_HomeActivity.class;
++        } else if ("admin".equalsIgnoreCase(role)) {
++            next = Admin_HomeActivity.class;
++        } else if ("guia".equalsIgnoreCase(role))  {
++            next = Guia_HomeActivity.class;
++        }
+         startActivity(new Intent(this, next));
+         finish();
+     }
+Index: app/src/main/java/com/example/proyecto_2025/login/ConfirmacionActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.login;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.Button;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport com.example.proyecto_2025.R;\r\n\r\npublic class ConfirmacionActivity extends AppCompatActivity {\r\n\r\n    private Button btnConfirmar;\r\n    private String rolSeleccionado;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_confirmacion_joaco);\r\n        rolSeleccionado = getIntent().getStringExtra(\"rol\");\r\n        initViews();\r\n        setupListeners();\r\n    }\r\n\r\n    private void initViews() {\r\n        btnConfirmar = findViewById(R.id.btn_confirmar);\r\n\r\n    }\r\n\r\n    private void setupListeners() {\r\n        btnConfirmar.setOnClickListener(v -> {\r\n            Intent intent;\r\n\r\n            if (\"Cliente\".equals(rolSeleccionado)) {\r\n                intent = new Intent(this, ExitoClienteActivity.class);\r\n            } else if (\"Guía de turismo\".equals(rolSeleccionado)) {\r\n                intent = new Intent(this, PendienteGuiaActivity.class);\r\n            } else {\r\n                // Por defecto, ir a cliente\r\n                intent = new Intent(this, ExitoClienteActivity.class);\r\n            }\r\n\r\n            startActivity(intent);\r\n        });\r\n\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/login/ConfirmacionActivity.java b/app/src/main/java/com/example/proyecto_2025/login/ConfirmacionActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/login/ConfirmacionActivity.java	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/java/com/example/proyecto_2025/login/ConfirmacionActivity.java	(date 1762143988044)
+@@ -3,43 +3,47 @@
+ import android.content.Intent;
+ import android.os.Bundle;
+ import android.widget.Button;
++
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import com.example.proyecto_2025.R;
+ 
+ public class ConfirmacionActivity extends AppCompatActivity {
+ 
+-    private Button btnConfirmar;
++    private Button btnOk;
+     private String rolSeleccionado;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-        setContentView(R.layout.activity_confirmacion_joaco);
+-        rolSeleccionado = getIntent().getStringExtra("rol");
++        setContentView(R.layout.activity_confirmacion);
++
++        rolSeleccionado = getIntent().getStringExtra("rol"); // "cliente" o "guia"
++
+         initViews();
+         setupListeners();
+     }
+ 
+     private void initViews() {
+-        btnConfirmar = findViewById(R.id.btn_confirmar);
+-
++        btnOk = findViewById(R.id.btn_ok);
+     }
+ 
+     private void setupListeners() {
+-        btnConfirmar.setOnClickListener(v -> {
++        btnOk.setOnClickListener(v -> {
+             Intent intent;
+ 
+-            if ("Cliente".equals(rolSeleccionado)) {
++            if ("cliente".equalsIgnoreCase(rolSeleccionado)) {
+                 intent = new Intent(this, ExitoClienteActivity.class);
+-            } else if ("Guía de turismo".equals(rolSeleccionado)) {
++            } else if ("guia".equalsIgnoreCase(rolSeleccionado) ||
++                    "guía de turismo".equalsIgnoreCase(rolSeleccionado)) {
+                 intent = new Intent(this, PendienteGuiaActivity.class);
+             } else {
+-                // Por defecto, ir a cliente
++                // por defecto, tratarlo como cliente
+                 intent = new Intent(this, ExitoClienteActivity.class);
+             }
+ 
+             startActivity(intent);
++            finish();
+         });
+-
+     }
+-}
+\ No newline at end of file
++}
+Index: app/src/main/java/com/example/proyecto_2025/login/RegistroActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.login;\r\n\r\nimport android.os.Bundle;\r\nimport android.widget.ArrayAdapter;\r\nimport android.widget.AutoCompleteTextView;\r\nimport android.widget.CheckBox;\r\nimport android.widget.Toast;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.data.auth.AuthRepository;\r\nimport com.google.android.material.textfield.TextInputEditText;\r\n\r\npublic class RegistroActivity extends AppCompatActivity {\r\n    private AuthRepository repo;\r\n\r\n    private TextInputEditText etNombre, etCorreo, etPass, etPass2;\r\n    private AutoCompleteTextView rolView;\r\n    private CheckBox cbTerminos;\r\n\r\n    @Override protected void onCreate(Bundle b) {\r\n        super.onCreate(b);\r\n        setContentView(R.layout.activity_registro);\r\n        repo = new AuthRepository();\r\n\r\n        etNombre = findViewById(R.id.et_nombre);\r\n        etCorreo = findViewById(R.id.et_correo);\r\n        etPass   = findViewById(R.id.et_password);\r\n        etPass2  = findViewById(R.id.et_confirm_password);\r\n        rolView  = findViewById(R.id.spinner_rol);\r\n        cbTerminos = findViewById(R.id.cb_terminos);\r\n\r\n        // Dropdown de roles (\"cliente\" / \"guia\")\r\n        String[] roles = new String[]{\"cliente\",\"guia\"};\r\n        rolView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, roles));\r\n        rolView.setText(roles[0], false); // valor por defecto\r\n\r\n        findViewById(R.id.btn_volver).setOnClickListener(v -> finish());\r\n\r\n        findViewById(R.id.btn_continuar).setOnClickListener(v -> {\r\n            String name  = safe(etNombre);\r\n            String email = safe(etCorreo);\r\n            String pass  = safe(etPass);\r\n            String pass2 = safe(etPass2);\r\n            String role  = safe(rolView).toLowerCase();\r\n\r\n            if (name.isEmpty() || email.isEmpty() || pass.isEmpty()) {\r\n                toast(\"Completa nombre, correo y contraseña.\"); return;\r\n            }\r\n            if (pass.length() < 6) { toast(\"La contraseña debe tener al menos 6 caracteres.\"); return; }\r\n            if (!pass.equals(pass2)) { toast(\"Las contraseñas no coinciden.\"); return; }\r\n            if (!role.equals(\"cliente\") && !role.equals(\"guia\")) { toast(\"Selecciona un rol válido.\"); return; }\r\n            if (!cbTerminos.isChecked()) { toast(\"Debes aceptar los términos y condiciones.\"); return; }\r\n\r\n            repo.signUp(name, email, pass, role, new AuthRepository.Callback<Void>() {\r\n                @Override public void onSuccess(Void unused) {\r\n                    toast(\"Cuenta creada. Inicia sesión.\"); finish();\r\n                }\r\n                @Override public void onError(Exception e) {\r\n                    toast(\"Error: \"+e.getMessage());\r\n                }\r\n            });\r\n        });\r\n    }\r\n\r\n    private String safe(TextInputEditText t){ return t.getText()==null? \"\": t.getText().toString().trim(); }\r\n    private String safe(AutoCompleteTextView t){ return t.getText()==null? \"\": t.getText().toString().trim(); }\r\n    private void toast(String m){ Toast.makeText(this,m,Toast.LENGTH_LONG).show(); }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/login/RegistroActivity.java b/app/src/main/java/com/example/proyecto_2025/login/RegistroActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/login/RegistroActivity.java	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/java/com/example/proyecto_2025/login/RegistroActivity.java	(date 1761977221960)
+@@ -1,10 +1,12 @@
+ package com.example.proyecto_2025.login;
+ 
+ import android.os.Bundle;
++import android.view.View;
+ import android.widget.ArrayAdapter;
+ import android.widget.AutoCompleteTextView;
+ import android.widget.CheckBox;
+ import android.widget.Toast;
++
+ import androidx.appcompat.app.AppCompatActivity;
+ 
+ import com.example.proyecto_2025.R;
+@@ -12,13 +14,15 @@
+ import com.google.android.material.textfield.TextInputEditText;
+ 
+ public class RegistroActivity extends AppCompatActivity {
++
+     private AuthRepository repo;
+ 
+-    private TextInputEditText etNombre, etCorreo, etPass, etPass2;
++    private TextInputEditText etNombre, etCorreo, etPass, etPass2, etDni;
+     private AutoCompleteTextView rolView;
+     private CheckBox cbTerminos;
+ 
+-    @Override protected void onCreate(Bundle b) {
++    @Override
++    protected void onCreate(Bundle b) {
+         super.onCreate(b);
+         setContentView(R.layout.activity_registro);
+         repo = new AuthRepository();
+@@ -29,11 +33,21 @@
+         etPass2  = findViewById(R.id.et_confirm_password);
+         rolView  = findViewById(R.id.spinner_rol);
+         cbTerminos = findViewById(R.id.cb_terminos);
++        etDni    = findViewById(R.id.et_dni);  // agrega este campo en el XML
+ 
+-        // Dropdown de roles ("cliente" / "guia")
+         String[] roles = new String[]{"cliente","guia"};
+         rolView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, roles));
+-        rolView.setText(roles[0], false); // valor por defecto
++        rolView.setText(roles[0], false);
++
++        // mostrar/ocultar dni según rol
++        rolView.setOnItemClickListener((parent, view, position, id) -> {
++            String r = roles[position];
++            if ("guia".equalsIgnoreCase(r)) {
++                if (etDni != null) etDni.setVisibility(View.VISIBLE);
++            } else {
++                if (etDni != null) etDni.setVisibility(View.GONE);
++            }
++        });
+ 
+         findViewById(R.id.btn_volver).setOnClickListener(v -> finish());
+ 
+@@ -43,6 +57,7 @@
+             String pass  = safe(etPass);
+             String pass2 = safe(etPass2);
+             String role  = safe(rolView).toLowerCase();
++            String dni   = etDni != null ? safe(etDni) : "";
+ 
+             if (name.isEmpty() || email.isEmpty() || pass.isEmpty()) {
+                 toast("Completa nombre, correo y contraseña."); return;
+@@ -51,13 +66,22 @@
+             if (!pass.equals(pass2)) { toast("Las contraseñas no coinciden."); return; }
+             if (!role.equals("cliente") && !role.equals("guia")) { toast("Selecciona un rol válido."); return; }
+             if (!cbTerminos.isChecked()) { toast("Debes aceptar los términos y condiciones."); return; }
++            if ("guia".equals(role) && dni.isEmpty()) { toast("El guía debe ingresar DNI."); return; }
+ 
++            // registramos
+             repo.signUp(name, email, pass, role, new AuthRepository.Callback<Void>() {
+                 @Override public void onSuccess(Void unused) {
+-                    toast("Cuenta creada. Inicia sesión."); finish();
++                    // aquí podrías mandar a ConfirmarEmailActivity
++                    if ("guia".equals(role)) {
++                        toast("Cuenta de guía creada. Revisa tu correo y espera aprobación.");
++                    } else {
++                        toast("Cuenta creada. Revisa tu correo y confirma con el código.");
++                    }
++                    finish();
+                 }
++
+                 @Override public void onError(Exception e) {
+-                    toast("Error: "+e.getMessage());
++                    toast("Error: " + e.getMessage());
+                 }
+             });
+         });
+Index: app/src/main/res/layout/activity_confirmacion_joaco.xml
+===================================================================
+diff --git a/app/src/main/res/layout/activity_confirmacion_joaco.xml b/app/src/main/res/layout/activity_confirmacion_joaco.xml
+deleted file mode 100644
+--- a/app/src/main/res/layout/activity_confirmacion_joaco.xml	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ /dev/null	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
+@@ -1,105 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-    android:layout_width="match_parent"
+-    android:layout_height="match_parent"
+-    android:orientation="vertical"
+-    android:background="#FFFFFF"
+-    android:padding="24dp"
+-    android:gravity="center">
+-
+-    <!-- Título principal -->
+-    <TextView
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:text="Introducir el código de confirmación"
+-        android:textSize="18sp"
+-        android:textStyle="bold"
+-        android:textColor="#000000"
+-        android:gravity="center"
+-        android:layout_marginBottom="16dp" />
+-
+-    <!-- Subtítulo -->
+-    <TextView
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:text="Se envió un código de 4 dígitos\na nombre@gmail.com"
+-        android:textSize="14sp"
+-        android:textColor="#666666"
+-        android:gravity="center"
+-        android:layout_marginBottom="40dp" />
+-
+-    <!-- Campos de código (4 campos separados) -->
+-    <LinearLayout
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:orientation="horizontal"
+-        android:layout_marginBottom="40dp">
+-
+-        <EditText
+-            android:id="@+id/et_digit1"
+-            android:layout_width="50dp"
+-            android:layout_height="50dp"
+-            android:layout_margin="8dp"
+-            android:gravity="center"
+-            android:inputType="number"
+-            android:maxLength="1"
+-            android:textSize="18sp"
+-            android:background="@android:drawable/edit_text" />
+-
+-        <EditText
+-            android:id="@+id/et_digit2"
+-            android:layout_width="50dp"
+-            android:layout_height="50dp"
+-            android:layout_margin="8dp"
+-            android:gravity="center"
+-            android:inputType="number"
+-            android:maxLength="1"
+-            android:textSize="18sp"
+-            android:background="@android:drawable/edit_text" />
+-
+-        <EditText
+-            android:id="@+id/et_digit3"
+-            android:layout_width="50dp"
+-            android:layout_height="50dp"
+-            android:layout_margin="8dp"
+-            android:gravity="center"
+-            android:inputType="number"
+-            android:maxLength="1"
+-            android:textSize="18sp"
+-            android:background="@android:drawable/edit_text" />
+-
+-        <EditText
+-            android:id="@+id/et_digit4"
+-            android:layout_width="50dp"
+-            android:layout_height="50dp"
+-            android:layout_margin="8dp"
+-            android:gravity="center"
+-            android:inputType="number"
+-            android:maxLength="1"
+-            android:textSize="18sp"
+-            android:background="@android:drawable/edit_text" />
+-
+-    </LinearLayout>
+-
+-    <!-- Botón Reenviar código -->
+-    <Button
+-        android:id="@+id/btn_reenviar"
+-        android:layout_width="match_parent"
+-        android:layout_height="50dp"
+-        android:text="Reenviar código"
+-        android:textColor="#FFFFFF"
+-        android:backgroundTint="#1976D2"
+-        android:layout_marginBottom="16dp"
+-        android:textSize="16sp" />
+-
+-    <!-- Botón Continuar -->
+-    <Button
+-        android:id="@+id/btn_confirmar"
+-        android:layout_width="match_parent"
+-        android:layout_height="50dp"
+-        android:text="Continuar"
+-        android:textColor="#FFFFFF"
+-        android:backgroundTint="#1976D2"
+-        android:textSize="16sp" />
+-
+-</LinearLayout>
+\ No newline at end of file
+Index: app/src/main/java/com/example/proyecto_2025/login/CodigoConfirmacionActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.login;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.Button;\r\nimport android.widget.ImageButton;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport com.example.proyecto_2025.R;\r\n\r\npublic class CodigoConfirmacionActivity extends AppCompatActivity {\r\n\r\n    private Button btnContinuar;\r\n    private ImageButton btnVolver;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_codigo_confirmacion_joaco);\r\n\r\n        initViews();\r\n        setupListeners();\r\n    }\r\n\r\n    private void initViews() {\r\n        btnContinuar = findViewById(R.id.btn_continuar);\r\n        btnVolver = findViewById(R.id.btn_volver);\r\n    }\r\n\r\n    private void setupListeners() {\r\n        btnVolver.setOnClickListener(v -> {\r\n            finish(); // Volver a la pantalla anterior\r\n        });\r\n\r\n        btnContinuar.setOnClickListener(v -> {\r\n            Intent intent = new Intent(this, CrearPasswordActivity.class);\r\n            startActivity(intent);\r\n        });\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/login/CodigoConfirmacionActivity.java b/app/src/main/java/com/example/proyecto_2025/login/CodigoConfirmacionActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/login/CodigoConfirmacionActivity.java	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/java/com/example/proyecto_2025/login/CodigoConfirmacionActivity.java	(date 1762011896910)
+@@ -3,37 +3,131 @@
+ import android.content.Intent;
+ import android.os.Bundle;
+ import android.widget.Button;
++import android.widget.EditText;
+ import android.widget.ImageButton;
++import android.widget.TextView;
++import android.widget.Toast;
++
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import com.example.proyecto_2025.R;
++import com.google.firebase.auth.FirebaseAuth;
++import com.google.firebase.auth.FirebaseUser;
++import com.google.firebase.firestore.FieldValue;
++import com.google.firebase.firestore.FirebaseFirestore;
++
++import java.util.HashMap;
++import java.util.Map;
+ 
+ public class CodigoConfirmacionActivity extends AppCompatActivity {
+ 
++    private EditText et1, et2, et3, et4;
+     private Button btnContinuar;
+     private ImageButton btnVolver;
++    private TextView tvSubtitulo;
++
++    private FirebaseAuth auth;
++    private FirebaseFirestore db;
+ 
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-        setContentView(R.layout.activity_codigo_confirmacion_joaco);
++        setContentView(R.layout.activity_codigo_confirmacion);
++
++        auth = FirebaseAuth.getInstance();
++        db   = FirebaseFirestore.getInstance();
+ 
+         initViews();
+         setupListeners();
++        fillEmailIfAvailable();
+     }
+ 
+     private void initViews() {
+         btnContinuar = findViewById(R.id.btn_continuar);
+-        btnVolver = findViewById(R.id.btn_volver);
++        btnVolver    = findViewById(R.id.btn_volver);
++        et1 = findViewById(R.id.et_digit1);
++        et2 = findViewById(R.id.et_digit2);
++        et3 = findViewById(R.id.et_digit3);
++        et4 = findViewById(R.id.et_digit4);
++        tvSubtitulo = findViewById(R.id.tv_subtitulo);
+     }
+ 
+     private void setupListeners() {
+-        btnVolver.setOnClickListener(v -> {
+-            finish(); // Volver a la pantalla anterior
+-        });
++        btnVolver.setOnClickListener(v -> finish());
+ 
+         btnContinuar.setOnClickListener(v -> {
+-            Intent intent = new Intent(this, CrearPasswordActivity.class);
+-            startActivity(intent);
++            String d1 = et1.getText() == null ? "" : et1.getText().toString().trim();
++            String d2 = et2.getText() == null ? "" : et2.getText().toString().trim();
++            String d3 = et3.getText() == null ? "" : et3.getText().toString().trim();
++            String d4 = et4.getText() == null ? "" : et4.getText().toString().trim();
++
++            String codeUser = d1 + d2 + d3 + d4;
++            if (codeUser.length() != 4) {
++                Toast.makeText(this, "Ingresa los 4 dígitos.", Toast.LENGTH_LONG).show();
++                return;
++            }
++
++            FirebaseUser u = auth.getCurrentUser();
++            if (u == null) {
++                Toast.makeText(this, "Vuelve a iniciar sesión para confirmar.", Toast.LENGTH_LONG).show();
++                return;
++            }
++
++            String uid = u.getUid();
++
++            db.collection("users").document(uid).get()
++                    .addOnSuccessListener(snap -> {
++                        if (!snap.exists()) {
++                            Toast.makeText(this, "No se encontró tu perfil.", Toast.LENGTH_LONG).show();
++                            return;
++                        }
++
++                        String codeDb = snap.getString("verificationCode");
++                        if (codeDb == null) {
++                            Toast.makeText(this, "No hay código registrado. Vuelve a registrarte.", Toast.LENGTH_LONG).show();
++                            return;
++                        }
++
++                        // si en BD está en 6 dígitos y en UI en 4 → comparamos primeros 4
++                        if (codeDb.length() > 4) {
++                            codeDb = codeDb.substring(0, 4);
++                        }
++
++                        if (!codeDb.equals(codeUser)) {
++                            Toast.makeText(this, "Código incorrecto.", Toast.LENGTH_LONG).show();
++                            return;
++                        }
++
++                        // si el código es correcto → actualizar flags
++                        Map<String, Object> updates = new HashMap<>();
++                        updates.put("emailVerified", true);
++                        updates.put("verificationRequired", false);
++                        updates.put("updatedAt", FieldValue.serverTimestamp());
++
++                        db.collection("users").document(uid).update(updates)
++                                .addOnSuccessListener(x -> {
++                                    Toast.makeText(this, "Correo verificado.", Toast.LENGTH_LONG).show();
++                                    // seguir tu flujo original → crear password
++                                    Intent i = new Intent(this, CrearPasswordActivity.class);
++                                    startActivity(i);
++                                    finish();
++                                })
++                                .addOnFailureListener(e -> Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show());
++                    })
++                    .addOnFailureListener(e -> Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show());
+         });
+     }
+-}
+\ No newline at end of file
++
++    private void fillEmailIfAvailable() {
++        // si el login te mandó el email como extra, lo mostramos
++        String email = getIntent().getStringExtra("email");
++        if (email == null) {
++            // si no vino por intent, tratamos de leerlo del currentUser
++            FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
++            if (u != null) email = u.getEmail();
++        }
++        if (email != null && tvSubtitulo != null) {
++            tvSubtitulo.setText("Se envió un código de 4 dígitos\na " + email);
++        }
++    }
++}
+Index: app/src/main/res/layout/activity_codigo_confirmacion_joaco.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_codigo_confirmacion_joaco.xml b/app/src/main/res/layout/activity_codigo_confirmacion.xml
+rename from app/src/main/res/layout/activity_codigo_confirmacion_joaco.xml
+rename to app/src/main/res/layout/activity_codigo_confirmacion.xml
+--- a/app/src/main/res/layout/activity_codigo_confirmacion_joaco.xml	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/res/layout/activity_codigo_confirmacion.xml	(date 1762011879210)
+@@ -23,11 +23,8 @@
+             android:src="@android:drawable/ic_menu_revert"
+             android:contentDescription="Volver atrás" />
+ 
+-
+-
+     </LinearLayout>
+ 
+-
+     <!-- Título -->
+     <TextView
+         android:layout_width="wrap_content"
+@@ -41,9 +38,10 @@
+ 
+     <!-- Subtítulo -->
+     <TextView
++        android:id="@+id/tv_subtitulo"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+-        android:text="Se envió un código de 4 dígitos\na nombre@gmail.com"
++        android:text="Se envió un código de 4 dígitos"
+         android:textSize="14sp"
+         android:textColor="#666666"
+         android:gravity="center"
+@@ -114,4 +112,4 @@
+         android:textStyle="bold"
+         android:textAllCaps="false" />
+ 
+-</LinearLayout>
+\ No newline at end of file
++</LinearLayout>
+Index: app/src/main/res/layout/activity_registro.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<ScrollView xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    android:background=\"#FFFFFF\">\r\n\r\n    <LinearLayout\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:orientation=\"vertical\"\r\n        android:padding=\"24dp\">\r\n\r\n        <LinearLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:orientation=\"horizontal\"\r\n            android:layout_marginBottom=\"16dp\">\r\n\r\n            <ImageButton\r\n                android:id=\"@+id/btn_volver\"\r\n                android:layout_width=\"40dp\"\r\n                android:layout_height=\"40dp\"\r\n                android:background=\"?android:attr/selectableItemBackgroundBorderless\"\r\n                android:src=\"@android:drawable/ic_menu_revert\"\r\n                android:contentDescription=\"Volver atrás\" />\r\n\r\n            <View\r\n                android:layout_width=\"0dp\"\r\n                android:layout_height=\"0dp\"\r\n                android:layout_weight=\"1\" />\r\n\r\n        </LinearLayout>\r\n\r\n\r\n        <!-- Header -->\r\n        <TextView\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:text=\"Regístrate\"\r\n            android:textSize=\"24sp\"\r\n            android:textStyle=\"bold\"\r\n            android:textColor=\"#000000\"\r\n            android:layout_marginBottom=\"8dp\" />\r\n\r\n        <TextView\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:text=\"Crea una cuenta para iniciar\"\r\n            android:textSize=\"14sp\"\r\n            android:textColor=\"#666666\"\r\n            android:layout_marginBottom=\"32dp\" />\r\n\r\n        <!-- Campo Nombre -->\r\n        <TextView\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:text=\"Nombre\"\r\n            android:textSize=\"14sp\"\r\n            android:textColor=\"#000000\"\r\n            android:textStyle=\"bold\"\r\n            android:layout_marginBottom=\"8dp\" />\r\n\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginBottom=\"16dp\"\r\n            app:boxStrokeColor=\"#1976D2\"\r\n            app:boxStrokeWidth=\"2dp\">\r\n\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:id=\"@+id/et_nombre\"\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:hint=\"Ingresa tu nombre completo\"\r\n                android:inputType=\"textPersonName\" />\r\n\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Campo Correo electrónico -->\r\n        <TextView\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:text=\"Correo electrónico\"\r\n            android:textSize=\"14sp\"\r\n            android:textColor=\"#000000\"\r\n            android:textStyle=\"bold\"\r\n            android:layout_marginBottom=\"8dp\" />\r\n\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginBottom=\"16dp\"\r\n            app:boxStrokeColor=\"#1976D2\"\r\n            app:boxStrokeWidth=\"2dp\">\r\n\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:id=\"@+id/et_correo\"\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:hint=\"nombre@gmail.com\"\r\n                android:inputType=\"textEmailAddress\" />\r\n\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Campo Contraseña -->\r\n        <TextView\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:text=\"Contraseña\"\r\n            android:textSize=\"14sp\"\r\n            android:textColor=\"#000000\"\r\n            android:textStyle=\"bold\"\r\n            android:layout_marginBottom=\"8dp\" />\r\n\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginBottom=\"16dp\"\r\n            app:boxStrokeColor=\"#1976D2\"\r\n            app:boxStrokeWidth=\"2dp\"\r\n            app:passwordToggleEnabled=\"true\">\r\n\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:id=\"@+id/et_password\"\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:hint=\"Crea tu contraseña\"\r\n                android:inputType=\"textPassword\" />\r\n\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Campo Confirmar contraseña -->\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginBottom=\"16dp\"\r\n            app:boxStrokeColor=\"#1976D2\"\r\n            app:boxStrokeWidth=\"2dp\"\r\n            app:passwordToggleEnabled=\"true\">\r\n\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:id=\"@+id/et_confirm_password\"\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:hint=\"Confirmar contraseña\"\r\n                android:inputType=\"textPassword\" />\r\n\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Campo Rol -->\r\n        <TextView\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:text=\"Rol\"\r\n            android:textSize=\"14sp\"\r\n            android:textColor=\"#000000\"\r\n            android:textStyle=\"bold\"\r\n            android:layout_marginBottom=\"8dp\" />\r\n\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginBottom=\"16dp\"\r\n            app:boxStrokeColor=\"#1976D2\"\r\n            app:boxStrokeWidth=\"2dp\"\r\n            style=\"@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu\">\r\n\r\n            <AutoCompleteTextView\r\n                android:id=\"@+id/spinner_rol\"\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:hint=\"Selecciona una opción\"\r\n                android:inputType=\"none\"\r\n                android:focusable=\"false\" />\r\n\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Checkbox términos -->\r\n        <LinearLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:orientation=\"horizontal\"\r\n            android:layout_marginBottom=\"24dp\">\r\n\r\n            <CheckBox\r\n                android:id=\"@+id/cb_terminos\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:layout_marginEnd=\"8dp\" />\r\n\r\n            <TextView\r\n                android:layout_width=\"0dp\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:layout_weight=\"1\"\r\n                android:text=\"He leído y acepto los Términos y Condiciones y la Política de Privacidad\"\r\n                android:textSize=\"12sp\"\r\n                android:textColor=\"#666666\"\r\n                android:lineSpacingExtra=\"2dp\" />\r\n\r\n        </LinearLayout>\r\n\r\n        <!-- Botón continuar -->\r\n        <Button\r\n            android:id=\"@+id/btn_continuar\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"50dp\"\r\n            android:text=\"Continuar\"\r\n            android:textColor=\"#FFFFFF\"\r\n            android:backgroundTint=\"#1976D2\"\r\n            android:textSize=\"16sp\"\r\n            android:textStyle=\"bold\"\r\n            android:textAllCaps=\"false\" />\r\n\r\n    </LinearLayout>\r\n\r\n</ScrollView>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_registro.xml b/app/src/main/res/layout/activity_registro.xml
+--- a/app/src/main/res/layout/activity_registro.xml	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/res/layout/activity_registro.xml	(date 1761977221918)
+@@ -77,6 +77,24 @@
+ 
+         </com.google.android.material.textfield.TextInputLayout>
+ 
++        <!-- DNI (solo guias) -->
++        <com.google.android.material.textfield.TextInputLayout
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:layout_marginBottom="16dp"
++            app:boxStrokeColor="#1976D2"
++            app:boxStrokeWidth="2dp">
++
++            <com.google.android.material.textfield.TextInputEditText
++                android:id="@+id/et_dni"
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:hint="DNI"
++                android:inputType="number"
++                android:visibility="gone"/>
++        </com.google.android.material.textfield.TextInputLayout>
++
++
+         <!-- Campo Correo electrónico -->
+         <TextView
+             android:layout_width="wrap_content"
+Index: app/src/main/res/navigation/nav_graph.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<navigation xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:id=\"@+id/nav_graph\"\r\n    app:startDestination=\"@id/loginActivity\">\r\n\r\n    <!-- Flujo principal de Login y Registro -->\r\n    <activity\r\n        android:id=\"@+id/loginActivity\"\r\n        android:name=\"com.example.proyecto_2025.login.LoginActivity\"\r\n        android:label=\"Login\"\r\n        tools:layout=\"@layout/activity_login\">\r\n        <action\r\n            android:id=\"@+id/action_login_to_registro\"\r\n            app:destination=\"@id/registroActivity\" />\r\n        <action\r\n            android:id=\"@+id/action_login_to_recuperar_password\"\r\n            app:destination=\"@id/recuperarPasswordActivity\" />\r\n    </activity>\r\n\r\n    <activity\r\n        android:id=\"@+id/registroActivity\"\r\n        android:name=\"com.example.proyecto_2025.login.RegistroActivity\"\r\n        android:label=\"Registro\"\r\n        tools:layout=\"@layout/activity_registro\">\r\n        <action\r\n            android:id=\"@+id/action_registro_to_confirmacion\"\r\n            app:destination=\"@id/confirmacionActivity\" />\r\n    </activity>\r\n\r\n    <activity\r\n        android:id=\"@+id/confirmacionActivity\"\r\n        android:name=\"com.example.proyecto_2025.login.ConfirmacionActivity\"\r\n        android:label=\"Confirmación\"\r\n        tools:layout=\"@layout/activity_confirmacion_joaco\">\r\n        <action\r\n            android:id=\"@+id/action_confirmacion_to_exito_cliente\"\r\n            app:destination=\"@id/exitoClienteActivity\" />\r\n        <action\r\n            android:id=\"@+id/action_confirmacion_to_pendiente_guia\"\r\n            app:destination=\"@id/pendienteGuiaActivity\" />\r\n    </activity>\r\n\r\n    <!-- Pantallas finales según rol -->\r\n    <activity\r\n        android:id=\"@+id/exitoClienteActivity\"\r\n        android:name=\"com.example.proyecto_2025.login.ExitoClienteActivity\"\r\n        android:label=\"Cuenta Creada\"\r\n        tools:layout=\"@layout/activity_exito_cliente_joaco\" />\r\n\r\n    <activity\r\n        android:id=\"@+id/pendienteGuiaActivity\"\r\n        android:name=\"com.example.proyecto_2025.login.PendienteGuiaActivity\"\r\n        android:label=\"Pendiente Aprobación\"\r\n        tools:layout=\"@layout/activity_pendiente_guia_joaco\" />\r\n\r\n    <!-- Flujo de recuperación de contraseña -->\r\n    <activity\r\n        android:id=\"@+id/recuperarPasswordActivity\"\r\n        android:name=\"com.example.proyecto_2025.login.RecuperarPasswordActivity\"\r\n        android:label=\"Recuperar Contraseña\"\r\n        tools:layout=\"@layout/activity_recuperar_password_joaco\">\r\n        <action\r\n            android:id=\"@+id/action_recuperar_to_confirmar_email\"\r\n            app:destination=\"@id/confirmarEmailActivity\" />\r\n    </activity>\r\n\r\n    <activity\r\n        android:id=\"@+id/confirmarEmailActivity\"\r\n        android:name=\"com.example.proyecto_2025.login.ConfirmarEmailActivity\"\r\n        android:label=\"Confirmar Email\"\r\n        tools:layout=\"@layout/activity_confirmar_email_joaco\">\r\n        <action\r\n            android:id=\"@+id/action_confirmar_email_to_codigo\"\r\n            app:destination=\"@id/codigoConfirmacionActivity\" />\r\n    </activity>\r\n\r\n    <activity\r\n        android:id=\"@+id/codigoConfirmacionActivity\"\r\n        android:name=\"com.example.proyecto_2025.login.CodigoConfirmacionActivity\"\r\n        android:label=\"Código Confirmación\"\r\n        tools:layout=\"@layout/activity_codigo_confirmacion_joaco\">\r\n        <action\r\n            android:id=\"@+id/action_codigo_to_crear_password\"\r\n            app:destination=\"@id/crearPasswordActivity\" />\r\n    </activity>\r\n\r\n    <activity\r\n        android:id=\"@+id/crearPasswordActivity\"\r\n        android:name=\"com.example.proyecto_2025.login.CrearPasswordActivity\"\r\n        android:label=\"Crear Nueva Contraseña\"\r\n        tools:layout=\"@layout/activity_crear_password_joaco\" />\r\n\r\n</navigation>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/navigation/nav_graph.xml b/app/src/main/res/navigation/nav_graph.xml
+--- a/app/src/main/res/navigation/nav_graph.xml	(revision ff37e809ab64bea5bcc32b16a8a24e0a0fa953af)
++++ b/app/src/main/res/navigation/nav_graph.xml	(date 1762104758737)
+@@ -47,13 +47,13 @@
+         android:id="@+id/exitoClienteActivity"
+         android:name="com.example.proyecto_2025.login.ExitoClienteActivity"
+         android:label="Cuenta Creada"
+-        tools:layout="@layout/activity_exito_cliente_joaco" />
++        tools:layout="@layout/activity_exito_cliente" />
+ 
+     <activity
+         android:id="@+id/pendienteGuiaActivity"
+         android:name="com.example.proyecto_2025.login.PendienteGuiaActivity"
+         android:label="Pendiente Aprobación"
+-        tools:layout="@layout/activity_pendiente_guia_joaco" />
++        tools:layout="@layout/activity_pendiente_guia" />
+ 
+     <!-- Flujo de recuperación de contraseña -->
+     <activity
+@@ -70,7 +70,7 @@
+         android:id="@+id/confirmarEmailActivity"
+         android:name="com.example.proyecto_2025.login.ConfirmarEmailActivity"
+         android:label="Confirmar Email"
+-        tools:layout="@layout/activity_confirmar_email_joaco">
++        tools:layout="@layout/activity_confirmar_email">
+         <action
+             android:id="@+id/action_confirmar_email_to_codigo"
+             app:destination="@id/codigoConfirmacionActivity" />
+@@ -80,7 +80,7 @@
+         android:id="@+id/codigoConfirmacionActivity"
+         android:name="com.example.proyecto_2025.login.CodigoConfirmacionActivity"
+         android:label="Código Confirmación"
+-        tools:layout="@layout/activity_codigo_confirmacion_joaco">
++        tools:layout="@layout/activity_codigo_confirmacion">
+         <action
+             android:id="@+id/action_codigo_to_crear_password"
+             app:destination="@id/crearPasswordActivity" />
+@@ -90,6 +90,6 @@
+         android:id="@+id/crearPasswordActivity"
+         android:name="com.example.proyecto_2025.login.CrearPasswordActivity"
+         android:label="Crear Nueva Contraseña"
+-        tools:layout="@layout/activity_crear_password_joaco" />
++        tools:layout="@layout/activity_crear_password" />
+ 
+ </navigation>
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_confirmacion.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_confirmacion.xml b/app/src/main/res/layout/activity_confirmacion.xml
+new file mode 100644
+--- /dev/null	(date 1762144028079)
++++ b/app/src/main/res/layout/activity_confirmacion.xml	(date 1762144028079)
+@@ -0,0 +1,55 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:orientation="vertical"
++    android:background="#FFFFFF"
++    android:padding="24dp"
++    android:gravity="center">
++
++    <!-- Ícono -->
++    <ImageView
++        android:layout_width="90dp"
++        android:layout_height="90dp"
++        android:src="@android:drawable/ic_dialog_info"
++        android:layout_marginBottom="28dp"
++        app:tint="#1976D2" />
++
++    <!-- Título -->
++    <TextView
++        android:id="@+id/tv_titulo"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:text="Registro completado"
++        android:textSize="22sp"
++        android:textStyle="bold"
++        android:textColor="#000000"
++        android:gravity="center"
++        android:layout_marginBottom="12dp" />
++
++    <!-- Mensaje -->
++    <TextView
++        android:id="@+id/tv_mensaje"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:text="Tu cuenta fue creada correctamente. Presiona continuar para finalizar."
++        android:textSize="15sp"
++        android:textColor="#666666"
++        android:gravity="center"
++        android:lineSpacingExtra="2dp"
++        android:layout_marginBottom="48dp" />
++
++    <!-- Botón continuar -->
++    <Button
++        android:id="@+id/btn_ok"
++        android:layout_width="match_parent"
++        android:layout_height="50dp"
++        android:text="Confirmar"
++        android:textColor="#FFFFFF"
++        android:backgroundTint="#1976D2"
++        android:textSize="16sp"
++        android:textStyle="bold"
++        android:textAllCaps="false" />
++
++</LinearLayout>
+diff --git a/app/src/main/res/layout/activity_exito_cliente_joaco.xml b/app/src/main/res/layout/activity_exito_cliente.xml
+rename from app/src/main/res/layout/activity_exito_cliente_joaco.xml
+rename to app/src/main/res/layout/activity_exito_cliente.xml
+diff --git a/app/src/main/res/layout/activity_confirmar_email_joaco.xml b/app/src/main/res/layout/activity_confirmar_email.xml
+rename from app/src/main/res/layout/activity_confirmar_email_joaco.xml
+rename to app/src/main/res/layout/activity_confirmar_email.xml
+diff --git a/app/src/main/res/layout/activity_pendiente_guia_joaco.xml b/app/src/main/res/layout/activity_pendiente_guia.xml
+rename from app/src/main/res/layout/activity_pendiente_guia_joaco.xml
+rename to app/src/main/res/layout/activity_pendiente_guia.xml
+diff --git a/app/src/main/res/layout/activity_crear_password_joaco.xml b/app/src/main/res/layout/activity_crear_password.xml
+rename from app/src/main/res/layout/activity_crear_password_joaco.xml
+rename to app/src/main/res/layout/activity_crear_password.xml

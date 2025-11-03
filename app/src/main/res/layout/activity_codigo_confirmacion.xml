@@ -7,7 +7,25 @@
     android:padding="24dp"
     android:gravity="center">
 
-    <!-- Título principal -->
+    <!-- Botón volver atrás -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="40dp"
+        android:gravity="start">
+
+        <ImageButton
+            android:id="@+id/btn_volver"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_revert"
+            android:contentDescription="Volver atrás" />
+
+    </LinearLayout>
+
+    <!-- Título -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,15 +38,16 @@
 
     <!-- Subtítulo -->
     <TextView
+        android:id="@+id/tv_subtitulo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Se envió un código de 4 dígitos\na nombre@gmail.com"
+        android:text="Se envió un código de 4 dígitos"
         android:textSize="14sp"
         android:textColor="#666666"
         android:gravity="center"
         android:layout_marginBottom="40dp" />
 
-    <!-- Campos de código (4 campos separados) -->
+    <!-- Campos de código -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -81,25 +100,16 @@
 
     </LinearLayout>
 
-    <!-- Botón Reenviar código -->
+    <!-- Botón continuar -->
     <Button
-        android:id="@+id/btn_reenviar"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="Reenviar código"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#1976D2"
-        android:layout_marginBottom="16dp"
-        android:textSize="16sp" />
-
-    <!-- Botón Continuar -->
-    <Button
-        android:id="@+id/btn_confirmar"
+        android:id="@+id/btn_continuar"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="Continuar"
         android:textColor="#FFFFFF"
         android:backgroundTint="#1976D2"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textAllCaps="false" />
 
 </LinearLayout>

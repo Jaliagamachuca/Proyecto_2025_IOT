@@ -3,43 +3,47 @@ package com.example.proyecto_2025.login;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.proyecto_2025.R;
 
 public class ConfirmacionActivity extends AppCompatActivity {
 
-    private Button btnConfirmar;
+    private Button btnOk;
     private String rolSeleccionado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_confirmacion_joaco);
-        rolSeleccionado = getIntent().getStringExtra("rol");
+        setContentView(R.layout.activity_confirmacion);
+
+        rolSeleccionado = getIntent().getStringExtra("rol"); // "cliente" o "guia"
+
         initViews();
         setupListeners();
     }
 
     private void initViews() {
-        btnConfirmar = findViewById(R.id.btn_confirmar);
-
+        btnOk = findViewById(R.id.btn_ok);
     }
 
     private void setupListeners() {
-        btnConfirmar.setOnClickListener(v -> {
+        btnOk.setOnClickListener(v -> {
             Intent intent;
 
-            if ("Cliente".equals(rolSeleccionado)) {
+            if ("cliente".equalsIgnoreCase(rolSeleccionado)) {
                 intent = new Intent(this, ExitoClienteActivity.class);
-            } else if ("Guía de turismo".equals(rolSeleccionado)) {
+            } else if ("guia".equalsIgnoreCase(rolSeleccionado) ||
+                    "guía de turismo".equalsIgnoreCase(rolSeleccionado)) {
                 intent = new Intent(this, PendienteGuiaActivity.class);
             } else {
-                // Por defecto, ir a cliente
+                // por defecto, tratarlo como cliente
                 intent = new Intent(this, ExitoClienteActivity.class);
             }
 
             startActivity(intent);
+            finish();
         });
-
     }
 }
