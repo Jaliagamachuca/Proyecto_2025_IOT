@@ -1,6 +1,7 @@
 package com.example.proyecto_2025.Activities_Guia;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Tour implements Serializable {
 
@@ -15,27 +16,30 @@ public class Tour implements Serializable {
     private String telefonoAdministrador;
     private String fotoUrl; // URL o ruta de la foto del tour
 
-    // Estado general: "disponible", "pendiente" o "finalizado"
+    // Estado general
     private String estadoGeneral;
 
-    // Subestados:
-    // - Para "disponible": "solicitado" o "no solicitado"
-    // - Para "pendiente": "iniciado" o "no iniciado"
+    // Subestado
     private String subEstado;
 
-    // Nuevo atributo: pago ofrecido al guía
+    // Pago al guía
     private double pagoOfrecido;
 
-    // Constructor vacío (necesario para Firebase y adaptadores)
+    // NUEVOS ATRIBUTOS
+    private List<String> usuarios;          // Ej: ["Juan Pérez", "Andrés Luján"]
+    private List<Ubicacion> ubicaciones;    // Lista con nombre + latitud + longitud
+
+    // Constructor vacío (Firebase necesita esto)
     public Tour() {
     }
 
-    // Constructor completo
+    // Constructor completo con los nuevos campos
     public Tour(String nombreEmpresa, String nombreTour, String descripcion,
                 String fechaTour, String horaInicio, String horaFin,
                 String nombreAdministrador, String telefonoAdministrador,
                 String fotoUrl, String estadoGeneral, String subEstado,
-                double pagoOfrecido) {
+                double pagoOfrecido, List<String> usuarios,
+                List<Ubicacion> ubicaciones) {
 
         this.nombreEmpresa = nombreEmpresa;
         this.nombreTour = nombreTour;
@@ -49,9 +53,11 @@ public class Tour implements Serializable {
         this.estadoGeneral = estadoGeneral;
         this.subEstado = subEstado;
         this.pagoOfrecido = pagoOfrecido;
+        this.usuarios = usuarios;
+        this.ubicaciones = ubicaciones;
     }
 
-    // Getters y Setters
+    // Getters y setters
     public String getNombreEmpresa() {
         return nombreEmpresa;
     }
@@ -148,9 +154,27 @@ public class Tour implements Serializable {
         this.pagoOfrecido = pagoOfrecido;
     }
 
-    // Método útil para mostrar un texto combinado (opcional)
+    // NUEVOS getters y setters
+    public List<String> getUsuarios() {
+        return usuarios;
+    }
+
+    public void setUsuarios(List<String> usuarios) {
+        this.usuarios = usuarios;
+    }
+
+    public List<Ubicacion> getUbicaciones() {
+        return ubicaciones;
+    }
+
+    public void setUbicaciones(List<Ubicacion> ubicaciones) {
+        this.ubicaciones = ubicaciones;
+    }
+
+    // Método útil opcional
     public String getEstadoCompleto() {
-        if (estadoGeneral.equalsIgnoreCase("disponible") || estadoGeneral.equalsIgnoreCase("pendiente")) {
+        if (estadoGeneral.equalsIgnoreCase("disponible") ||
+                estadoGeneral.equalsIgnoreCase("pendiente")) {
             return estadoGeneral + " (" + subEstado + ")";
         }
         return estadoGeneral;

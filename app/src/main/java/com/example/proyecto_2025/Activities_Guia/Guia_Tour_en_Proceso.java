@@ -55,9 +55,23 @@ public class Guia_Tour_en_Proceso extends AppCompatActivity {
                 .into(binding.imgCheckOut);
 
         // 🔹 Botones
-        binding.btnCheckIn.setOnClickListener(v -> startActivity(new Intent(this, Guia_Registrar_CheckIn.class)));
-        binding.btnProgreso.setOnClickListener(v -> startActivity(new Intent(this, Guia_Registrar_Progreso.class)));
-        binding.btnCheckOut.setOnClickListener(v -> startActivity(new Intent(this, Guia_Registrar_CheckOut.class)));
+        binding.btnCheckIn.setOnClickListener(v -> {
+            Intent i = new Intent(this, Guia_Registrar_CheckIn.class);
+            i.putExtra("tour", tour);
+            startActivity(i);
+        });
+
+        binding.btnProgreso.setOnClickListener(v -> {
+            Intent i = new Intent(this, Guia_Registrar_Progreso.class);
+            i.putExtra("tour", tour);
+            startActivity(i);
+        });
+
+        binding.btnCheckOut.setOnClickListener(v -> {
+            Intent i = new Intent(this, Guia_Registrar_CheckOut.class);
+            i.putExtra("tour", tour);
+            startActivity(i);
+        });
 
         // 🔹 Finalizar tour
         binding.btnFinaliarTour.setOnClickListener(view -> finalizarTour());

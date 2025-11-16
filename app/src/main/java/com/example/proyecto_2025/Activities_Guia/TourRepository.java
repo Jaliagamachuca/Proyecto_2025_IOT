@@ -3,9 +3,6 @@ package com.example.proyecto_2025.Activities_Guia;
 import android.content.Context;
 import java.util.*;
 
-/**
- * Repositorio de tours disponibles, pendientes y finalizados
- */
 public class TourRepository {
     private static TourRepository instance;
     private final List<Tour> tours = new ArrayList<>();
@@ -17,11 +14,29 @@ public class TourRepository {
         return instance;
     }
 
-    /** Carga data de demo si no hay tours aún */
     public void seedIfEmpty(Context ctx) {
         if (!tours.isEmpty()) return;
 
-        // 🔹 TOURS DISPONIBLES
+        // 🔹 Lista de usuarios demo
+        List<String> demoUsuarios = Arrays.asList(
+                "Juan Perez",
+                "Andres Lujan",
+                "Maria Torres",
+                "Luis Ccapa"
+        );
+
+        // 🔹 Lista de ubicaciones demo (nombre + coordenadas)
+        List<Ubicacion> demoUbicaciones = Arrays.asList(
+                new Ubicacion("Plaza Mayor de Lima", -12.04318, -77.02824),
+                new Ubicacion("Parque Kennedy", -12.12186, -77.02824),
+                new Ubicacion("Malecón Cisneros", -12.12850, -77.03000),
+                new Ubicacion("Costa Verde Miraflores", -12.14637, -77.04279)
+        );
+
+        // ----------------------------------------------------------------------------------------------------
+        //                                         TOURS DISPONIBLES
+        // ----------------------------------------------------------------------------------------------------
+
         tours.add(new Tour(
                 "Andes Travel",
                 "Ruta del Inca",
@@ -34,7 +49,9 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour1/400",
                 "disponible",
                 "no solicitado",
-                350.0
+                350.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
 
         tours.add(new Tour(
@@ -49,7 +66,9 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour2/400",
                 "disponible",
                 "solicitado",
-                400.0
+                400.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
 
         tours.add(new Tour(
@@ -64,7 +83,9 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour3/400",
                 "disponible",
                 "no solicitado",
-                500.0
+                500.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
 
         tours.add(new Tour(
@@ -79,10 +100,15 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour4/400",
                 "disponible",
                 "solicitado",
-                380.0
+                380.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
 
-        // 🔹 TOURS PENDIENTES
+        // ----------------------------------------------------------------------------------------------------
+        //                                         TOURS PENDIENTES
+        // ----------------------------------------------------------------------------------------------------
+
         tours.add(new Tour(
                 "Apu Adventures",
                 "Laguna Humantay",
@@ -95,7 +121,9 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour5/400",
                 "pendiente",
                 "no iniciado",
-                320.0
+                320.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
 
         tours.add(new Tour(
@@ -110,7 +138,9 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour6/400",
                 "pendiente",
                 "iniciado",
-                450.0
+                450.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
 
         tours.add(new Tour(
@@ -125,7 +155,9 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour7/400",
                 "pendiente",
                 "iniciado",
-                480.0
+                480.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
 
         tours.add(new Tour(
@@ -140,14 +172,19 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour8/400",
                 "pendiente",
                 "no iniciado",
-                370.0
+                370.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
 
-        // 🔹 TOURS FINALIZADOS
+        // ----------------------------------------------------------------------------------------------------
+        //                                         TOURS FINALIZADOS
+        // ----------------------------------------------------------------------------------------------------
+
         tours.add(new Tour(
                 "Cusco Heritage",
                 "City Tour Cusco",
-                "Recorrido histórico por los templos y calles coloniales.",
+                "Recorrido histórico por templos y calles coloniales.",
                 "2025-10-10",
                 "09:00",
                 "13:00",
@@ -156,7 +193,9 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour9/400",
                 "finalizado",
                 "",
-                300.0
+                300.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
 
         tours.add(new Tour(
@@ -171,13 +210,15 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour10/400",
                 "finalizado",
                 "",
-                420.0
+                420.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
 
         tours.add(new Tour(
                 "Tierra Andina",
                 "Mirador de Taray",
-                "Hermosas vistas del Valle Sagrado y tradiciones locales.",
+                "Hermosas vistas del Valle Sagrado.",
                 "2025-10-20",
                 "08:00",
                 "12:00",
@@ -186,13 +227,15 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour11/400",
                 "finalizado",
                 "",
-                280.0
+                280.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
 
         tours.add(new Tour(
                 "Explora Perú",
                 "Sacsayhuamán y Qenqo",
-                "Recorrido por los sitios arqueológicos del Cusco.",
+                "Recorrido por sitios arqueológicos del Cusco.",
                 "2025-10-22",
                 "09:00",
                 "14:00",
@@ -201,16 +244,18 @@ public class TourRepository {
                 "https://picsum.photos/seed/tour12/400",
                 "finalizado",
                 "",
-                310.0
+                310.0,
+                demoUsuarios,
+                demoUbicaciones
         ));
     }
 
-    // ✅ Obtener todos los tours
+    // Obtener TODOS los tours
     public List<Tour> all() {
         return new ArrayList<>(tours);
     }
 
-    // ✅ Obtener tours por estado general
+    // Obtener tours por estado: disponible, pendiente, finalizado
     public List<Tour> byEstado(String estado) {
         List<Tour> result = new ArrayList<>();
         for (Tour t : tours) {
@@ -221,7 +266,7 @@ public class TourRepository {
         return result;
     }
 
-    // ✅ Buscar por nombre del tour
+    // Obtener tour por nombre
     public Tour byNombre(String nombreTour) {
         for (Tour t : tours) {
             if (t.getNombreTour().equalsIgnoreCase(nombreTour)) {
