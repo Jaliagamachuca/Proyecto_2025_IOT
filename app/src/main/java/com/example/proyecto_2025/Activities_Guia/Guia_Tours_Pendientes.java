@@ -16,7 +16,6 @@ import com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Administra
 import com.example.proyecto_2025.BaseActivity;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivityGuiaToursPendientesBinding;
-import com.example.proyecto_2025.databinding.ActivitySuperadminAdministradoresSedeBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class Guia_Tours_Pendientes extends AppCompatActivity {

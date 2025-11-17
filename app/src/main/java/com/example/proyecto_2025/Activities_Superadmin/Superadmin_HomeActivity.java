@@ -249,9 +249,22 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
         userRepo.allGuias(new UserRepository.Callback<List<User>>() {
             @Override
             public void onSuccess(List<User> data) {
-                listaGuiasFull = data;
-                configurarGrafico(binding.scrDashboard.chartGuias, "Guías", data);
 
+                // 🔹 FILTRAR SOLO GUIAS APROBADOS (status = active)
+                List<User> soloAprobados = new ArrayList<>();
+                for (User u : data) {
+                    if (u.getStatus() != null &&
+                            "active".equalsIgnoreCase(u.getStatus())) {
+                        soloAprobados.add(u);
+                    }
+                }
+
+                listaGuiasFull = soloAprobados;
+
+                // Gráfico en dashboard SOLO con aprobados
+                configurarGrafico(binding.scrDashboard.chartGuias, "Guías", soloAprobados);
+
+                // RecyclerView de guías
                 if (adapterGuias == null) {
                     adapterGuias = new UserAdapter();
                     adapterGuias.setContext(Superadmin_HomeActivity.this);
@@ -259,7 +272,7 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
                             new LinearLayoutManager(Superadmin_HomeActivity.this));
                     binding.scrGuias.recyclerView.setAdapter(adapterGuias);
                 }
-                adapterGuias.setListaEmpleados(data);
+                adapterGuias.setListaEmpleados(soloAprobados);
 
                 // Buscador de guías (solo una vez)
                 if (!buscadorGuiasInit) {

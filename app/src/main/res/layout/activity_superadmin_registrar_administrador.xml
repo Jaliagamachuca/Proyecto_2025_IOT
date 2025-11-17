@@ -34,7 +34,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Nombre -->
+        <!-- Campo Nombre -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilNombreAdmin"
             android:layout_width="match_parent"
@@ -47,7 +47,7 @@
                 android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Apellidos -->
+        <!-- Campo Apellidos -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilApellidosAdmin"
             android:layout_width="match_parent"
@@ -61,7 +61,7 @@
                 android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- DNI -->
+        <!-- Campo Número de Documento -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilDniAdmin"
             android:layout_width="match_parent"
@@ -75,14 +75,13 @@
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Fecha de Nacimiento -->
+        <!-- Campo Fecha de Nacimiento (con DatePicker, ya lo habíamos dejado así) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilFechaNacimientoAdmin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Fecha de Nacimiento"
             android:layout_marginTop="8dp">
-
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etFechaNacimientoAdmin"
                 android:layout_width="match_parent"
@@ -92,8 +91,7 @@
                 android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
-
-        <!-- Edad (opcional, no la guardamos si no quieres) -->
+        <!-- Campo Edad (opcional, lo dejamos por compatibilidad) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textFieldEdad"
             android:layout_width="match_parent"
@@ -107,7 +105,7 @@
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Correo -->
+        <!-- Campo Correo Electrónico -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilCorreoAdmin"
             android:layout_width="match_parent"
@@ -121,7 +119,7 @@
                 android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Teléfono -->
+        <!-- Campo Teléfono -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilTelefonoAdmin"
             android:layout_width="match_parent"
@@ -135,7 +133,7 @@
                 android:inputType="phone" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Domicilio -->
+        <!-- Campo Domicilio -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilDomicilioAdmin"
             android:layout_width="match_parent"
