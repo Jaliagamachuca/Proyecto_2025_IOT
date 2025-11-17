@@ -119,12 +119,13 @@ public class EmpresaRepository {
                     e.adminId = doc.getString("adminId");
 
                     e.nombre       = doc.getString("nombre");
+                    // La guardamos como "descripcionCorta" en Firestore
                     e.descripcion  = doc.getString("descripcionCorta");
 
                     e.correo       = doc.getString("email");
                     e.telefono     = doc.getString("telefono");
-                    // aún no almacenamos "web" en Firestore, así que se queda vacío
-                    e.web          = "";
+                    // ⬇️ AHORA sí leemos la web desde Firestore
+                    e.web          = doc.getString("web");
 
                     e.direccion    = doc.getString("direccion");
                     Double lat     = doc.getDouble("lat");
@@ -132,9 +133,8 @@ public class EmpresaRepository {
                     e.lat          = lat != null ? lat : 0d;
                     e.lon          = lng != null ? lng : 0d;
 
-                    e.status       = doc.getString("status") != null
-                            ? doc.getString("status")
-                            : "pending";
+                    String status  = doc.getString("status");
+                    e.status       = status != null ? status : "pending";
 
                     Double rating  = doc.getDouble("ratingPromedio");
                     Double ingresos= doc.getDouble("totalIngresos");
@@ -234,6 +234,8 @@ public class EmpresaRepository {
         // Contacto
         data.put("email", e.correo);
         data.put("telefono", e.telefono);
+        // ⬇️ AHORA también subimos la web
+        data.put("web", e.web);
 
         // Imágenes
         data.put("fotos", e.imagenUris);
