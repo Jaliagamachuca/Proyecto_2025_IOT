@@ -13,17 +13,14 @@ import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Administrador;
 import com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Cliente;
 import com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Guia_Turismo;
-import com.example.proyecto_2025.model.User;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.IrvEmployeeBinding;
+import com.example.proyecto_2025.model.User;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.List;
 
-/**
- * Adaptador que muestra información de los usuarios (Admins, Guías y Clientes)
- */
-public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.UserViewHolder> {
+public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
     private List<User> listaUsuarios;
     private Context context;
@@ -43,34 +40,35 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.UserVi
         User user = listaUsuarios.get(position);
         holder.user = user;
 
-        // 🔹 Mostrar nombre completo
-        String fullName = user.getNombre() + " " + user.getApellidos();
-        holder.binding.textViewFullName.setText(fullName);
+        // Nombre completo (displayName)
+        holder.binding.textViewFullName.setText(user.getNombreCompleto());
 
-        // 🔹 Cargar imagen del usuario
-        if (user.getFotoUrl() != null && !user.getFotoUrl().isEmpty()) {
+        // Imagen
+        String foto = user.getPhotoUrl();
+        if (foto != null && !foto.isEmpty()) {
             Glide.with(context)
-                    .load(user.getFotoUrl())
-                    .placeholder(R.drawable.ic_person) // imagen temporal mientras carga
-                    .error(R.drawable.ic_person)       // imagen por defecto si falla
+                    .load(foto)
+                    .placeholder(R.drawable.ic_person)
+                    .error(R.drawable.ic_person)
                     .into(holder.binding.imgUser);
         } else {
             holder.binding.imgUser.setImageResource(R.drawable.ic_person);
         }
 
-        // 🔹 Botón "Ver información"
+        // Botón "Ver información"
         holder.binding.buttonInformacion.setOnClickListener(view -> {
             Intent intent;
 
-            // Dependiendo del rol, abre diferentes pantallas
-            switch (user.getRol()) {
-                case "Administrador":
+            String rol = user.getRole() != null ? user.getRole().toLowerCase() : "";
+
+            switch (rol) {
+                case "admin":
                     intent = new Intent(context, Superadmin_Ver_Administrador.class);
                     break;
-                case "Guía":
+                case "guia":
                     intent = new Intent(context, Superadmin_Ver_Guia_Turismo.class);
                     break;
-                case "Cliente":
+                case "cliente":
                 default:
                     intent = new Intent(context, Superadmin_Ver_Cliente.class);
                     break;
@@ -80,7 +78,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.UserVi
             context.startActivity(intent);
         });
 
-        // 🔹 Lógica del botón según si el usuario está activo o no
+        // Botón Activar / Desactivar según status
         if (user.isActivo()) {
             holder.binding.buttonActivar.setText("DESACTIVAR");
             holder.binding.buttonActivar.setBackgroundTintList(
@@ -101,24 +99,15 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.UserVi
         return listaUsuarios != null ? listaUsuarios.size() : 0;
     }
 
-    // Getters y Setters
-    public List<User> getListaUsuarios() {
-        return listaUsuarios;
-    }
-
-    public void setListaEmpleados(List<User> listaUsuarios) { // mantiene el mismo nombre del método
+    public void setListaEmpleados(List<User> listaUsuarios) {
         this.listaUsuarios = listaUsuarios;
-    }
-
-    public Context getContext() {
-        return context;
+        notifyDataSetChanged();
     }
 
     public void setContext(Context context) {
         this.context = context;
     }
 
-    // 🔹 ViewHolder adaptado
     public static class UserViewHolder extends RecyclerView.ViewHolder {
         IrvEmployeeBinding binding;
         User user;
@@ -129,31 +118,27 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.UserVi
         }
     }
 
-    // 🔹 Diálogo de activación
     private void mostrarDialogActivar(User usuario) {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(context);
-        dialogBuilder.setTitle("Activar usuario");
-        dialogBuilder.setMessage("¿Está seguro de activar al usuario " + usuario.getNombre() + "?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) ->
-                Log.d(TAG, "btn neutral")
-        );
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) ->
-                Log.d(TAG, "Usuario activado: " + usuario.getNombre())
-        );
-        dialogBuilder.show();
+        new MaterialAlertDialogBuilder(context)
+                .setTitle("Activar usuario")
+                .setMessage("¿Está seguro de activar a " + usuario.getNombreCompleto() + "?")
+                .setNeutralButton(R.string.cancel, (d, i) -> Log.d(TAG, "cancelar activar"))
+                .setPositiveButton(R.string.ok, (d, i) -> {
+                    Log.d(TAG, "Usuario activado: " + usuario.getNombreCompleto());
+                    // Aquí luego actualizaremos status en Firestore
+                })
+                .show();
     }
 
-    // 🔹 Diálogo de desactivación
     private void mostrarDialogDesactivar(User usuario) {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(context);
-        dialogBuilder.setTitle("Desactivar usuario");
-        dialogBuilder.setMessage("¿Está seguro de desactivar al usuario " + usuario.getNombre() + "?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) ->
-                Log.d(TAG, "btn neutral")
-        );
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) ->
-                Log.d(TAG, "Usuario desactivado: " + usuario.getNombre())
-        );
-        dialogBuilder.show();
+        new MaterialAlertDialogBuilder(context)
+                .setTitle("Desactivar usuario")
+                .setMessage("¿Está seguro de desactivar a " + usuario.getNombreCompleto() + "?")
+                .setNeutralButton(R.string.cancel, (d, i) -> Log.d(TAG, "cancelar desactivar"))
+                .setPositiveButton(R.string.ok, (d, i) -> {
+                    Log.d(TAG, "Usuario desactivado: " + usuario.getNombreCompleto());
+                    // Aquí luego actualizaremos status en Firestore
+                })
+                .show();
     }
 }

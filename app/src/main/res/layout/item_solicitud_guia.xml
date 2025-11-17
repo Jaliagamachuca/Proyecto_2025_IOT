@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:cardUseCompatPadding="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/imgAvatarGuia"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_person"
+            android:background="@drawable/bg_image_circle"
+            android:scaleType="centerCrop"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/tvNombreGuia"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Nombre del guía"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#000000"
+            android:layout_marginStart="12dp"
+            app:layout_constraintTop_toTopOf="@id/imgAvatarGuia"
+            app:layout_constraintStart_toEndOf="@id/imgAvatarGuia"
+            app:layout_constraintEnd_toStartOf="@id/btnRevisarGuia"
+            app:layout_constraintHorizontal_bias="0" />
+
+        <TextView
+            android:id="@+id/tvCorreoGuia"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="correo@ejemplo.com"
+            android:textSize="13sp"
+            android:textColor="#666666"
+            app:layout_constraintTop_toBottomOf="@id/tvNombreGuia"
+            app:layout_constraintStart_toStartOf="@id/tvNombreGuia"
+            app:layout_constraintEnd_toEndOf="@id/tvNombreGuia" />
+
+        <TextView
+            android:id="@+id/tvDniGuia"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="DNI: 12345678"
+            android:textSize="12sp"
+            android:textColor="#888888"
+            app:layout_constraintTop_toBottomOf="@id/tvCorreoGuia"
+            app:layout_constraintStart_toStartOf="@id/tvNombreGuia"
+            app:layout_constraintEnd_toEndOf="@id/tvNombreGuia" />
+
+        <TextView
+            android:id="@+id/tvEstadoSolicitud"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pendiente"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#FF9800"
+            android:background="@drawable/bg_chip_estado_pending"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            app:layout_constraintBottom_toBottomOf="@id/imgAvatarGuia"
+            app:layout_constraintStart_toStartOf="@id/tvNombreGuia" />
+
+        <Button
+            android:id="@+id/btnRevisarGuia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Revisar"
+            android:textAllCaps="false"
+            android:backgroundTint="#007AFF"
+            android:textColor="#FFFFFF"
+            android:minHeight="36dp"
+            android:paddingHorizontal="16dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

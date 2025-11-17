@@ -9,8 +9,6 @@
     tools:context=".Activities_Superadmin.Superadmin_Registrar_Administrador">
 
     <!-- Título -->
-
-    <!-- Contenedor de campos -->
     <TextView
         android:id="@+id/Etiqueta1"
         android:layout_width="wrap_content"
@@ -24,6 +22,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Contenedor de campos -->
     <LinearLayout
         android:id="@+id/contenedorCampos"
         android:layout_width="0dp"
@@ -35,54 +34,66 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Campo Nombre -->
+        <!-- Nombre -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilNombreAdmin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Nombre">
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNombreAdmin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Campo Apellidos -->
+        <!-- Apellidos -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilApellidosAdmin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Apellidos"
             android:layout_marginTop="8dp">
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etApellidosAdmin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Campo Número de Documento -->
+        <!-- DNI -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilDniAdmin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Número de Documento de Identidad"
             android:layout_marginTop="8dp">
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDniAdmin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Campo Fecha de Nacimiento -->
+        <!-- Fecha de Nacimiento -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilFechaNacimientoAdmin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Fecha de Nacimiento"
             android:layout_marginTop="8dp">
+
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etFechaNacimientoAdmin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="date" />
+                android:focusable="false"
+                android:clickable="true"
+                android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Campo Edad -->
+
+        <!-- Edad (opcional, no la guardamos si no quieres) -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textFieldEdad"
             android:layout_width="match_parent"
@@ -90,42 +101,49 @@
             android:hint="Edad"
             android:layout_marginTop="8dp">
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEdadAdmin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Campo Correo Electrónico -->
+        <!-- Correo -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilCorreoAdmin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Correo Electrónico"
             android:layout_marginTop="8dp">
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCorreoAdmin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Campo Teléfono -->
+        <!-- Teléfono -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilTelefonoAdmin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Teléfono"
             android:layout_marginTop="8dp">
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTelefonoAdmin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="phone" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Campo Domicilio -->
+        <!-- Domicilio -->
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilDomicilioAdmin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Domicilio"
             android:layout_marginTop="8dp">
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDomicilioAdmin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPostalAddress" />

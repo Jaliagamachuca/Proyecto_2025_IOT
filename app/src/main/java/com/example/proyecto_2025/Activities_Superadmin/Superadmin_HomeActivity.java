@@ -3,9 +3,11 @@ package com.example.proyecto_2025.Activities_Superadmin;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
+import android.util.Log;
 
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,18 +16,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.R;
-import com.example.proyecto_2025.adapter.EmployeeAdapter;
+import com.example.proyecto_2025.adapter.UserAdapter;
+import com.example.proyecto_2025.data.auth.AuthRepository;
+import com.example.proyecto_2025.data.repository.UserRepository;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;
 import com.example.proyecto_2025.model.User;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * HomeView Superadmin (sin fragments):
@@ -44,12 +47,32 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
     private static final int SCR_REGISTROS = R.id.scrRegistros;
     private static final int SCR_PERFIL    = R.id.scrPerfil;
 
+    // Repo Firebase
+    private UserRepository userRepo;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    // Adapters y listas completas para filtros
+    private UserAdapter adapterAdmins;
+    private UserAdapter adapterGuias;
+    private UserAdapter adapterClientes;
+
+    private List<User> listaAdminsFull   = new ArrayList<>();
+    private List<User> listaGuiasFull    = new ArrayList<>();
+    private List<User> listaClientesFull = new ArrayList<>();
+
+    // Flags para no agregar múltiples TextWatchers
+    private boolean buscadorAdminsInit = false;
+    private boolean buscadorGuiasInit  = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySuperadminVistaInicialBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        userRepo = UserRepository.get();
+
+        // Ocultamos opción de registros por ahora
         binding.bottomNav.getMenu().findItem(R.id.nav_registros).setVisible(false);
 
         setSupportActionBar(binding.toolbar);
@@ -58,25 +81,21 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        // Bottom bar -> navegación (if/else para evitar "constant expression required")
+        // Bottom bar -> navegación
         binding.bottomNav.setOnItemSelectedListener(this::onBottomItemSelected);
 
         // Estado inicial: Dashboard
         binding.bottomNav.setSelectedItemId(R.id.nav_dashboard);
         showScreen(SCR_DASHBOARD);
 
-        // 🔹 Acción del botón "Registrar Admin" en el Dashboard
-        binding.scrDashboard.btnRegistrarAdmin.setOnClickListener(v -> {
-            Intent intent = new Intent(this, Superadmin_Registrar_Administrador.class);
-            startActivity(intent);
-        });
-        // 🔹 Acción del botón "Registrar Admin" en el Dashboard
-        binding.scrDashboard.btnRegistrarGuias.setOnClickListener(v -> {
-            Intent intent = new Intent(this, Superadmin_Registrar_Guias_Turismo.class);
-            startActivity(intent);
-        });
+        // Botones rápidos en Dashboard
+        binding.scrDashboard.btnRegistrarAdmin.setOnClickListener(v ->
+                startActivity(new Intent(this, Superadmin_Registrar_Administrador.class)));
 
-        // 🔹 Cargar imágenes bonitas para las tarjetas del Dashboard
+        binding.scrDashboard.btnRegistrarGuias.setOnClickListener(v ->
+                startActivity(new Intent(this, Superadmin_Registrar_Guias_Turismo.class)));
+
+        // Imágenes del dashboard
         Glide.with(this)
                 .load("https://cdn-icons-png.flaticon.com/512/190/190411.png") // Admin
                 .into(binding.scrDashboard.imgRegistrarAdmin);
@@ -93,11 +112,26 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
                 .load("https://cdn-icons-png.flaticon.com/512/337/337946.png") // PDF
                 .into(binding.scrDashboard.imgDescargarPDF);
 
-        // ⚡️ Llamamos aquí siempre, así la lista llega a Admins, Guias y Clientes
-        createRetrofitService();
-        cargarListaWebService();
+        // Cargar datos reales desde Firestore
+        cargarDatosAdmins();
+        cargarDatosGuias();
+        cargarDatosClientes();
+
+        // Perfil (datos del usuario actual)
+        cargarPerfilActual();
+        configurarAccionesPerfil();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // 🔁 Cada vez que regreses a esta Activity, recarga las listas
+        cargarDatosAdmins();
+        cargarDatosGuias();
+        cargarDatosClientes();
+    }
+
+    // ================== NAV BOTTOM ==================
     private boolean onBottomItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_dashboard) {
@@ -117,7 +151,7 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
     }
 
     private void showScreen(@IdRes int screenId) {
-        // Raíces de cada include (con ViewBinding -> usar getRoot())
+        // Raíces de cada include
         View vDash     = binding.scrDashboard.getRoot();
         View vAdmins   = binding.scrAdmins.getRoot();
         View vGuias    = binding.scrGuias.getRoot();
@@ -148,136 +182,223 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
             binding.fab.setVisibility(View.VISIBLE);
             binding.fab.setImageResource(R.drawable.ic_person_add_24);
 
-            // 🔹 Hace que el fondo del botón sea más oscuro (por ejemplo, azul oscuro)
             binding.fab.setBackgroundTintList(
                     ContextCompat.getColorStateList(this, R.color.teal_700));
-
-            // 🔹 Cambia el color del ícono (por ejemplo, blanco para que resalte)
             binding.fab.setImageTintList(
                     ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)));
 
-            // 🔹 Acción del botón
             binding.fab.setOnClickListener(v ->
                     startActivity(new Intent(this,
-                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Registrar_Administrador.class)));
-            /*
-            binding.scrAdmins.InfoAdmin1.setOnClickListener(v ->
-                    startActivity(new Intent(this,
-                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Administrador.class)));
-            binding.scrAdmins.InfoAdmin2.setOnClickListener(v ->
-                    startActivity(new Intent(this,
-                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Administrador.class)));
-            binding.scrAdmins.btn1.setOnClickListener(view ->
-                    activarAdministrador());
-
-            binding.scrAdmins.btn2.setOnClickListener(view ->
-                    desactivarAdministrador());
-            binding.scrAdmins.btnRegistrarAdministrador.setOnClickListener(v -> {
-                // Creamos un Intent para ir a OtraActivity
-                Intent intent = new Intent(this, Superadmin_Registrar_Administrador.class);
-                startActivity(intent);
-            });*/
+                            Superadmin_Registrar_Administrador.class)));
 
         } else if (screenId == SCR_GUIAS) {
+
             binding.fab.setVisibility(View.VISIBLE);
             binding.fab.setImageResource(R.drawable.ic_person_add_24);
+            binding.fab.setBackgroundTintList(
+                    ContextCompat.getColorStateList(this, R.color.teal_700));
+            binding.fab.setImageTintList(
+                    ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)));
+
             binding.fab.setOnClickListener(v ->
                     startActivity(new Intent(this,
-                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Registrar_Guias_Turismo.class)));
-            /*
-            binding.scrGuias.InfoGuia1.setOnClickListener(v ->
-                    startActivity(new Intent(this,
-                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Guia_Turismo.class)));
-            binding.scrGuias.InfoGuia2.setOnClickListener(v ->
-                    startActivity(new Intent(this,
-                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Guia_Turismo.class)));
-            binding.scrGuias.btn1.setOnClickListener(view ->
-                    activarGuia());
+                            Superadmin_Registrar_Guias_Turismo.class)));
 
-            binding.scrGuias.btn2.setOnClickListener(view ->
-                    desactivarGuia());
-            binding.scrGuias.btnRegistrarGuia.setOnClickListener(v -> {
-                // Creamos un Intent para ir a OtraActivity
-                Intent intent = new Intent(this, Superadmin_Registrar_Guias_Turismo.class);
-                startActivity(intent);
-            }); */
-        } else if (screenId == SCR_CLIENTES) {
-            binding.fab.setVisibility(View.VISIBLE);
-            binding.fab.setImageResource(R.drawable.ic_person_add_24);
-            binding.fab.setOnClickListener(v ->
-                    startActivity(new Intent(this,
-                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Cliente.class)));
-            /*
-            binding.scrClientes.InfoCliente1.setOnClickListener(v ->
-                    startActivity(new Intent(this,
-                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Cliente.class)));
-            binding.scrClientes.InfoCliente2.setOnClickListener(v ->
-                    startActivity(new Intent(this,
-                            com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Cliente.class)));
-            binding.scrClientes.btn1.setOnClickListener(view ->
-                    activarCliente());
-
-            binding.scrClientes.btn2.setOnClickListener(view ->
-                    desactivarCliente()); */
         } else {
             binding.fab.setVisibility(View.GONE);
             binding.fab.setOnClickListener(null);
         }
-
     }
 
-    // ================== Retrofit ==================
-    public void createRetrofitService() {
-        // ⚡ cambia según tu backend
-        // 🔹 servicio retrofit
-        EmployeeService employeeService = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:8080") // ⚡ cambia según tu backend
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-                .create(EmployeeService.class);
+    // ================== CARGA DE DATOS DESDE FIRESTORE ==================
+
+    private void cargarDatosAdmins() {
+        userRepo.allAdmins(new UserRepository.Callback<List<User>>() {
+            @Override
+            public void onSuccess(List<User> data) {
+                listaAdminsFull = data;
+
+                // Gráfico en dashboard
+                configurarGrafico(binding.scrDashboard.chartAdmins, "Administradores", data);
+
+                // RecyclerView de admins
+                if (adapterAdmins == null) {
+                    adapterAdmins = new UserAdapter();
+                    adapterAdmins.setContext(Superadmin_HomeActivity.this);
+                    binding.scrAdmins.recyclerView.setLayoutManager(
+                            new LinearLayoutManager(Superadmin_HomeActivity.this));
+                    binding.scrAdmins.recyclerView.setAdapter(adapterAdmins);
+                }
+                adapterAdmins.setListaEmpleados(data);
+
+                // Buscador de admins (solo una vez)
+                if (!buscadorAdminsInit) {
+                    configurarBuscadorAdmins();
+                    buscadorAdminsInit = true;
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e("superadmin-admins", "Error cargando admins", e);
+            }
+        });
     }
 
-    public void cargarListaWebService() {
-        // 1️⃣ Obtener data local del nuevo repositorio
-        UserRepository repo = UserRepository.get();
-        repo.seedIfEmpty(this); // Carga los datos de ejemplo si están vacíos
+    private void cargarDatosGuias() {
+        userRepo.allGuias(new UserRepository.Callback<List<User>>() {
+            @Override
+            public void onSuccess(List<User> data) {
+                listaGuiasFull = data;
+                configurarGrafico(binding.scrDashboard.chartGuias, "Guías", data);
 
-        // 2️⃣ Obtener listas separadas por rol
-        List<User> listaAdmins = repo.allAdmins();
-        List<User> listaGuias = repo.allGuias();
-        List<User> listaClientes = repo.allClientes();
+                if (adapterGuias == null) {
+                    adapterGuias = new UserAdapter();
+                    adapterGuias.setContext(Superadmin_HomeActivity.this);
+                    binding.scrGuias.recyclerView.setLayoutManager(
+                            new LinearLayoutManager(Superadmin_HomeActivity.this));
+                    binding.scrGuias.recyclerView.setAdapter(adapterGuias);
+                }
+                adapterGuias.setListaEmpleados(data);
 
-        // ================== GRÁFICOS CIRCULARES ==================
-        configurarGrafico(binding.scrDashboard.chartAdmins, "Administradores", listaAdmins);
-        configurarGrafico(binding.scrDashboard.chartGuias, "Guías", listaGuias);
-        configurarGrafico(binding.scrDashboard.chartClientes, "Clientes", listaClientes);
+                // Buscador de guías (solo una vez)
+                if (!buscadorGuiasInit) {
+                    configurarBuscadorGuias();
+                    buscadorGuiasInit = true;
+                }
+            }
 
-        // 3️⃣ Cargar adapters para cada tipo de usuario
-        EmployeeAdapter adapterAdmins = new EmployeeAdapter();
-        adapterAdmins.setListaEmpleados(listaAdmins);
-        adapterAdmins.setContext(this);
-        binding.scrAdmins.recyclerView.setAdapter(adapterAdmins);
-        binding.scrAdmins.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        EmployeeAdapter adapterGuias = new EmployeeAdapter();
-        adapterGuias.setListaEmpleados(listaGuias);
-        adapterGuias.setContext(this);
-        binding.scrGuias.recyclerView.setAdapter(adapterGuias);
-        binding.scrGuias.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        EmployeeAdapter adapterClientes = new EmployeeAdapter();
-        adapterClientes.setListaEmpleados(listaClientes);
-        adapterClientes.setContext(this);
-        binding.scrClientes.recyclerView.setAdapter(adapterClientes);
-        binding.scrClientes.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        Log.d("msg-superadmin", "Lista cargada desde UserRepository: " +
-                (listaAdmins.size() + listaGuias.size() + listaClientes.size()));
+            @Override
+            public void onError(Exception e) {
+                Log.e("superadmin-guias", "Error cargando guías", e);
+            }
+        });
     }
+
+    private void cargarDatosClientes() {
+        userRepo.allClientes(new UserRepository.Callback<List<User>>() {
+            @Override
+            public void onSuccess(List<User> data) {
+                listaClientesFull = data;
+                configurarGrafico(binding.scrDashboard.chartClientes, "Clientes", data);
+
+                if (adapterClientes == null) {
+                    adapterClientes = new UserAdapter();
+                    adapterClientes.setContext(Superadmin_HomeActivity.this);
+                    binding.scrClientes.recyclerView.setLayoutManager(
+                            new LinearLayoutManager(Superadmin_HomeActivity.this));
+                    binding.scrClientes.recyclerView.setAdapter(adapterClientes);
+                }
+                adapterClientes.setListaEmpleados(data);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e("superadmin-clientes", "Error cargando clientes", e);
+            }
+        });
+    }
+
+    // ================== BUSCADORES ==================
+
+    private void configurarBuscadorAdmins() {
+        binding.scrAdmins.etBuscarAdmin.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String q = s.toString().trim().toLowerCase();
+                List<User> filtrados = new ArrayList<>();
+
+                for (User u : listaAdminsFull) {
+                    String nombre = u.getNombreCompleto() != null ? u.getNombreCompleto().toLowerCase() : "";
+                    String email  = u.getEmail() != null ? u.getEmail().toLowerCase() : "";
+                    String dni    = u.getDni()   != null ? u.getDni().toLowerCase()   : "";
+
+                    if (nombre.contains(q) || email.contains(q) || dni.contains(q)) {
+                        filtrados.add(u);
+                    }
+                }
+
+                adapterAdmins.setListaEmpleados(filtrados);
+            }
+        });
+    }
+
+    private void configurarBuscadorGuias() {
+        binding.scrGuias.etBuscarGuia.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String q = s.toString().trim().toLowerCase();
+                List<User> filtrados = new ArrayList<>();
+
+                for (User u : listaGuiasFull) {
+                    String nombre = u.getNombreCompleto() != null ? u.getNombreCompleto().toLowerCase() : "";
+                    String email  = u.getEmail() != null ? u.getEmail().toLowerCase() : "";
+                    String dni    = u.getDni()   != null ? u.getDni().toLowerCase()   : "";
+
+                    if (nombre.contains(q) || email.contains(q) || dni.contains(q)) {
+                        filtrados.add(u);
+                    }
+                }
+
+                adapterGuias.setListaEmpleados(filtrados);
+            }
+        });
+    }
+
+    // ================== PERFIL (SCR_PERFIL) ==================
+
+    /** Carga los datos del usuario logueado y los muestra en el screen Perfil */
+    private void cargarPerfilActual() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db.collection("users").document(uid).get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+
+                    User u = doc.toObject(User.class);
+                    if (u == null) return;
+
+                    // Nombre, email, teléfono
+                    binding.scrPerfil.tvNombre.setText(
+                            u.getNombreCompleto() != null ? u.getNombreCompleto() : "-");
+                    binding.scrPerfil.tvEmail.setText(
+                            u.getEmail() != null ? u.getEmail() : "-");
+                    binding.scrPerfil.tvTelefono.setText(
+                            u.getPhone() != null ? u.getPhone() : "-");
+
+                    // Empresa (por ahora mostramos companyId como identificador)
+                    String company = u.getCompanyId() != null ? u.getCompanyId() : "Sin empresa";
+                    binding.scrPerfil.tvEmpresaNombre.setText(company);
+
+                    // RUC: si en el futuro tienes colección Empresa, aquí se consulta.
+                    binding.scrPerfil.tvRuc.setText("—");
+                })
+                .addOnFailureListener(e ->
+                        Log.e("superadmin-perfil", "Error cargando perfil", e));
+    }
+
+    /** Listeners básicos del screen Perfil (cerrar sesión, etc.) */
+    private void configurarAccionesPerfil() {
+        // Cerrar sesión
+        binding.scrPerfil.btnCerrarSesion.setOnClickListener(v -> {
+            new AuthRepository().signOut();
+            finish(); // vuelves a la pantalla anterior (login)
+        });
+
+        // Otros botones (editar perfil, cambiar foto, etc.) se pueden agregar luego.
+    }
+
+    // ================== GRÁFICOS ==================
     private void configurarGrafico(com.github.mikephil.charting.charts.PieChart chart,
                                    String titulo, List<User> lista) {
 
-        // Contar activos e inactivos
         long activos = lista.stream().filter(User::isActivo).count();
         long inactivos = lista.size() - activos;
 
@@ -301,6 +422,6 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(true);
         chart.animateY(1000);
-        chart.invalidate(); // refrescar
+        chart.invalidate();
     }
 }

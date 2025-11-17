@@ -3,6 +3,7 @@ package com.example.proyecto_2025.Activities_Superadmin;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,11 +13,14 @@ import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVerClientesBinding;
 import com.example.proyecto_2025.model.User;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class Superadmin_Ver_Cliente extends AppCompatActivity {
 
     private ActivitySuperadminVerClientesBinding binding;
     private User user;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private static final String TAG = "Superadmin_Ver_Cliente";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -24,85 +28,88 @@ public class Superadmin_Ver_Cliente extends AppCompatActivity {
         binding = ActivitySuperadminVerClientesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // ✅ Recuperar el usuario enviado
         Intent intent = getIntent();
         user = (User) intent.getSerializableExtra("user");
 
         if (user != null) {
-            // 🔹 Mostrar los datos del usuario
-            binding.inputNombre.setText(user.getNombre());
-            binding.inputApellidos.setText(user.getApellidos());
+            binding.inputNombre.setText(user.getNombreCompleto());
+            binding.inputApellidos.setText("");
             binding.inputDni.setText(user.getDni());
-            binding.inputCorreo.setText(user.getCorreo());
-            binding.inputTelefono.setText(user.getTelefono());
-            binding.inputDomicilio.setText(user.getDomicilio());
-            binding.inputFechaNacimiento.setText(user.getFechaNacimiento());
+            binding.inputCorreo.setText(user.getEmail());
+            binding.inputTelefono.setText(user.getPhone());
+            binding.inputDomicilio.setText("-");
+            binding.inputFechaNacimiento.setText("-");
 
-            // 🟢 Mostrar la imagen del guía
-            if (user.getFotoUrl() != null && !user.getFotoUrl().isEmpty()) {
+            if (user.getPhotoUrl() != null && !user.getPhotoUrl().isEmpty()) {
                 try {
                     Glide.with(this)
-                            .load(user.getFotoUrl())
-                            .placeholder(R.drawable.ic_person) // mientras carga
-                            .error(R.drawable.ic_person) // si falla la carga
-                            .circleCrop() // hace la imagen redonda
+                            .load(user.getPhotoUrl())
+                            .placeholder(R.drawable.ic_person)
+                            .error(R.drawable.ic_person)
+                            .circleCrop()
                             .into(binding.imgCliente);
                 } catch (Exception e) {
-                    Log.e("Superadmin_Ver_Guia", "Error al cargar imagen: " + e.getMessage());
+                    Log.e(TAG, "Error al cargar imagen: " + e.getMessage());
+                    binding.imgCliente.setImageResource(R.drawable.ic_person);
                 }
             } else {
                 binding.imgCliente.setImageResource(R.drawable.ic_person);
             }
 
-            // 🔹 Mostrar el estado actual
             actualizarBotonEstado();
         } else {
-            Log.e("Superadmin_Ver_Cliente", "El objeto User es null — revisa el putExtra()");
+            Log.e(TAG, "User es null — revisa el putExtra(\"user\")");
         }
     }
 
-    /** 🔹 Cambia el texto y color del botón según si el usuario está activo o no */
     private void actualizarBotonEstado() {
         if (user.isActivo()) {
             binding.btnActivarCliente.setText("DESACTIVAR");
             binding.btnActivarCliente.setBackgroundTintList(
                     getResources().getColorStateList(android.R.color.holo_red_dark)
             );
-            binding.btnActivarCliente.setOnClickListener(v -> mostrarDialogDesactivar(user));
+            binding.btnActivarCliente.setOnClickListener(v -> mostrarDialogCambiarEstado(false));
         } else {
             binding.btnActivarCliente.setText("ACTIVAR");
             binding.btnActivarCliente.setBackgroundTintList(
                     getResources().getColorStateList(android.R.color.holo_green_dark)
             );
-            binding.btnActivarCliente.setOnClickListener(v -> mostrarDialogActivar(user));
+            binding.btnActivarCliente.setOnClickListener(v -> mostrarDialogCambiarEstado(true));
         }
     }
 
-    /** 🔹 Dialogo para activar */
-    private void mostrarDialogActivar(User user) {
+    private void mostrarDialogCambiarEstado(boolean activar) {
+        String titulo = activar ? "Activar Cliente" : "Desactivar Cliente";
+        String accion = activar ? "activar" : "desactivar";
+
         new MaterialAlertDialogBuilder(this)
-                .setTitle("Activar Cliente")
-                .setMessage("¿Está seguro de activar al usuario " + user.getNombre() + "?")
-                .setNeutralButton(R.string.cancel, (dialog, i) -> Log.d("msg-test", "cancelado"))
-                .setPositiveButton(R.string.ok, (dialog, i) -> {
-                    user.setActivo(true);
-                    actualizarBotonEstado();
-                    Log.d("msg-test", "Usuario activado: " + user.getNombre());
-                })
+                .setTitle(titulo)
+                .setMessage("¿Está seguro de " + accion + " al usuario " + user.getNombreCompleto() + "?")
+                .setNeutralButton(R.string.cancel, (dialog, i) -> Log.d(TAG, "cancelado"))
+                .setPositiveButton(R.string.ok, (dialog, i) -> actualizarEstadoEnFirestore(activar))
                 .show();
     }
 
-    /** 🔹 Dialogo para desactivar */
-    private void mostrarDialogDesactivar(User user) {
-        new MaterialAlertDialogBuilder(this)
-                .setTitle("Desactivar Cliente")
-                .setMessage("¿Está seguro de desactivar al usuario " + user.getNombre() + "?")
-                .setNeutralButton(R.string.cancel, (dialog, i) -> Log.d("msg-test", "cancelado"))
-                .setPositiveButton(R.string.ok, (dialog, i) -> {
-                    user.setActivo(false);
+    private void actualizarEstadoEnFirestore(boolean activar) {
+        if (user.getUid() == null || user.getUid().isEmpty()) {
+            Toast.makeText(this, "UID inválido, no se puede actualizar.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        String nuevoStatus = activar ? "active" : "inactive";
+
+        db.collection("users").document(user.getUid())
+                .update("status", nuevoStatus)
+                .addOnSuccessListener(aVoid -> {
+                    user.setStatus(nuevoStatus);
                     actualizarBotonEstado();
-                    Log.d("msg-test", "Usuario desactivado: " + user.getNombre());
+                    Toast.makeText(this,
+                            activar ? "Cliente activado" : "Cliente desactivado",
+                            Toast.LENGTH_SHORT).show();
                 })
-                .show();
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error actualizando estado", e);
+                    Toast.makeText(this, "Error actualizando estado", Toast.LENGTH_LONG).show();
+                });
     }
 }

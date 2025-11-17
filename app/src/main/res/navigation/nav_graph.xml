@@ -60,7 +60,7 @@
         android:id="@+id/recuperarPasswordActivity"
         android:name="com.example.proyecto_2025.login.RecuperarPasswordActivity"
         android:label="Recuperar Contraseña"
-        tools:layout="@layout/activity_recuperar_password_joaco">
+        tools:layout="@layout/activity_recuperar_password">
         <action
             android:id="@+id/action_recuperar_to_confirmar_email"
             app:destination="@id/confirmarEmailActivity" />

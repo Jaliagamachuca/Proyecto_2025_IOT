@@ -23,7 +23,7 @@ public class RecuperarPasswordActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recuperar_password_joaco);
+        setContentView(R.layout.activity_recuperar_password);
 
         auth = FirebaseAuth.getInstance();
         initViews();
