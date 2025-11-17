@@ -87,6 +87,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
         // Inicializar todas las secciones
         initializeAllSections();
+        syncEmpresaFromRemote();
 
         // Pantalla inicial
         binding.bottomNav.setSelectedItemId(R.id.nav_empresa);
@@ -112,6 +113,42 @@ public class Admin_HomeActivity extends AppCompatActivity {
         empresa = empresaRepo.load();
         adminRepo = new AdminRepository(this);
         admin = adminRepo.load();
+    }
+    private void syncEmpresaFromRemote() {
+        empresaRepo.loadFromRemote(remoteEmpresa -> {
+            if (remoteEmpresa == null) return;
+
+            empresa = remoteEmpresa;
+
+            runOnUiThread(() -> {
+                // === Recargar UI de empresa con la data remota ===
+                binding.scrEmpresa.etNombre.setText(empresa.nombre);
+                binding.scrEmpresa.etCorreo.setText(empresa.correo);
+                binding.scrEmpresa.etTelefono.setText(empresa.telefono);
+                binding.scrEmpresa.etWeb.setText(empresa.web);
+                binding.scrEmpresa.etDescripcion.setText(empresa.descripcion);
+
+                if (empresa.direccion != null && !empresa.direccion.isEmpty()) {
+                    binding.scrEmpresa.tvDireccion.setText(empresa.direccion);
+                } else {
+                    binding.scrEmpresa.tvDireccion.setText("Sin dirección");
+                }
+
+                // Galería
+                galeriaUris.clear();
+                for (String s : empresa.imagenUris) {
+                    try {
+                        galeriaUris.add(Uri.parse(s));
+                    } catch (Exception ignore) {}
+                }
+                if (binding.scrEmpresa.rvGaleria.getAdapter() != null) {
+                    binding.scrEmpresa.rvGaleria.getAdapter().notifyDataSetChanged();
+                }
+
+                updateMapPreview();
+                actualizarChecklistYEstado();
+            });
+        });
     }
 
     private void setupLaunchers() {
@@ -309,6 +346,9 @@ public class Admin_HomeActivity extends AppCompatActivity {
     private void guardarEmpresa(boolean publicar) {
         if (!capturarFormulario(publicar)) return;
 
+        // Definir estado lógico según acción
+        empresa.status = publicar ? "active" : "pending";
+
         if (publicar && !empresa.esCompleta()) {
             Snackbar.make(binding.getRoot(),
                     "Aún faltan requisitos para publicar.", Snackbar.LENGTH_LONG).show();
@@ -319,6 +359,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
         String msg = publicar ? "Perfil publicado" : "Empresa guardada";
         Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
     }
+
 
     private boolean capturarFormulario(boolean validarTodo) {
         EditText etNombre = binding.scrEmpresa.etNombre;
