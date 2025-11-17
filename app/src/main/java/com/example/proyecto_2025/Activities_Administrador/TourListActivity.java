@@ -100,6 +100,11 @@ public class TourListActivity extends AppCompatActivity {
             clone.servicios = new ArrayList<>(t.servicios);
             clone.imagenUris = new ArrayList<>(t.imagenUris);
             clone.ruta = new ArrayList<>(t.ruta);
+
+            clone.setIncluyeDesayuno(t.isIncluyeDesayuno());
+            clone.setIncluyeAlmuerzo(t.isIncluyeAlmuerzo());
+            clone.setIncluyeCena(t.isIncluyeCena());
+
             repo.upsert(clone);
             load(TourEstado.values());
             return true;

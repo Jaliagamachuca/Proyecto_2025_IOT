@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.adapter.ImageUriAdapter;
 import com.example.proyecto_2025.adapter.GuideAdapter;
+import com.example.proyecto_2025.adapter.OfferAdapter;
 import com.example.proyecto_2025.adapter.TourAdapter;
 import com.example.proyecto_2025.data.EmpresaRepository;
 import com.example.proyecto_2025.data.TourRepository;
@@ -264,7 +265,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
                 && empresa.direccion != null && !empresa.direccion.isEmpty();
 
         if (!hasLoc) {
-            binding.scrEmpresa.tvDireccion.setText("Sin direcci├│n");
+            binding.scrEmpresa.tvDireccion.setText("Sin dirección");
             binding.scrEmpresa.mapPreview.getOverlays().clear();
             binding.scrEmpresa.mapPreview.getController().setZoom(4.0);
             binding.scrEmpresa.mapPreview.getController().setCenter(
@@ -281,7 +282,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
         m.setPosition(p);
         m.setAnchor(org.osmdroid.views.overlay.Marker.ANCHOR_CENTER,
                 org.osmdroid.views.overlay.Marker.ANCHOR_BOTTOM);
-        m.setTitle("Ubicaci├│n seleccionada");
+        m.setTitle("Ubicación seleccionada");
         binding.scrEmpresa.mapPreview.getOverlays().add(m);
 
         binding.scrEmpresa.mapPreview.getController().setZoom(15.0);
@@ -298,7 +299,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
         i.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
         i.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION |
                 Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        pickImagesLauncher.launch(Intent.createChooser(i, "Selecciona im├ígenes"));
+        pickImagesLauncher.launch(Intent.createChooser(i, "Selecciona imágenes"));
     }
 
     private void abrirPickerUbicacion() {
@@ -310,12 +311,12 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
         if (publicar && !empresa.esCompleta()) {
             Snackbar.make(binding.getRoot(),
-                    "A├║n faltan requisitos para publicar.", Snackbar.LENGTH_LONG).show();
+                    "Aún faltan requisitos para publicar.", Snackbar.LENGTH_LONG).show();
             return;
         }
 
         persistir();
-        String msg = publicar ? "Perfil publicado Ô£à" : "Empresa guardada";
+        String msg = publicar ? "Perfil publicado" : "Empresa guardada";
         Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
     }
 
@@ -338,7 +339,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
         }
 
         if (empresa.correo.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(empresa.correo).matches()) {
-            etCorreo.setError("Correo inv├ílido");
+            etCorreo.setError("Correo inválido");
             if (validarTodo) return false;
         }
 
@@ -374,15 +375,23 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
         TextView tvEstado = binding.scrEmpresa.tvEstado;
         boolean completa = empresa.esCompleta();
-        tvEstado.setText(completa ? "Ô£à Perfil completo" : "ÔÜá´©Å Perfil incompleto");
+        tvEstado.setText(completa ? "Perfil completo" : "Perfil incompleto");
 
         Button btnPublicar = binding.scrEmpresa.btnPublicar;
         btnPublicar.setEnabled(completa);
     }
 
     private void setCheck(TextView tv, boolean ok) {
-        tv.setText((ok ? "Ô£ô " : "ÔÇó ") + tv.getText().toString().replaceFirst("^[Ô£ôÔÇó]\\s*", ""));
+        // Guarda el texto base la primera vez en el tag
+        if (tv.getTag() == null) {
+            // quita posible prefijo viejo tipo "✔ " o "• "
+            String base = tv.getText().toString().replaceFirst("^[✔•]\\s*", "");
+            tv.setTag(base);
+        }
+        String base = tv.getTag().toString();
+        tv.setText((ok ? "✔ " : "• ") + base);
     }
+
 
     // ===================== SECTION 2: TOURS =====================
 
@@ -453,39 +462,63 @@ public class Admin_HomeActivity extends AppCompatActivity {
     // ===================== SECTION 3: GU├ìAS =====================
 
     private void initGuiasSection() {
-        // Acciones r├ípidas
+
+        // Botones
         binding.scrGuias.btnExplorarGuias.setOnClickListener(v ->
                 startActivity(new Intent(this, GuideDirectoryActivity.class)));
 
+        binding.scrGuias.btnOfertasGuias.setText("📨 Ver solicitudes de guías");
         binding.scrGuias.btnOfertasGuias.setOnClickListener(v ->
                 startActivity(new Intent(this, OfferInboxActivity.class)));
 
-        // Carrusel horizontal de gu├¡as sugeridos
+        // KPI: Guías activos
+        binding.scrGuias.kpiGuiasActivos.setText(
+                String.valueOf(GuideRepository.get().all().size())
+        );
+
+        // KPI: Solicitudes pendientes
+        binding.scrGuias.kpiOfertasPendientes.setText(
+                String.valueOf(OfferRepository.get().byStatus(Offer.Status.PENDIENTE).size())
+        );
+
+        // KPI: Guías con tours asignados (ofertas aceptadas)
+        binding.scrGuias.kpiOfertasAceptadas.setText(
+                String.valueOf(OfferRepository.get().byStatus(Offer.Status.ACEPTADA).size())
+        );
+
+        // === SOLICITUDES RECIENTES ===
+        loadSolicitudesRecientes();
+
+        // === CARRUSEL DE GUÍAS SUGERIDOS ===
         RecyclerView rv = binding.scrGuias.rvGuiasSugeridos;
-        rv.setLayoutManager(new LinearLayoutManager(this,
-                LinearLayoutManager.HORIZONTAL, false));
+        rv.setLayoutManager(new LinearLayoutManager(
+                this,
+                LinearLayoutManager.HORIZONTAL,
+                false
+        ));
 
         guiasAdapter = new GuideAdapter(this, sugeridos, new GuideAdapter.OnAction() {
             @Override
             public void onProfile(Guide g) {
-                Intent i = new Intent(Admin_HomeActivity.this,
-                        GuideProfileActivity.class);
+                Intent i = new Intent(Admin_HomeActivity.this, GuideProfileActivity.class);
                 i.putExtra("guide", g);
                 startActivity(i);
             }
 
             @Override
             public void onOffer(Guide g) {
-                Intent i = new Intent(Admin_HomeActivity.this,
-                        OfferCreateActivity.class);
-                i.putExtra("guide", g);
-                startActivity(i);
+                // En este flujo ya no envías oferta desde aquí,
+                // si quisieras podrías abrir detalles del guía o dejarlo vacío.
             }
         });
+
         rv.setAdapter(guiasAdapter);
 
-        refreshGuiasDashboard();
+        // Cargar datos iniciales del carrusel
+        loadGuiasSugeridos();
     }
+
+
 
     private void refreshGuiasDashboard() {
         // Actualizar KPIs
@@ -532,21 +565,21 @@ public class Admin_HomeActivity extends AppCompatActivity {
         switch (periodo) {
             case "SEMANA":
                 binding.scrReportes.tvIngresosTotales.setText("S/ 2,850");
-                binding.scrReportes.tvIngresosCambio.setText("Ôåæ +12% vs anterior");
+                binding.scrReportes.tvIngresosCambio.setText("+12% vs anterior");
                 binding.scrReportes.tvReservasTotales.setText("12");
                 binding.scrReportes.tvReservasCambio.setText("Ôåæ +3 vs anterior");
                 break;
             case "MES":
                 binding.scrReportes.tvIngresosTotales.setText("S/ 12,450");
-                binding.scrReportes.tvIngresosCambio.setText("Ôåæ +15% vs anterior");
+                binding.scrReportes.tvIngresosCambio.setText("+15% vs anterior");
                 binding.scrReportes.tvReservasTotales.setText("48");
-                binding.scrReportes.tvReservasCambio.setText("Ôåæ +8 vs anterior");
+                binding.scrReportes.tvReservasCambio.setText("+8 vs anterior");
                 break;
             case "ANIO":
                 binding.scrReportes.tvIngresosTotales.setText("S/ 148,900");
-                binding.scrReportes.tvIngresosCambio.setText("Ôåæ +23% vs anterior");
+                binding.scrReportes.tvIngresosCambio.setText("+23% vs anterior");
                 binding.scrReportes.tvReservasTotales.setText("567");
-                binding.scrReportes.tvReservasCambio.setText("Ôåæ +89 vs anterior");
+                binding.scrReportes.tvReservasCambio.setText("+89 vs anterior");
                 break;
         }
 
@@ -606,7 +639,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
         // Cerrar sesi├│n
         binding.scrPerfil.btnCerrarSesion.setOnClickListener(v -> {
             new androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setTitle("Cerrar sesi├│n")
+                    .setTitle("Cerrar sesión")
                     .setMessage("┬┐Est├ís seguro de que deseas cerrar sesi├│n?")
                     .setPositiveButton("S├¡", (dialog, which) -> {
                         adminRepo.clear();
@@ -656,7 +689,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
             }
 
             if (telefono.isEmpty() || telefono.length() < 9) {
-                etTelefono.setError("Tel├®fono inv├ílido (m├¡nimo 9 d├¡gitos)");
+                etTelefono.setError("Teléfono inválido (mínimo 9 dígitos)");
                 return;
             }
 
@@ -677,6 +710,63 @@ public class Admin_HomeActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    private void loadSolicitudesRecientes() {
+        List<Offer> pendientes = OfferRepository.get().byStatus(Offer.Status.PENDIENTE);
+
+        binding.scrGuias.tvContadorSolicitudes.setText(pendientes.size() + " solicitudes");
+
+        if (pendientes.isEmpty()) {
+            binding.scrGuias.emptyStateSolicitudes.setVisibility(View.VISIBLE);
+            binding.scrGuias.rvSolicitudesGuias.setVisibility(View.GONE);
+            return;
+        }
+
+        binding.scrGuias.emptyStateSolicitudes.setVisibility(View.GONE);
+        binding.scrGuias.rvSolicitudesGuias.setVisibility(View.VISIBLE);
+
+        OfferAdapter adapter = new OfferAdapter(
+                this,
+                pendientes,
+                new OfferAdapter.OnAction() {
+                    @Override
+                    public void onAssign(Offer o) {
+                        // Si quieres permitir asignar guía desde aquí:
+                        Intent i = new Intent(Admin_HomeActivity.this, AssignGuideActivity.class);
+                        i.putExtra("offerId", o.getId());   // o.id si tu modelo no tiene getId()
+                        startActivity(i);
+                    }
+
+                    @Override
+                    public void onDetail(Offer o) {
+                        Intent i = new Intent(Admin_HomeActivity.this, OfferDetailActivity.class);
+                        i.putExtra("offerId", o.getId());   // o.id si tu modelo no tiene getId()
+                        startActivity(i);
+                    }
+                }
+        );
+
+        binding.scrGuias.rvSolicitudesGuias.setLayoutManager(
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        );
+        binding.scrGuias.rvSolicitudesGuias.setAdapter(adapter);
+    }
+
+
+
+    private void loadGuiasSugeridos() {
+        sugeridos.clear();
+        List<Guide> all = GuideRepository.get().all();
+        for (int i = 0; i < Math.min(5, all.size()); i++) {
+            sugeridos.add(all.get(i));
+        }
+        guiasAdapter.notifyDataSetChanged();
+
+        binding.scrGuias.emptyStateGuias.setVisibility(
+                sugeridos.isEmpty() ? View.VISIBLE : View.GONE
+        );
+    }
+
+
     // ===================== DATA SEEDING (DEVELOPMENT ONLY) =====================
 
     /**
@@ -691,7 +781,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
         Tour t1 = new Tour();
         t1.id = "1";
         t1.titulo = "City Tour Lima Centro";
-        t1.descripcionCorta = "Conoce el centro hist├│rico de Lima";
+        t1.descripcionCorta = "Conoce el centro histórico de Lima";
         t1.precioPorPersona = 50.0;
         t1.cupos = 15;
         t1.estado = TourEstado.PUBLICADO;
@@ -700,7 +790,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
         // Tour 2
         Tour t2 = new Tour();
         t2.id = "2";
-        t2.titulo = "Tour Gastron├│mico Miraflores";
+        t2.titulo = "Tour Gastronómico Miraflores";
         t2.descripcionCorta = "Degusta los mejores platos peruanos";
         t2.precioPorPersona = 80.0;
         t2.cupos = 10;

@@ -1,6 +1,7 @@
 package com.example.proyecto_2025.Activities_Administrador;
 
 import android.app.Activity;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,9 +19,11 @@ import com.example.proyecto_2025.model.PuntoRuta;
 import com.example.proyecto_2025.model.Tour;
 import com.example.proyecto_2025.model.TourEstado;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class TourFormActivity extends AppCompatActivity {
 
@@ -31,6 +34,10 @@ public class TourFormActivity extends AppCompatActivity {
     private final ArrayList<PuntoRuta> ruta = new ArrayList<>();
     private TourRepository repo;
 
+    private MaterialCheckBox chkDesayuno, chkAlmuerzo, chkCena;
+
+    private final Calendar calInicio = Calendar.getInstance();
+    private final Calendar calFin    = Calendar.getInstance();
     private ActivityResultLauncher<Intent> pickImagesLauncher;
     private ActivityResultLauncher<Intent> pickPointLauncher;
 
@@ -39,12 +46,55 @@ public class TourFormActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityTourFormBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        chkDesayuno = findViewById(R.id.chkDesayuno);
+        chkAlmuerzo = findViewById(R.id.chkAlmuerzo);
+        chkCena     = findViewById(R.id.chkCena);
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("Nuevo tour");
         }
 
         repo = new TourRepository(this);
+
+        // ================== HORA INICIO ==================
+        binding.tvHoraInicio.setOnClickListener(v -> {
+            int h = calInicio.get(Calendar.HOUR_OF_DAY);
+            int m = calInicio.get(Calendar.MINUTE);
+
+            new TimePickerDialog(
+                    this,
+                    (view, hourOfDay, minute) -> {
+                        calInicio.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        calInicio.set(Calendar.MINUTE, minute);
+                        calInicio.set(Calendar.SECOND, 0);
+                        binding.tvHoraInicio.setText(
+                                String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute)
+                        );
+                    },
+                    h, m, true
+            ).show();
+        });
+
+        // ================== HORA FIN ==================
+        binding.tvHoraFin.setOnClickListener(v -> {
+            int h = calFin.get(Calendar.HOUR_OF_DAY);
+            int m = calFin.get(Calendar.MINUTE);
+
+            new TimePickerDialog(
+                    this,
+                    (view, hourOfDay, minute) -> {
+                        calFin.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        calFin.set(Calendar.MINUTE, minute);
+                        calFin.set(Calendar.SECOND, 0);
+                        binding.tvHoraFin.setText(
+                                String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute)
+                        );
+                    },
+                    h, m, true
+            ).show();
+        });
+
+
 
         // Selector de imágenes
         pickImagesLauncher = registerForActivityResult(
@@ -133,6 +183,11 @@ public class TourFormActivity extends AppCompatActivity {
         String cuposStr = binding.etCupos.getText().toString().trim();
         tour.precioPorPersona = TextUtils.isEmpty(precioStr) ? 0 : Double.parseDouble(precioStr);
         tour.cupos = TextUtils.isEmpty(cuposStr) ? 0 : Integer.parseInt(cuposStr);
+
+        tour.setIncluyeDesayuno(chkDesayuno.isChecked());
+        tour.setIncluyeAlmuerzo(chkAlmuerzo.isChecked());
+        tour.setIncluyeCena(chkCena.isChecked());
+
         tour.imagenUris.clear();
         tour.imagenUris.addAll(imagenes);
 
@@ -142,28 +197,33 @@ public class TourFormActivity extends AppCompatActivity {
 
         Calendar cal = Calendar.getInstance();
         // Inicio
-        int y = binding.dpInicio.getYear();
-        int m = binding.dpInicio.getMonth();        // 0-11
-        int d = binding.dpInicio.getDayOfMonth();
-        cal.set(y, m, d, 0, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        tour.fechaInicioUtc = cal.getTimeInMillis();
+        // ===== FECHA + HORA DE INICIO =====
+        calInicio.set(
+                binding.dpInicio.getYear(),
+                binding.dpInicio.getMonth(),
+                binding.dpInicio.getDayOfMonth()
+        );
+        tour.fechaInicioUtc = calInicio.getTimeInMillis();
 
-        // Fin
-        y = binding.dpFin.getYear();
-        m = binding.dpFin.getMonth();
-        d = binding.dpFin.getDayOfMonth();
-        cal.set(y, m, d, 0, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        tour.fechaFinUtc = cal.getTimeInMillis();
+        // ===== FECHA + HORA DE FIN =====
+        calFin.set(
+                binding.dpFin.getYear(),
+                binding.dpFin.getMonth(),
+                binding.dpFin.getDayOfMonth()
+        );
+        tour.fechaFinUtc = calFin.getTimeInMillis();
+
 
         // Paso 3: guía (por ahora solo marco “pendiente”)
-        tour.guiaId = binding.etGuiaId.getText().toString().trim();
+
         String propStr = binding.etPropuesta.getText().toString().trim();
         tour.propuestaPagoGuia = TextUtils.isEmpty(propStr) ? 0 : Double.parseDouble(propStr);
         tour.pagoEsPorcentaje = binding.swPorcentaje.isChecked();
-        tour.estado = (tour.guiaId == null || tour.guiaId.isEmpty())
-                ? TourEstado.BORRADOR : TourEstado.PENDIENTE_GUIA;
+
+        tour.guiaId = null;
+
+
+        tour.estado = TourEstado.BORRADOR;
 
         // Validaciones mínimas
         if (TextUtils.isEmpty(tour.titulo)) {

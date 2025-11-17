@@ -43,4 +43,7 @@
 
     <color name="gray">#9E9E9E</color>
 
+    <color name="colorBackground">@color/background_light</color>
+    <color name="colorOnBackground">@color/text_primary</color>
+
 </resources>

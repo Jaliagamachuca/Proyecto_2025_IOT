@@ -7,6 +7,9 @@ import java.util.UUID;
 
 public class Tour implements Serializable {
     public String id = UUID.randomUUID().toString();
+
+    public Tour() {}
+
     public String empresaId;                  // opcional si manejas multi-empresa
     public String titulo;
     public String descripcionCorta;
@@ -23,6 +26,10 @@ public class Tour implements Serializable {
     public boolean pagoEsPorcentaje;          // true => propuestaPagoGuia es %
     public TourEstado estado = TourEstado.BORRADOR;
 
+    private Boolean incluyeDesayuno = false;
+    private Boolean incluyeAlmuerzo = false;
+    private Boolean incluyeCena = false;
+
     public boolean esPublicable() {
         return titulo != null && !titulo.isEmpty()
                 && descripcionCorta != null && !descripcionCorta.isEmpty()
@@ -37,4 +44,14 @@ public class Tour implements Serializable {
     public String precioTexto() {
         return (precioPorPersona <= 0) ? "—" : "S/ " + String.format("%.2f", precioPorPersona);
     }
+
+    public boolean isIncluyeDesayuno() { return incluyeDesayuno; }
+    public void setIncluyeDesayuno(boolean incluyeDesayuno) { this.incluyeDesayuno = incluyeDesayuno; }
+
+    public boolean isIncluyeAlmuerzo() { return incluyeAlmuerzo; }
+    public void setIncluyeAlmuerzo(boolean incluyeAlmuerzo) { this.incluyeAlmuerzo = incluyeAlmuerzo; }
+
+    public boolean isIncluyeCena() { return incluyeCena; }
+    public void setIncluyeCena(boolean incluyeCena) { this.incluyeCena = incluyeCena; }
+
 }

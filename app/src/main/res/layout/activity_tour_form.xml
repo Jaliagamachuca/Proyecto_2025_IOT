@@ -92,7 +92,34 @@
                         android:hint="Cupos"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Botón "tonal" aproximado en M2: filled con tint primario -->
+                <!-- 🚩 NUEVO: Servicios incluidos -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Servicios adicionales"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_marginTop="16dp" />
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/chkDesayuno"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Desayuno" />
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/chkAlmuerzo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Almuerzo" />
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/chkCena"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cena" />
+
+                <!-- Botón imágenes -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPickImgs"
                     android:layout_width="wrap_content"
@@ -154,6 +181,23 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Hora de inicio"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/tvHoraInicio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_field"
+                    android:padding="12dp"
+                    android:minHeight="48dp"
+                    android:gravity="center_vertical"
+                    android:text="Seleccionar hora" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="Fecha de fin"
                     android:textStyle="bold"/>
@@ -162,6 +206,25 @@
                     android:id="@+id/dpFin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
+
+                <!-- HORA FIN -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Hora de fin"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/tvHoraFin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_field"
+                    android:padding="12dp"
+                    android:minHeight="48dp"
+                    android:gravity="center_vertical"
+                    android:text="Seleccionar hora" />
+
             </LinearLayout>
         </ScrollView>
 
@@ -178,15 +241,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etGuiaId"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="ID Guía"/>
-                </com.google.android.material.textfield.TextInputLayout>
+
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"

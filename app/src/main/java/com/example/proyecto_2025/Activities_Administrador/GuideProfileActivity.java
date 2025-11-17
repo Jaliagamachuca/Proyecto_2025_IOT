@@ -23,7 +23,7 @@ public class GuideProfileActivity extends AppCompatActivity {
         TextView bio = findViewById(R.id.bio);
         TextView zone = findViewById(R.id.zone);
         TextView rating = findViewById(R.id.rating);
-        Button btnOffer = findViewById(R.id.btnOffer);
+
 
         Glide.with(this).load(g.getPhotoUrl()).into(img);
         name.setText(g.getName());
@@ -32,10 +32,6 @@ public class GuideProfileActivity extends AppCompatActivity {
         zone.setText("Zona: "+g.getZone());
         rating.setText(String.format("★ %.1f", g.getRating()));
 
-        btnOffer.setOnClickListener(v->{
-            Intent i = new Intent(this, OfferCreateActivity.class);
-            i.putExtra("guide", g);
-            startActivity(i);
-        });
+
     }
 }

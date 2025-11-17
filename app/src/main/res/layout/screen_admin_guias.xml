@@ -23,7 +23,7 @@
             android:textSize="22sp"
             android:layout_marginBottom="16dp"/>
 
-        <!-- KPIs - Estilo similar a Tours -->
+        <!-- KPIs -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -53,22 +53,21 @@
                         android:id="@+id/kpiGuiasActivos"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="8"
+                        android:text="0"
                         android:textSize="28sp"
-                        android:textStyle="bold"
-                        />
+                        android:textStyle="bold"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Activos"
+                        android:text="Guías activos"
                         android:textSize="12sp"
                         android:textColor="#757575"
                         android:layout_marginTop="4dp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Ofertas pendientes -->
+            <!-- Solicitudes pendientes (antes ofertas pendientes) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -99,14 +98,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pendientes"
+                        android:text="Sol. pendientes"
                         android:textSize="12sp"
                         android:textColor="#757575"
                         android:layout_marginTop="4dp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Ofertas aceptadas -->
+            <!-- Guías con tours asignados (antes ofertas aceptadas) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -136,7 +135,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Aceptadas"
+                        android:text="Guías con tours"
                         android:textSize="12sp"
                         android:textColor="#757575"
                         android:layout_marginTop="4dp"/>
@@ -160,12 +159,12 @@
             android:orientation="vertical"
             android:layout_marginBottom="20dp">
 
-            <!-- Botón Explorar guías -->
+            <!-- Ver directorio de guías -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExplorarGuias"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="👥 Buscar guías disponibles"
+                android:text="👥 Ver directorio de guías"
                 android:textAllCaps="false"
                 android:textSize="15sp"
                 android:paddingTop="14dp"
@@ -173,12 +172,12 @@
                 android:layout_marginBottom="8dp"
                 style="@style/Widget.Material3.Button.OutlinedButton"/>
 
-            <!-- Botón Ver mis ofertas enviadas -->
+            <!-- Ver solicitudes de guías (antes “ofertas enviadas”) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnOfertasGuias"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="📨 Ver ofertas enviadas"
+                android:text="📨 Ver solicitudes de guías"
                 android:textAllCaps="false"
                 android:textSize="15sp"
                 android:paddingTop="14dp"
@@ -187,12 +186,70 @@
 
         </LinearLayout>
 
+        <!-- Bloque: Solicitudes recientes de guías -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Solicitudes recientes"
+                android:textStyle="bold"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/tvContadorSolicitudes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 solicitudes"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSolicitudesGuias"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"/>
+
+        <LinearLayout
+            android:id="@+id/emptyStateSolicitudes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="32dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📭"
+                android:textSize="48sp"
+                android:alpha="0.4"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="No hay solicitudes de guías por ahora"
+                android:textSize="15sp"
+                android:textColor="#757575"/>
+        </LinearLayout>
+
         <!-- Guías recomendados -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="12dp">
 
             <TextView
@@ -201,16 +258,14 @@
                 android:layout_weight="1"
                 android:text="Guías recomendados"
                 android:textStyle="bold"
-                android:textSize="18sp"
-                />
+                android:textSize="18sp"/>
 
             <TextView
                 android:id="@+id/tvContadorGuiasSugeridos"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="5 guías"
-                android:textSize="14sp"
-                />
+                android:textSize="14sp"/>
         </LinearLayout>
 
         <!-- RecyclerView de guías sugeridos (horizontal) -->
@@ -222,7 +277,7 @@
             android:paddingStart="0dp"
             android:paddingEnd="0dp"/>
 
-        <!-- Empty state -->
+        <!-- Empty state de guías -->
         <LinearLayout
             android:id="@+id/emptyStateGuias"
             android:layout_width="match_parent"

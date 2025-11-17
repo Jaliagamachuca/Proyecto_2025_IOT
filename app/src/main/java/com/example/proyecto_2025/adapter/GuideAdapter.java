@@ -49,11 +49,11 @@ public class GuideAdapter extends RecyclerView.Adapter<GuideAdapter.VH> {
         h.btnMore.setOnClickListener(v -> {
             PopupMenu menu = new PopupMenu(v.getContext(), h.btnMore);
             menu.getMenu().add(0, 1, 0, "Ver perfil");
-            menu.getMenu().add(0, 2, 1, "Ofertar");
+            //menu.getMenu().add(0, 2, 1, "Ofertar");
             menu.setOnMenuItemClickListener(mi -> {
                 int id = mi.getItemId();
                 if (id == 1) listener.onProfile(g);
-                else if (id == 2) listener.onOffer(g);
+                //else if (id == 2) listener.onOffer(g);
                 return true;
             });
             menu.show();

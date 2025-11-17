@@ -37,16 +37,16 @@ public class OfferInboxActivity extends AppCompatActivity implements OfferAdapte
             // Actualizar mensaje según el filtro
             switch (s) {
                 case PENDIENTE:
-                    tvEmptyTitle.setText("No hay ofertas pendientes");
+                    tvEmptyTitle.setText("No hay solicitudes pendientes");
                     break;
                 case ACEPTADA:
-                    tvEmptyTitle.setText("No hay ofertas aceptadas");
+                    tvEmptyTitle.setText("No hay solicitudes aceptadas");
                     break;
                 case RECHAZADA:
-                    tvEmptyTitle.setText("No hay ofertas rechazadas");
+                    tvEmptyTitle.setText("No hay solicitudes rechazadas");
                     break;
                 case VENCIDA:
-                    tvEmptyTitle.setText("No hay ofertas vencidas");
+                    tvEmptyTitle.setText("No hay solicitudes vencidas");
                     break;
             }
         } else {
@@ -68,11 +68,7 @@ public class OfferInboxActivity extends AppCompatActivity implements OfferAdapte
         // Empty state
         emptyState = findViewById(R.id.emptyState);
         tvEmptyTitle = findViewById(R.id.tvEmptyTitle);
-        MaterialButton btnBuscarGuias = findViewById(R.id.btnBuscarGuias);
 
-        btnBuscarGuias.setOnClickListener(v -> {
-            startActivity(new Intent(this, GuideDirectoryActivity.class));
-        });
 
         // Chips (ahora son Chip en lugar de Button)
         Chip bPend = findViewById(R.id.btnPend);
