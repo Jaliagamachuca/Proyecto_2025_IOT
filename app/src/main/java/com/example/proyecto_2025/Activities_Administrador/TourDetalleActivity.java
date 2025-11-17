@@ -24,7 +24,14 @@ public class TourDetalleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityTourDetalleBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        if (tour.estado == TourEstado.BORRADOR) {
+            binding.btnPublicar.setText("Enviar a guías");
+        } else if (tour.estado == TourEstado.PENDIENTE_GUIA) {
+            binding.btnPublicar.setText("Publicar a clientes");
+        } else {
+            binding.btnPublicar.setText("Publicar");
+            binding.btnPublicar.setEnabled(false); // ya no tiene sentido publicar de nuevo
+        }
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("Detalle del tour");
@@ -89,18 +96,46 @@ public class TourDetalleActivity extends AppCompatActivity {
         binding.tvServiciosExtra.setText(serviciosText);
         // ===== FIN NUEVO =====
 
-        // Botón publicar
+        // Botón publicar: BORRADOR → PENDIENTE_GUIA → PUBLICADO
         binding.btnPublicar.setOnClickListener(v -> {
-            if (tour.estado == TourEstado.PENDIENTE_GUIA) {
-                // simula aceptación del guía (en tu app real esto vendría del lado guía)
+            if (tour.estado == TourEstado.BORRADOR) {
+                // 1) Enviar a bolsa de guías
+                tour.estado = TourEstado.PENDIENTE_GUIA;
+                repo.upsert(tour);
+
+                binding.tvEstado.setText(tour.estado.name().replace("_", " "));
+                binding.btnPublicar.setText("Publicar a clientes");
+
+                Snackbar.make(binding.getRoot(),
+                        "Tour enviado a la bolsa de guías",
+                        Snackbar.LENGTH_LONG).show();
+
+            } else if (tour.estado == TourEstado.PENDIENTE_GUIA) {
+                // 2) Publicar a clientes SOLO si ya hay guía asignado
+                if (tour.guiaId == null || tour.guiaId.isEmpty()) {
+                    Snackbar.make(binding.getRoot(),
+                            "Aún no hay guía asignado. No puedes publicar a clientes.",
+                            Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+
                 tour.estado = TourEstado.PUBLICADO;
                 repo.upsert(tour);
+
                 binding.tvEstado.setText(tour.estado.name().replace("_", " "));
-                Snackbar.make(binding.getRoot(), "Tour publicado", Snackbar.LENGTH_LONG).show();
+                Snackbar.make(binding.getRoot(),
+                        "Tour publicado para clientes",
+                        Snackbar.LENGTH_LONG).show();
+
+                binding.btnPublicar.setEnabled(false);
+
             } else {
-                Snackbar.make(binding.getRoot(), "Requiere estado Pendiente de guía", Snackbar.LENGTH_LONG).show();
+                Snackbar.make(binding.getRoot(),
+                        "Este tour ya no puede cambiarse desde aquí.",
+                        Snackbar.LENGTH_LONG).show();
             }
         });
+
 
         // Botón empezar
         binding.btnEmpezar.setOnClickListener(v -> {

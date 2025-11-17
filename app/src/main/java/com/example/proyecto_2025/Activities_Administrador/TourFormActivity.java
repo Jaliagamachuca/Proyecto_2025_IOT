@@ -13,13 +13,16 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_2025.R;
+import com.example.proyecto_2025.data.repository.TourRemoteDataSource; // ⭐ NUEVO
 import com.example.proyecto_2025.data.repository.TourRepository;
 import com.example.proyecto_2025.databinding.ActivityTourFormBinding;
 import com.example.proyecto_2025.model.PuntoRuta;
 import com.example.proyecto_2025.model.Tour;
 import com.example.proyecto_2025.model.TourEstado;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.checkbox.MaterialCheckBox;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;                      // ⭐ NUEVO
+import com.google.firebase.auth.FirebaseUser;                      // ⭐ NUEVO
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -41,20 +44,26 @@ public class TourFormActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> pickImagesLauncher;
     private ActivityResultLauncher<Intent> pickPointLauncher;
 
+    // ⭐ NUEVO: remote (Firestore)
+    private TourRemoteDataSource tourRemote;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityTourFormBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         chkDesayuno = findViewById(R.id.chkDesayuno);
         chkAlmuerzo = findViewById(R.id.chkAlmuerzo);
         chkCena     = findViewById(R.id.chkCena);
+
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("Nuevo tour");
         }
 
         repo = new TourRepository(this);
+        tourRemote = new TourRemoteDataSource();     // ⭐ NUEVO
 
         // ================== HORA INICIO ==================
         binding.tvHoraInicio.setOnClickListener(v -> {
@@ -93,8 +102,6 @@ public class TourFormActivity extends AppCompatActivity {
                     h, m, true
             ).show();
         });
-
-
 
         // Selector de imágenes
         pickImagesLauncher = registerForActivityResult(
@@ -157,8 +164,7 @@ public class TourFormActivity extends AppCompatActivity {
     }
 
     private void abrirPickerPunto() {
-        startActivityForResult(new Intent(this, MapPickerActivity.class), 1001);
-        // O usa pickPointLauncher si ya tienes MapPicker con ActivityResult: pickPointLauncher.launch(...)
+        // NOTA: ya usas ActivityResultLauncher (pickPointLauncher)
         pickPointLauncher.launch(new Intent(this, MapPickerActivity.class));
     }
 
@@ -191,12 +197,10 @@ public class TourFormActivity extends AppCompatActivity {
         tour.imagenUris.clear();
         tour.imagenUris.addAll(imagenes);
 
-        // Paso 2: ruta y fechas (DatePicker)
+        // Paso 2: ruta y fechas
         tour.ruta.clear();
         tour.ruta.addAll(ruta);
 
-        Calendar cal = Calendar.getInstance();
-        // Inicio
         // ===== FECHA + HORA DE INICIO =====
         calInicio.set(
                 binding.dpInicio.getYear(),
@@ -213,19 +217,26 @@ public class TourFormActivity extends AppCompatActivity {
         );
         tour.fechaFinUtc = calFin.getTimeInMillis();
 
-
-        // Paso 3: guía (por ahora solo marco “pendiente”)
-
+        // Paso 3: guía (por ahora solo propuesta, sin asignar guía)
         String propStr = binding.etPropuesta.getText().toString().trim();
         tour.propuestaPagoGuia = TextUtils.isEmpty(propStr) ? 0 : Double.parseDouble(propStr);
         tour.pagoEsPorcentaje = binding.swPorcentaje.isChecked();
 
+        // 🔗 Ligar tour con la empresa del admin (usamos UID del usuario como empresaId)
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (fbUser == null) {
+            Snackbar.make(binding.getRoot(),
+                    "No se pudo obtener tu sesión. Vuelve a iniciar sesión.",
+                    Snackbar.LENGTH_LONG).show();
+            return;
+        }
+        tour.empresaId = fbUser.getUid();
+
+        // De inicio siempre BORRADOR. Luego desde Detalle se pasará a PENDIENTE_GUIA
         tour.guiaId = null;
-
-
         tour.estado = TourEstado.BORRADOR;
 
-        // Validaciones mínimas
+        // ==== Validaciones mínimas ====
         if (TextUtils.isEmpty(tour.titulo)) {
             Snackbar.make(binding.getRoot(), "Falta título", Snackbar.LENGTH_LONG).show();
             step = 1; updateStep(); return;
@@ -243,8 +254,10 @@ public class TourFormActivity extends AppCompatActivity {
             step = 2; updateStep(); return;
         }
 
+        // Guardar (local + Firestore)
         repo.upsert(tour);
-        Snackbar.make(binding.getRoot(), "Tour guardado", Snackbar.LENGTH_LONG).show();
+        Snackbar.make(binding.getRoot(), "Tour guardado como borrador", Snackbar.LENGTH_LONG).show();
         finish();
     }
+
 }

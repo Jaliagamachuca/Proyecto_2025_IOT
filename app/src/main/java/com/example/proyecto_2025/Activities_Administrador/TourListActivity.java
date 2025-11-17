@@ -66,13 +66,32 @@ public class TourListActivity extends AppCompatActivity {
 
     private void load(TourEstado... estados) {
         List<Tour> all = repo.findAll();
+
+        // UID del admin actual (lo usamos como empresaId)
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        String empresaIdActual = fbUser != null ? fbUser.getUid() : null;
+
         data.clear();
-        outer: for (Tour t : all) {
-            for (TourEstado e : estados) if (t.estado == e) { data.add(t); continue outer; }
+        outer:
+        for (Tour t : all) {
+            // Filtrar por empresaId si está seteado
+            if (empresaIdActual != null && t.empresaId != null
+                    && !empresaIdActual.equals(t.empresaId)) {
+                continue; // tour de otra empresa
+            }
+
+            for (TourEstado e : estados) {
+                if (t.estado == e) {
+                    data.add(t);
+                    continue outer;
+                }
+            }
         }
+
         binding.empty.setVisibility(data.isEmpty() ? View.VISIBLE : View.GONE);
         adapter.notifyDataSetChanged();
     }
+
 
     private void openDetail(Tour t) {
         Intent i = new Intent(this, TourDetalleActivity.class);
