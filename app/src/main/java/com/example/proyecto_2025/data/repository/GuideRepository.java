@@ -1,4 +1,4 @@
-package com.example.proyecto_2025.data;
+package com.example.proyecto_2025.data.repository;
 
 import android.content.Context;
 import com.example.proyecto_2025.model.Guide;

@@ -13,7 +13,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_2025.R;
-import com.example.proyecto_2025.data.OfferRepository;
+import com.example.proyecto_2025.data.repository.OfferRepository;
 import com.example.proyecto_2025.model.Guide;
 import com.example.proyecto_2025.model.Offer;
 

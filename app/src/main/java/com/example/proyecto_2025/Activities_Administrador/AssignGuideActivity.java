@@ -4,11 +4,11 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.proyecto_2025.R;
-import com.example.proyecto_2025.data.*;
-import com.example.proyecto_2025.model.*;
+import com.example.proyecto_2025.data.repository.GuideRepository;
+import com.example.proyecto_2025.data.repository.OfferRepository;
 
 public class AssignGuideActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
@@ -18,9 +18,9 @@ public class AssignGuideActivity extends AppCompatActivity {
 
         String offerId = getIntent().getStringExtra("offerId");
         com.example.proyecto_2025.model.Offer o =
-                com.example.proyecto_2025.data.OfferRepository.get().byId(offerId);
+                OfferRepository.get().byId(offerId);
         com.example.proyecto_2025.model.Guide g =
-                com.example.proyecto_2025.data.GuideRepository.get().byId(o.getGuideId());
+                GuideRepository.get().byId(o.getGuideId());
 
         TextView tv = findViewById(R.id.tvSummary);
         // Usamos el ID de tour como placeholder hasta enlazar tu TourRepository real

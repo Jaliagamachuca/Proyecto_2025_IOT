@@ -21,18 +21,51 @@ public class AuthRepository {
         void onError(Exception e);
     }
 
-    // 🔸 si luego quieres volver al código, ya tienes este generador
+    // Genera código si más adelante quieres verificación manual
     private String genCode() {
-        int n = new Random().nextInt(900000) + 100000; // 100000..999999
+        int n = new Random().nextInt(900000) + 100000;
         return String.valueOf(n);
     }
 
-    /**
-     * REGISTRO de cliente/guia
-     * Versión SIMPLE: crea el usuario en Auth y en Firestore, y queda listo para loguear.
-     * - cliente: status=active
-     * - guia:    status=pending (hasta que lo apruebe un admin/superadmin)
-     */
+    // ===============================================================
+    //  NUEVO MÉTODO (RECOMENDADO)
+    //  signUpWithExtraFields(email, pass, extraFields)
+    // ===============================================================
+    public void signUpWithExtraFields(String email,
+                                      String pass,
+                                      Map<String, Object> extraFields,
+                                      Callback<Void> cb) {
+
+        auth.createUserWithEmailAndPassword(email, pass)
+                .addOnSuccessListener((AuthResult r) -> {
+                    FirebaseUser fUser = r.getUser();
+                    if (fUser == null) {
+                        cb.onError(new Exception("No se pudo crear usuario en Auth."));
+                        return;
+                    }
+
+                    String uid = fUser.getUid();
+
+                    // Base mínima para Firestore
+                    Map<String, Object> base = new HashMap<>();
+                    base.put("uid", uid);
+                    base.put("createdAt", FieldValue.serverTimestamp());
+                    base.put("updatedAt", FieldValue.serverTimestamp());
+
+                    // Mezclamos base + extraFields del Activity
+                    base.putAll(extraFields);
+
+                    db.collection("users").document(uid).set(base)
+                            .addOnSuccessListener(x -> cb.onSuccess(null))
+                            .addOnFailureListener(cb::onError);
+
+                })
+                .addOnFailureListener(cb::onError);
+    }
+
+    // ===============================================================
+    // MÉTODO ANTIGUO (solo si quieres compatibilidad con código viejo)
+    // ===============================================================
     public void signUp(String name,
                        String email,
                        String pass,
@@ -48,11 +81,8 @@ public class AuthRepository {
                     }
                     String uid = fUser.getUid();
 
-                    // status según rol
                     String status = "active";
-                    if ("guia".equalsIgnoreCase(role)) {
-                        status = "pending";
-                    }
+                    if ("guia".equalsIgnoreCase(role)) status = "pending";
 
                     Map<String, Object> u = new HashMap<>();
                     u.put("uid", uid);
@@ -67,14 +97,6 @@ public class AuthRepository {
                     u.put("createdAt", FieldValue.serverTimestamp());
                     u.put("updatedAt", FieldValue.serverTimestamp());
 
-                    // 🔻🔻🔻 FLUJO REAL CON CÓDIGO / EMAIL (COMENTADO)
-                    // String code = genCode();
-                    // u.put("emailVerified", false);
-                    // u.put("verificationCode", code);
-                    // u.put("verificationRequired", true);
-                    // fUser.sendEmailVerification(); // correo de Firebase (link)
-                    // 🔺🔺🔺
-
                     db.collection("users").document(uid).set(u)
                             .addOnSuccessListener(x -> cb.onSuccess(null))
                             .addOnFailureListener(cb::onError);
@@ -82,18 +104,19 @@ public class AuthRepository {
                 .addOnFailureListener(cb::onError);
     }
 
-    /**
-     * LOGIN → devuelve el doc de Firestore del usuario
-     */
+    // ===============================================================
+    // LOGIN
+    // ===============================================================
     public void login(String email, String pass, Callback<DocumentSnapshot> cb) {
         auth.signInWithEmailAndPassword(email, pass)
                 .addOnSuccessListener((AuthResult r) -> {
                     FirebaseUser fUser = auth.getCurrentUser();
                     if (fUser == null) {
-                        cb.onError(new Exception("No se encontró el usuario."));
+                        cb.onError(new Exception("No se pudo obtener usuario."));
                         return;
                     }
                     String uid = fUser.getUid();
+
                     db.collection("users").document(uid).get()
                             .addOnSuccessListener(cb::onSuccess)
                             .addOnFailureListener(cb::onError);
@@ -101,6 +124,9 @@ public class AuthRepository {
                 .addOnFailureListener(cb::onError);
     }
 
+    // ===============================================================
+    // GET CURRENT USER / SIGN OUT
+    // ===============================================================
     public FirebaseUser getCurrentUser() {
         return auth.getCurrentUser();
     }

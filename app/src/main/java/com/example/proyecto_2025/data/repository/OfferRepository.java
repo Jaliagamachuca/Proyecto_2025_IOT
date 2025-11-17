@@ -1,4 +1,4 @@
-package com.example.proyecto_2025.data;
+package com.example.proyecto_2025.data.repository;
 
 import com.example.proyecto_2025.model.Offer;
 import java.util.*;

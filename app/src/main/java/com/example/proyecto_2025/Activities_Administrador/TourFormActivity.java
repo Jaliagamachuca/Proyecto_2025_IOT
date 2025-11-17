@@ -13,7 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_2025.R;
-import com.example.proyecto_2025.data.TourRepository;
+import com.example.proyecto_2025.data.repository.TourRepository;
 import com.example.proyecto_2025.databinding.ActivityTourFormBinding;
 import com.example.proyecto_2025.model.PuntoRuta;
 import com.example.proyecto_2025.model.Tour;

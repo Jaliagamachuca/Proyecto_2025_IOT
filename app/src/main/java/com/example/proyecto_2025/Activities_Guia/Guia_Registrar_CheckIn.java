@@ -1,22 +1,11 @@
 package com.example.proyecto_2025.Activities_Guia;
 
 import android.os.Bundle;
-import android.util.Log;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.proyecto_2025.Activities_Superadmin.EmployeeAdapter;
-import com.example.proyecto_2025.Activities_Superadmin.User;
-import com.example.proyecto_2025.Activities_Superadmin.UserRepository;
-import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivityGuiaRegistrarCheckInBinding;
-import com.example.proyecto_2025.databinding.ActivityGuiaTourEnProcesoBinding;
-import com.example.proyecto_2025.databinding.ActivityGuiaVistaInicialBinding;
 
 import java.util.List;
 

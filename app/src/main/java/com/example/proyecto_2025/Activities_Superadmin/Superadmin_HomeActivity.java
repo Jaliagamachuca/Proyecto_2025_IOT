@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.R;
-import com.example.proyecto_2025.data.GuideRepository;
+import com.example.proyecto_2025.adapter.EmployeeAdapter;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;
-import com.example.proyecto_2025.model.Guide;
+import com.example.proyecto_2025.model.User;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
@@ -24,9 +24,6 @@ import com.github.mikephil.charting.data.PieEntry;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -38,8 +35,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class Superadmin_HomeActivity extends AppCompatActivity {
 
     private ActivitySuperadminVistaInicialBinding binding;
-
-    private EmployeeService employeeService;  // 🔹 servicio retrofit
 
     // IDs de raíces (coinciden con los android:id de cada <include/>)
     private static final int SCR_DASHBOARD = R.id.scrDashboard;
@@ -233,7 +228,9 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
 
     // ================== Retrofit ==================
     public void createRetrofitService() {
-        employeeService = new Retrofit.Builder()
+        // ⚡ cambia según tu backend
+        // 🔹 servicio retrofit
+        EmployeeService employeeService = new Retrofit.Builder()
                 .baseUrl("http://10.0.2.2:8080") // ⚡ cambia según tu backend
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()

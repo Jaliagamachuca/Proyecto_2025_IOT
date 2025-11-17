@@ -8,10 +8,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.adapter.OfferAdapter;
-import com.example.proyecto_2025.data.OfferRepository;
+import com.example.proyecto_2025.data.repository.OfferRepository;
 import com.example.proyecto_2025.model.Offer;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.button.MaterialButton;
+
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.util.*;

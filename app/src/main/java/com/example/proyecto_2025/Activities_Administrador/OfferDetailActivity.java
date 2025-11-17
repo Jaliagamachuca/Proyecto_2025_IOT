@@ -1,7 +1,6 @@
 package com.example.proyecto_2025.Activities_Administrador;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,9 +8,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.adapter.MessageAdapter;
-import com.example.proyecto_2025.data.GuideRepository;
-import com.example.proyecto_2025.data.OfferRepository;
-import com.example.proyecto_2025.data.TourRepository;
+import com.example.proyecto_2025.data.repository.GuideRepository;
+import com.example.proyecto_2025.data.repository.OfferRepository;
+import com.example.proyecto_2025.data.repository.TourRepository;
 import com.example.proyecto_2025.model.Guide;
 import com.example.proyecto_2025.model.Message;
 import com.example.proyecto_2025.model.Offer;

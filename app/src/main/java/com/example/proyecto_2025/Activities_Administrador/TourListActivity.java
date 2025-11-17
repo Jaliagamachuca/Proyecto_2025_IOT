@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.adapter.TourAdapter;
-import com.example.proyecto_2025.data.TourRepository;
+import com.example.proyecto_2025.data.repository.TourRepository;
 import com.example.proyecto_2025.databinding.ActivityTourListBinding;
 import com.example.proyecto_2025.model.Tour;
 import com.example.proyecto_2025.model.TourEstado;

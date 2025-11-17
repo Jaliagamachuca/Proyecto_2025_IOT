@@ -1,5 +1,7 @@
 package com.example.proyecto_2025.Activities_Superadmin;
 
+import com.example.proyecto_2025.model.Employee;
+
 import java.util.List;
 
 public class EmployeeDto {

@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.adapter.GuideAdapter;
-import com.example.proyecto_2025.data.GuideRepository;
+import com.example.proyecto_2025.data.repository.GuideRepository;
 import com.example.proyecto_2025.model.Guide;
 import java.util.*;
 import java.util.stream.Collectors;

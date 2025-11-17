@@ -1,0 +1,567 @@
+Index: app/src/main/java/com/example/proyecto_2025/Activities_Administrador/AssignGuideActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.Activities_Administrador;\r\n\r\nimport android.annotation.SuppressLint;\r\nimport android.os.Bundle;\r\nimport android.widget.Button;\r\nimport android.widget.TextView;\r\nimport android.widget.Toast;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.data.*;\r\nimport com.example.proyecto_2025.model.*;\r\n\r\npublic class AssignGuideActivity extends AppCompatActivity {\r\n    @SuppressLint(\"SetTextI18n\")\r\n    @Override protected void onCreate(Bundle b){\r\n        super.onCreate(b);\r\n        setContentView(R.layout.assign_guide);\r\n\r\n        String offerId = getIntent().getStringExtra(\"offerId\");\r\n        com.example.proyecto_2025.model.Offer o =\r\n                com.example.proyecto_2025.data.OfferRepository.get().byId(offerId);\r\n        com.example.proyecto_2025.model.Guide g =\r\n                com.example.proyecto_2025.data.GuideRepository.get().byId(o.getGuideId());\r\n\r\n        TextView tv = findViewById(R.id.tvSummary);\r\n        // Usamos el ID de tour como placeholder hasta enlazar tu TourRepository real\r\n        String tourDisplay = (o.getTourId() != null) ? o.getTourId() : \"(sin tour)\";\r\n        tv.setText(\"Tour: \" + tourDisplay\r\n                + \"\\nGuía: \" + (g != null ? g.getName() : \"(desconocido)\")\r\n                + \"\\nPago: \" + o.getPayMode() + \" S/\" + o.getAmount());\r\n\r\n        Button btn = findViewById(R.id.btnConfirm);\r\n        btn.setOnClickListener(v -> {\r\n            // Aquí solo confirmamos. Cuando integremos con tu TourRepository real,\r\n            // marcamos el tour como \"con guía\".\r\n            android.widget.Toast.makeText(this, \"Guía asignado.\", android.widget.Toast.LENGTH_LONG).show();\r\n            finish();\r\n        });\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/AssignGuideActivity.java b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/AssignGuideActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/AssignGuideActivity.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/AssignGuideActivity.java	(date 1763339941568)
+@@ -5,36 +5,89 @@
+ import android.widget.Button;
+ import android.widget.TextView;
+ import android.widget.Toast;
++
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import com.example.proyecto_2025.R;
+-import com.example.proyecto_2025.data.*;
+-import com.example.proyecto_2025.model.*;
++import com.example.proyecto_2025.data.OfferRepository;
++import com.example.proyecto_2025.data.repository.GuiaRepository;
++import com.example.proyecto_2025.model.Guia;
++import com.example.proyecto_2025.model.Offer;
++
++import java.util.List;
+ 
+ public class AssignGuideActivity extends AppCompatActivity {
++
+     @SuppressLint("SetTextI18n")
+-    @Override protected void onCreate(Bundle b){
++    @Override
++    protected void onCreate(Bundle b) {
+         super.onCreate(b);
+         setContentView(R.layout.assign_guide);
+ 
+         String offerId = getIntent().getStringExtra("offerId");
+-        com.example.proyecto_2025.model.Offer o =
+-                com.example.proyecto_2025.data.OfferRepository.get().byId(offerId);
+-        com.example.proyecto_2025.model.Guide g =
+-                com.example.proyecto_2025.data.GuideRepository.get().byId(o.getGuideId());
++        if (offerId == null) {
++            Toast.makeText(this, "Oferta no especificada", Toast.LENGTH_LONG).show();
++            finish();
++            return;
++        }
++
++        // OfferRepository sigue siendo síncrono (byId)
++        Offer o = OfferRepository.get().byId(offerId);
++        if (o == null) {
++            Toast.makeText(this, "Oferta no encontrada", Toast.LENGTH_LONG).show();
++            finish();
++            return;
++        }
+ 
+         TextView tv = findViewById(R.id.tvSummary);
+-        // Usamos el ID de tour como placeholder hasta enlazar tu TourRepository real
+-        String tourDisplay = (o.getTourId() != null) ? o.getTourId() : "(sin tour)";
+-        tv.setText("Tour: " + tourDisplay
+-                + "\nGuía: " + (g != null ? g.getName() : "(desconocido)")
+-                + "\nPago: " + o.getPayMode() + " S/" + o.getAmount());
++        Button btn = findViewById(R.id.btnConfirm);
++        btn.setEnabled(false); // se habilita cuando carguemos al guía
++
++        // Cargar guías activos y buscar el que corresponde a la oferta
++        GuiaRepository.get().getGuiasActivos(
++                new GuiaRepository.Callback<List<Guia>>() {
++                    @Override
++                    public void onSuccess(List<Guia> result) {
++                        Guia guia = null;
++                        if (result != null && o.getGuideId() != null) {
++                            for (Guia g : result) {
++                                // asumiendo que Guia tiene getUid() que coincide con guideId
++                                if (g.getUid() != null && g.getUid().equals(o.getGuideId())) {
++                                    guia = g;
++                                    break;
++                                }
++                            }
++                        }
++
++                        String tourDisplay = (o.getTourId() != null) ? o.getTourId() : "(sin tour)";
++                        String guiaNombre;
++                        if (guia != null && guia.getDisplayName() != null && !guia.getDisplayName().isEmpty()) {
++                            guiaNombre = guia.getDisplayName();
++                        } else {
++                            guiaNombre = "(desconocido)";
++                        }
++
++                        tv.setText("Tour: " + tourDisplay
++                                + "\nGuía: " + guiaNombre
++                                + "\nPago: " + o.getPayMode() + " S/" + o.getAmount());
+ 
+-        Button btn = findViewById(R.id.btnConfirm);
+-        btn.setOnClickListener(v -> {
+-            // Aquí solo confirmamos. Cuando integremos con tu TourRepository real,
+-            // marcamos el tour como "con guía".
+-            android.widget.Toast.makeText(this, "Guía asignado.", android.widget.Toast.LENGTH_LONG).show();
+-            finish();
+-        });
++                        btn.setEnabled(true);
++                        btn.setOnClickListener(v -> {
++                            // Aquí solo confirmamos. Cuando integres TourRepository,
++                            // podrás marcar el tour como "con guía".
++                            Toast.makeText(AssignGuideActivity.this,
++                                    "Guía asignado.", Toast.LENGTH_LONG).show();
++                            finish();
++                        });
++                    }
++
++                    @Override
++                    public void onError(Exception e) {
++                        Toast.makeText(AssignGuideActivity.this,
++                                "Error al cargar guía: " + e.getMessage(),
++                                Toast.LENGTH_LONG).show();
++                        finish();
++                    }
++                });
+     }
+ }
+Index: app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_Registrar_Administrador.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.Activities_Superadmin;\r\n\r\nimport android.os.Bundle;\r\nimport android.util.Log;\r\n\r\nimport androidx.activity.EdgeToEdge;\r\nimport androidx.annotation.Nullable;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.core.graphics.Insets;\r\nimport androidx.core.view.ViewCompat;\r\nimport androidx.core.view.WindowInsetsCompat;\r\n\r\nimport com.example.proyecto_2025.BaseActivity;\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.databinding.ActivitySuperadminAdministradoresSedeBinding;\r\nimport com.example.proyecto_2025.databinding.ActivitySuperadminRegistrarAdministradorBinding;\r\nimport com.google.android.material.dialog.MaterialAlertDialogBuilder;\r\n\r\npublic class Superadmin_Registrar_Administrador extends AppCompatActivity {\r\n\r\n    private ActivitySuperadminRegistrarAdministradorBinding binding;\r\n\r\n    @Override\r\n    protected void onCreate(@Nullable Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        binding = ActivitySuperadminRegistrarAdministradorBinding.inflate(getLayoutInflater());\r\n        setContentView(binding.getRoot());\r\n\r\n        binding.btnRegistrarAdministrador.setOnClickListener(view ->\r\n                RegistrarAdministrador());\r\n    }\r\n\r\n    public void RegistrarAdministrador() {\r\n        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);\r\n        dialogBuilder.setTitle(\"Registrar Administrador\");\r\n        dialogBuilder.setMessage(\"¿Está seguro de registrar este usuario?\");\r\n        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d(\"msg-test\",\"btn neutral\"));\r\n        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d(\"msg-test\",\"btn positivo\"));\r\n        dialogBuilder.show();\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_Registrar_Administrador.java b/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_Registrar_Administrador.java
+--- a/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_Registrar_Administrador.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_Registrar_Administrador.java	(date 1763339941689)
+@@ -1,24 +1,22 @@
+ package com.example.proyecto_2025.Activities_Superadmin;
+ 
+ import android.os.Bundle;
+-import android.util.Log;
+-
+-import androidx.activity.EdgeToEdge;
++import android.text.TextUtils;
++import android.widget.Toast;
+ import androidx.annotation.Nullable;
+ import androidx.appcompat.app.AppCompatActivity;
+-import androidx.core.graphics.Insets;
+-import androidx.core.view.ViewCompat;
+-import androidx.core.view.WindowInsetsCompat;
+ 
+-import com.example.proyecto_2025.BaseActivity;
+-import com.example.proyecto_2025.R;
+-import com.example.proyecto_2025.databinding.ActivitySuperadminAdministradoresSedeBinding;
+ import com.example.proyecto_2025.databinding.ActivitySuperadminRegistrarAdministradorBinding;
+-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
++import com.google.android.gms.tasks.Task;
++import com.google.firebase.functions.FirebaseFunctions;
++
++import java.util.HashMap;
++import java.util.Map;
+ 
+ public class Superadmin_Registrar_Administrador extends AppCompatActivity {
+ 
+     private ActivitySuperadminRegistrarAdministradorBinding binding;
++    private FirebaseFunctions functions;
+ 
+     @Override
+     protected void onCreate(@Nullable Bundle savedInstanceState) {
+@@ -26,16 +24,67 @@
+         binding = ActivitySuperadminRegistrarAdministradorBinding.inflate(getLayoutInflater());
+         setContentView(binding.getRoot());
+ 
+-        binding.btnRegistrarAdministrador.setOnClickListener(view ->
+-                RegistrarAdministrador());
++        functions = FirebaseFunctions.getInstance();
++
++        binding.btnRegistrarAdministrador.setOnClickListener(v -> registrarAdministrador());
++    }
++
++    private void registrarAdministrador() {
++        String nombre    = txt(binding.etNombre);
++        String dni       = txt(binding.etDni);
++        String email     = txt(binding.etEmail);
++        String password  = txt(binding.etPassword);
++        String companyId = txt(binding.etCompanyId);
++        String telefono  = txt(binding.etTelefono);
++        String domicilio = txt(binding.etDomicilio);
++
++        // Validaciones mínimas
++        if (TextUtils.isEmpty(nombre) || TextUtils.isEmpty(email) ||
++                TextUtils.isEmpty(password) || TextUtils.isEmpty(companyId) ||
++                TextUtils.isEmpty(dni)) {
++            toast("Completa nombre, DNI, email, contraseña y companyId.");
++            return;
++        }
++        if (dni.length() != 8) { toast("DNI debe tener 8 dígitos."); return; }
++        if (password.length() < 6) { toast("La contraseña debe tener al menos 6 caracteres."); return; }
++
++        binding.btnRegistrarAdministrador.setEnabled(false);
++
++        Map<String, Object> data = new HashMap<>();
++        data.put("displayName", nombre);
++        data.put("email", email);
++        data.put("password", password);
++        data.put("dni", dni);
++        data.put("phone", emptyToNull(telefono));
++        data.put("address", emptyToNull(domicilio));
++        data.put("companyId", companyId);
++
++        // Llama a la Cloud Function createAdmin
++        functions
++                .getHttpsCallable("createAdmin")
++                .call(data)
++                .continueWith(task -> {
++                    binding.btnRegistrarAdministrador.setEnabled(true);
++                    if (!task.isSuccessful()) {
++                        Exception e = task.getException();
++                        throw e != null ? e : new Exception("Error desconocido");
++                    }
++                    return task.getResult();
++                })
++                .addOnSuccessListener(result -> {
++                    toast("Administrador creado correctamente.");
++                    finish(); // opcional
++                })
++                .addOnFailureListener(e -> {
++                    toast("Error: " + e.getMessage());
++                });
++    }
++
++    private String txt(com.google.android.material.textfield.TextInputEditText e) {
++        return e.getText() == null ? "" : e.getText().toString().trim();
+     }
+ 
+-    public void RegistrarAdministrador() {
+-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
+-        dialogBuilder.setTitle("Registrar Administrador");
+-        dialogBuilder.setMessage("¿Está seguro de registrar este usuario?");
+-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
+-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
+-        dialogBuilder.show();
+-    }
+-}
+\ No newline at end of file
++    private Object emptyToNull(String s) { return s.isEmpty() ? null : s; }
++
++    private void toast(String m){ Toast.makeText(this, m, Toast.LENGTH_LONG).show(); }
++}
+Index: app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_Clientes.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.Activities_Superadmin;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.util.Log;\r\n\r\nimport androidx.activity.EdgeToEdge;\r\nimport androidx.annotation.Nullable;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.core.graphics.Insets;\r\nimport androidx.core.view.ViewCompat;\r\nimport androidx.core.view.WindowInsetsCompat;\r\n\r\nimport com.example.proyecto_2025.BaseActivity;\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.databinding.ActivitySuperadminAdministradoresSedeBinding;\r\nimport com.example.proyecto_2025.databinding.ActivitySuperadminClientesBinding;\r\nimport com.google.android.material.dialog.MaterialAlertDialogBuilder;\r\n\r\npublic class Superadmin_Clientes extends BaseActivity {\r\n\r\n    private ActivitySuperadminClientesBinding binding;\r\n\r\n    @Override\r\n    protected void onCreate(@Nullable Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        binding = ActivitySuperadminClientesBinding.inflate(getLayoutInflater());\r\n        setActivityContent(binding.getRoot());\r\n\r\n        binding.btn1.setOnClickListener(view ->\r\n                activarCliente());\r\n\r\n        binding.btn2.setOnClickListener(view ->\r\n                desactivarCliente());\r\n\r\n        binding.InfoCliente1.setOnClickListener(v -> {\r\n            // Creamos un Intent para ir a OtraActivity\r\n            Intent intent = new Intent(this, Superadmin_Ver_Cliente.class);\r\n            startActivity(intent);\r\n        });\r\n\r\n        binding.InfoCliente2.setOnClickListener(v -> {\r\n            // Creamos un Intent para ir a OtraActivity\r\n            Intent intent = new Intent(this, Superadmin_Ver_Cliente.class);\r\n            startActivity(intent);\r\n        });\r\n    }\r\n\r\n    public void activarCliente() {\r\n        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);\r\n        dialogBuilder.setTitle(\"Activar Cliente\");\r\n        dialogBuilder.setMessage(\"¿Está seguro de activar este usuario?\");\r\n        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d(\"msg-test\",\"btn neutral\"));\r\n        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d(\"msg-test\",\"btn positivo\"));\r\n        dialogBuilder.show();\r\n    }\r\n    public void desactivarCliente() {\r\n        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);\r\n        dialogBuilder.setTitle(\"Desactivar Cliente\");\r\n        dialogBuilder.setMessage(\"¿Está seguro de desactivar este usuario?\");\r\n        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d(\"msg-test\",\"btn neutral\"));\r\n        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d(\"msg-test\",\"btn positivo\"));\r\n        dialogBuilder.show();\r\n    }\r\n\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_Clientes.java b/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_Clientes.java
+--- a/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_Clientes.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_Clientes.java	(date 1763339941591)
+@@ -19,12 +19,10 @@
+ 
+ public class Superadmin_Clientes extends BaseActivity {
+ 
+-    private ActivitySuperadminClientesBinding binding;
+-
+     @Override
+     protected void onCreate(@Nullable Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
+-        binding = ActivitySuperadminClientesBinding.inflate(getLayoutInflater());
++        ActivitySuperadminClientesBinding binding = ActivitySuperadminClientesBinding.inflate(getLayoutInflater());
+         setActivityContent(binding.getRoot());
+ 
+         binding.btn1.setOnClickListener(view ->
+Index: app/src/main/java/com/example/proyecto_2025/Activities_Administrador/GuideDirectoryActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.Activities_Administrador;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.EditText;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.recyclerview.widget.LinearLayoutManager;\r\nimport androidx.recyclerview.widget.RecyclerView;\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.adapter.GuideAdapter;\r\nimport com.example.proyecto_2025.data.GuideRepository;\r\nimport com.example.proyecto_2025.model.Guide;\r\nimport java.util.*;\r\nimport java.util.stream.Collectors;\r\n\r\npublic class GuideDirectoryActivity extends AppCompatActivity implements GuideAdapter.OnAction {\r\n    private List<Guide> base = new ArrayList<>();\r\n    private List<Guide> view = new ArrayList<>();\r\n    private GuideAdapter adapter;\r\n\r\n    @Override protected void onCreate(Bundle b){\r\n        super.onCreate(b);\r\n        setContentView(R.layout.guide_directory);\r\n\r\n        base = GuideRepository.get().all();\r\n        view.addAll(base);\r\n\r\n        RecyclerView rv = findViewById(R.id.rvGuides);\r\n        rv.setLayoutManager(new LinearLayoutManager(this));\r\n        adapter = new GuideAdapter(this, view, this);\r\n        rv.setAdapter(adapter);\r\n\r\n        EditText etSearch = findViewById(R.id.etSearch);\r\n        etSearch.addTextChangedListener(new android.text.TextWatcher(){\r\n            public void beforeTextChanged(CharSequence s,int a,int b,int c){}\r\n            public void onTextChanged(CharSequence s,int a,int b,int c){\r\n                String q = s.toString().toLowerCase(Locale.getDefault());\r\n                view.clear();\r\n                view.addAll(base.stream().filter(g ->\r\n                        g.getName().toLowerCase(Locale.getDefault()).contains(q) ||\r\n                                g.getZone().toLowerCase(Locale.getDefault()).contains(q)\r\n                ).collect(Collectors.toList()));\r\n                adapter.notifyDataSetChanged();\r\n            }\r\n            public void afterTextChanged(android.text.Editable s){}\r\n        });\r\n    }\r\n\r\n    @Override public void onProfile(Guide g) {\r\n        Intent i = new Intent(this, GuideProfileActivity.class);\r\n        i.putExtra(\"guide\", g);\r\n        startActivity(i);\r\n    }\r\n\r\n    @Override public void onOffer(Guide g) {\r\n        Intent i = new Intent(this, OfferCreateActivity.class);\r\n        i.putExtra(\"guide\", g);\r\n        startActivity(i);\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/GuideDirectoryActivity.java b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/GuideDirectoryActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/GuideDirectoryActivity.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/GuideDirectoryActivity.java	(date 1763339941604)
+@@ -2,59 +2,125 @@
+ 
+ import android.content.Intent;
+ import android.os.Bundle;
++import android.text.Editable;
++import android.text.TextWatcher;
+ import android.widget.EditText;
++
+ import androidx.appcompat.app.AppCompatActivity;
+ import androidx.recyclerview.widget.LinearLayoutManager;
+ import androidx.recyclerview.widget.RecyclerView;
++
+ import com.example.proyecto_2025.R;
+-import com.example.proyecto_2025.adapter.GuideAdapter;
+-import com.example.proyecto_2025.data.GuideRepository;
+-import com.example.proyecto_2025.model.Guide;
+-import java.util.*;
++import com.example.proyecto_2025.adapter.GuiasAdapter;
++import com.example.proyecto_2025.data.repository.GuiaRepository;
++import com.example.proyecto_2025.model.Guia;
++import com.google.android.material.snackbar.Snackbar;
++
++import java.util.ArrayList;
++import java.util.List;
++import java.util.Locale;
+ import java.util.stream.Collectors;
+ 
+-public class GuideDirectoryActivity extends AppCompatActivity implements GuideAdapter.OnAction {
+-    private List<Guide> base = new ArrayList<>();
+-    private List<Guide> view = new ArrayList<>();
+-    private GuideAdapter adapter;
++public class GuideDirectoryActivity extends AppCompatActivity {
+ 
+-    @Override protected void onCreate(Bundle b){
+-        super.onCreate(b);
++    private final List<Guia> base = new ArrayList<>();
++    private final List<Guia> filtered = new ArrayList<>();
++    private GuiasAdapter adapter;
++
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
+         setContentView(R.layout.guide_directory);
+ 
+-        base = GuideRepository.get().all();
+-        view.addAll(base);
+-
++        // RecyclerView
+         RecyclerView rv = findViewById(R.id.rvGuides);
+         rv.setLayoutManager(new LinearLayoutManager(this));
+-        adapter = new GuideAdapter(this, view, this);
++
++        // GuiasAdapter: usamos Mode.APPROVED y reasignamos las acciones
++        adapter = new GuiasAdapter(
++                GuiasAdapter.Mode.APPROVED,
++                // onToggle -> ver perfil
++                g -> {
++                    Intent i = new Intent(GuideDirectoryActivity.this,
++                            GuideProfileActivity.class);
++                    i.putExtra("guia", g);
++                    startActivity(i);
++                },
++                // onApprove -> crear oferta
++                g -> {
++                    Intent i = new Intent(GuideDirectoryActivity.this,
++                            OfferCreateActivity.class);
++                    i.putExtra("guia", g);
++                    startActivity(i);
++                },
++                // onReject -> por ahora solo mensaje
++                g -> Snackbar.make(
++                        findViewById(android.R.id.content),
++                        "Acción de rechazo no implementada aún",
++                        Snackbar.LENGTH_SHORT
++                ).show()
++        );
+         rv.setAdapter(adapter);
+ 
++        // Cargar guías activos desde Firestore
++        cargarGuiasActivos();
++
++        // Buscador
+         EditText etSearch = findViewById(R.id.etSearch);
+-        etSearch.addTextChangedListener(new android.text.TextWatcher(){
+-            public void beforeTextChanged(CharSequence s,int a,int b,int c){}
+-            public void onTextChanged(CharSequence s,int a,int b,int c){
++        etSearch.addTextChangedListener(new TextWatcher() {
++            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
++            @Override public void afterTextChanged(Editable s) {}
++
++            @Override
++            public void onTextChanged(CharSequence s, int a, int b, int c) {
+                 String q = s.toString().toLowerCase(Locale.getDefault());
+-                view.clear();
+-                view.addAll(base.stream().filter(g ->
+-                        g.getName().toLowerCase(Locale.getDefault()).contains(q) ||
+-                                g.getZone().toLowerCase(Locale.getDefault()).contains(q)
+-                ).collect(Collectors.toList()));
+-                adapter.notifyDataSetChanged();
++                aplicarFiltro(q);
+             }
+-            public void afterTextChanged(android.text.Editable s){}
+-        });
++        });
++    }
++
++    private void cargarGuiasActivos() {
++        GuiaRepository.get().getGuiasActivos(
++                new GuiaRepository.Callback<List<Guia>>() {
++                    @Override
++                    public void onSuccess(List<Guia> result) {
++                        base.clear();
++                        if (result != null) base.addAll(result);
++
++                        // Sin filtro inicial: mostrar todo
++                        aplicarFiltro("");
++                    }
++
++                    @Override
++                    public void onError(Exception e) {
++                        base.clear();
++                        filtered.clear();
++                        adapter.setData(filtered);
++                        Snackbar.make(findViewById(android.R.id.content),
++                                "Error cargando guías", Snackbar.LENGTH_SHORT).show();
++                    }
++                });
+     }
+ 
+-    @Override public void onProfile(Guide g) {
+-        Intent i = new Intent(this, GuideProfileActivity.class);
+-        i.putExtra("guide", g);
+-        startActivity(i);
+-    }
++    private void aplicarFiltro(String q) {
++        filtered.clear();
++
++        if (q == null || q.isEmpty()) {
++            filtered.addAll(base);
++        } else {
++            filtered.addAll(
++                    base.stream()
++                            .filter(g ->
++                                    (g.getName() != null &&
++                                            g.getName().toLowerCase(Locale.getDefault()).contains(q))
++                                            ||
++                                            (g.getZone() != null &&
++                                                    g.getZone().toLowerCase(Locale.getDefault()).contains(q))
++                            )
++                            .collect(Collectors.toList())
++            );
++        }
+ 
+-    @Override public void onOffer(Guide g) {
+-        Intent i = new Intent(this, OfferCreateActivity.class);
+-        i.putExtra("guide", g);
+-        startActivity(i);
++        adapter.setData(filtered);
+     }
+ }
+Index: app/src/main/res/layout/screen_superadmin_guias.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    android:padding=\"4dp\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\">\r\n\r\n    <EditText\r\n        android:id=\"@+id/etBuscarGuia\"\r\n        android:layout_width=\"0dp\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:hint=\"Buscar guia\"\r\n        android:drawableStart=\"@android:drawable/ic_menu_search\"\r\n        android:inputType=\"text\"\r\n        android:padding=\"12dp\"\r\n        android:background=\"@drawable/bg_input\"\r\n        android:layout_marginBottom=\"12dp\"\r\n        app:layout_constraintTop_toTopOf=\"parent\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\" />\r\n\r\n    <TextView\r\n        android:id=\"@+id/Etiqueta1\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:text=\"Guias Registrados\"\r\n        android:textColor=\"#000000\"\r\n        android:textSize=\"16sp\"\r\n        android:textStyle=\"bold\"\r\n        android:layout_marginTop=\"16dp\"\r\n        app:layout_constraintTop_toBottomOf=\"@id/etBuscarGuia\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\"/>\r\n\r\n    <androidx.recyclerview.widget.RecyclerView\r\n        android:id=\"@+id/recyclerView\"\r\n        android:layout_width=\"0dp\"\r\n        android:layout_height=\"0dp\"\r\n        android:layout_marginTop=\"24dp\"\r\n        app:layout_constraintTop_toBottomOf=\"@id/Etiqueta1\"\r\n        app:layout_constraintBottom_toBottomOf=\"parent\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\"\r\n        app:layout_constraintStart_toStartOf=\"parent\" />\r\n</androidx.constraintlayout.widget.ConstraintLayout>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/screen_superadmin_guias.xml b/app/src/main/res/layout/screen_superadmin_guias.xml
+--- a/app/src/main/res/layout/screen_superadmin_guias.xml	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/res/layout/screen_superadmin_guias.xml	(date 1763339941739)
+@@ -1,43 +1,67 @@
+-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++<androidx.constraintlayout.widget.ConstraintLayout
++    xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+-    android:padding="4dp"
++    android:padding="8dp"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent">
+ 
+-    <EditText
+-        android:id="@+id/etBuscarGuia"
+-        android:layout_width="0dp"
+-        android:layout_height="wrap_content"
+-        android:hint="Buscar guia"
+-        android:drawableStart="@android:drawable/ic_menu_search"
+-        android:inputType="text"
+-        android:padding="12dp"
+-        android:background="@drawable/bg_input"
+-        android:layout_marginBottom="12dp"
+-        app:layout_constraintTop_toTopOf="parent"
+-        app:layout_constraintStart_toStartOf="parent"
+-        app:layout_constraintEnd_toEndOf="parent" />
++    <LinearLayout
++        android:id="@+id/rowFiltros"
++        android:layout_width="0dp"
++        android:layout_height="wrap_content"
++        android:orientation="horizontal"
++        android:gravity="center_vertical"
++        app:layout_constraintTop_toTopOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintEnd_toEndOf="parent">
++
++        <EditText
++            android:id="@+id/etBuscarGuia"
++            android:layout_width="0dp"
++            android:layout_height="wrap_content"
++            android:layout_weight="1"
++            android:hint="Buscar guía"
++            android:drawableStart="@android:drawable/ic_menu_search"
++            android:inputType="text"
++            android:padding="12dp"
++            android:background="@android:drawable/edit_text"/>
++
++        <com.google.android.material.button.MaterialButton
++            android:id="@+id/btnAprobados"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:text="Aprobados"
++            style="@style/Widget.Material3.Button.OutlinedButton"
++            android:layout_marginStart="8dp"/>
++
++        <com.google.android.material.button.MaterialButton
++            android:id="@+id/btnPendientes"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:text="Pendientes"
++            style="@style/Widget.Material3.Button.OutlinedButton"
++            android:layout_marginStart="4dp"/>
++    </LinearLayout>
+ 
+     <TextView
+-        android:id="@+id/Etiqueta1"
++        android:id="@+id/tvTituloLista"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+-        android:text="Guias Registrados"
++        android:text="Guías registrados"
+         android:textColor="#000000"
+         android:textSize="16sp"
+         android:textStyle="bold"
+-        android:layout_marginTop="16dp"
+-        app:layout_constraintTop_toBottomOf="@id/etBuscarGuia"
+-        app:layout_constraintStart_toStartOf="parent"
+-        app:layout_constraintEnd_toEndOf="parent"/>
++        android:layout_marginTop="12dp"
++        app:layout_constraintTop_toBottomOf="@id/rowFiltros"
++        app:layout_constraintStart_toStartOf="parent"/>
+ 
+     <androidx.recyclerview.widget.RecyclerView
+-        android:id="@+id/recyclerView"
++        android:id="@+id/rvGuias"
+         android:layout_width="0dp"
+         android:layout_height="0dp"
+-        android:layout_marginTop="24dp"
+-        app:layout_constraintTop_toBottomOf="@id/Etiqueta1"
++        android:layout_marginTop="8dp"
++        app:layout_constraintTop_toBottomOf="@id/tvTituloLista"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+-        app:layout_constraintStart_toStartOf="parent" />
++        app:layout_constraintStart_toStartOf="parent"/>
+ </androidx.constraintlayout.widget.ConstraintLayout>
+Index: app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferCreateActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.Activities_Administrador;\r\n\r\nimport android.app.DatePickerDialog;\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.ArrayAdapter;\r\nimport android.widget.Button;\r\nimport android.widget.EditText;\r\nimport android.widget.RadioGroup;\r\nimport android.widget.TextView;\r\nimport android.widget.Toast;\r\n\r\nimport androidx.appcompat.app.AppCompatActivity;\r\n\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.data.OfferRepository;\r\nimport com.example.proyecto_2025.model.Guide;\r\nimport com.example.proyecto_2025.model.Offer;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.Calendar;\r\nimport java.util.Locale;\r\nimport java.util.UUID;\r\n\r\npublic class OfferCreateActivity extends AppCompatActivity {\r\n\r\n    // Listas simples para el spinner (mock por ahora)\r\n    private final ArrayList<String> tourIds    = new ArrayList<>();\r\n    private final ArrayList<String> tourTitles = new ArrayList<>();\r\n\r\n    @Override protected void onCreate(Bundle b){\r\n        super.onCreate(b);\r\n        setContentView(R.layout.offer_create);\r\n\r\n        Guide guide = (Guide) getIntent().getSerializableExtra(\"guide\");\r\n        if (guide == null) { finish(); return; }\r\n\r\n        TextView tvGuide   = findViewById(R.id.tvGuide);\r\n        TextView tvStart   = findViewById(R.id.tvStart);\r\n        TextView tvEnd     = findViewById(R.id.tvEnd);\r\n        RadioGroup rgPay   = findViewById(R.id.rgPay);\r\n        EditText etAmount  = findViewById(R.id.etAmount);\r\n        Button btnSend     = findViewById(R.id.btnSend);\r\n        android.widget.Spinner spTour = findViewById(R.id.spTour);\r\n\r\n        tvGuide.setText(\"Guía: \" + guide.getName());\r\n\r\n        // --------- CARGA DE TOURS (MOCK) ----------\r\n        seedToursForDemo(); // quita esto cuando conectes tu repo real\r\n\r\n        ArrayAdapter<String> ad = new ArrayAdapter<>(\r\n                this, android.R.layout.simple_spinner_dropdown_item, tourTitles);\r\n        spTour.setAdapter(ad);\r\n        // ------------------------------------------\r\n\r\n        final Calendar start = Calendar.getInstance();\r\n        final Calendar end   = Calendar.getInstance();\r\n\r\n        tvStart.setOnClickListener(v -> pickDate(tvStart, start));\r\n        tvEnd.setOnClickListener(v -> pickDate(tvEnd, end));\r\n\r\n        btnSend.setOnClickListener(v -> {\r\n            if (spTour.getSelectedItemPosition() == android.widget.AdapterView.INVALID_POSITION) {\r\n                Toast.makeText(this, \"Selecciona un tour\", Toast.LENGTH_SHORT).show();\r\n                return;\r\n            }\r\n            String tourId = tourIds.get(spTour.getSelectedItemPosition());\r\n\r\n            Offer.PayMode payMode =\r\n                    (rgPay.getCheckedRadioButtonId() == R.id.rbFijo)\r\n                            ? Offer.PayMode.FIJO\r\n                            : Offer.PayMode.POR_HORA;\r\n\r\n            double amount;\r\n            try {\r\n                amount = Double.parseDouble(etAmount.getText().toString().trim());\r\n            } catch (Exception e) {\r\n                Toast.makeText(this, \"Monto inválido\", Toast.LENGTH_SHORT).show();\r\n                return;\r\n            }\r\n\r\n            Offer o = new Offer(\r\n                    UUID.randomUUID().toString(),\r\n                    guide.getId(),\r\n                    tourId,\r\n                    start.getTime(),\r\n                    end.getTime(),\r\n                    payMode,\r\n                    amount,\r\n                    Offer.Status.PENDIENTE\r\n            );\r\n            OfferRepository.get().add(o);\r\n\r\n            Toast.makeText(this, \"Oferta enviada\", Toast.LENGTH_SHORT).show();\r\n            startActivity(new Intent(this, OfferInboxActivity.class));\r\n            finish();\r\n        });\r\n    }\r\n\r\n    private void pickDate(TextView tv, Calendar cal){\r\n        new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {\r\n            cal.set(Calendar.YEAR, year);\r\n            cal.set(Calendar.MONTH, month);\r\n            cal.set(Calendar.DAY_OF_MONTH, dayOfMonth);\r\n            tv.setText(String.format(Locale.getDefault(), \"%02d/%02d/%04d\", dayOfMonth, month + 1, year));\r\n        }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show();\r\n    }\r\n\r\n    /** Datos de ejemplo para que el flujo sea presentable */\r\n    private void seedToursForDemo() {\r\n        if (!tourIds.isEmpty()) return;\r\n        tourIds.add(\"t1\");  tourTitles.add(\"City Tour Cusco\");\r\n        tourIds.add(\"t2\");  tourTitles.add(\"Valle Sagrado Full Day\");\r\n        // agrega más si quieres\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferCreateActivity.java b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferCreateActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferCreateActivity.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferCreateActivity.java	(date 1763339941613)
+@@ -14,7 +14,7 @@
+ 
+ import com.example.proyecto_2025.R;
+ import com.example.proyecto_2025.data.OfferRepository;
+-import com.example.proyecto_2025.model.Guide;
++import com.example.proyecto_2025.model.Guia;
+ import com.example.proyecto_2025.model.Offer;
+ 
+ import java.util.ArrayList;
+@@ -32,7 +32,7 @@
+         super.onCreate(b);
+         setContentView(R.layout.offer_create);
+ 
+-        Guide guide = (Guide) getIntent().getSerializableExtra("guide");
++        Guia guide = (Guia) getIntent().getSerializableExtra("guide");
+         if (guide == null) { finish(); return; }
+ 
+         TextView tvGuide   = findViewById(R.id.tvGuide);

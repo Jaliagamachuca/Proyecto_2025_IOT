@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVerGuiaTurismoBinding;
+import com.example.proyecto_2025.model.User;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class Superadmin_Ver_Guia_Turismo extends AppCompatActivity {

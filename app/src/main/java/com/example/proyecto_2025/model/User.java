@@ -1,4 +1,4 @@
-package com.example.proyecto_2025.Activities_Superadmin;
+package com.example.proyecto_2025.model;
 
 import java.io.Serializable;
 import java.util.List;

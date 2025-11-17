@@ -1,0 +1,2308 @@
+Index: app/src/main/java/com/example/proyecto_2025/Activities_Administrador/GuideProfileActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.Activities_Administrador;\r\n\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.widget.Button;\r\nimport android.widget.ImageView;\r\nimport android.widget.TextView;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport com.bumptech.glide.Glide;\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.model.Guide;\r\n\r\npublic class GuideProfileActivity extends AppCompatActivity {\r\n    @Override protected void onCreate(Bundle b){\r\n        super.onCreate(b);\r\n        setContentView(R.layout.guide_profile);\r\n\r\n        Guide g = (Guide) getIntent().getSerializableExtra(\"guide\");\r\n\r\n        ImageView img = findViewById(R.id.img);\r\n        TextView name = findViewById(R.id.name);\r\n        TextView langs = findViewById(R.id.langs);\r\n        TextView bio = findViewById(R.id.bio);\r\n        TextView zone = findViewById(R.id.zone);\r\n        TextView rating = findViewById(R.id.rating);\r\n        Button btnOffer = findViewById(R.id.btnOffer);\r\n\r\n        Glide.with(this).load(g.getPhotoUrl()).into(img);\r\n        name.setText(g.getName());\r\n        langs.setText(\"Idiomas: \"+g.getLanguages().toString().replace(\"[\",\"\").replace(\"]\",\"\").replace(\",\",\" · \"));\r\n        bio.setText(g.getBio());\r\n        zone.setText(\"Zona: \"+g.getZone());\r\n        rating.setText(String.format(\"★ %.1f\", g.getRating()));\r\n\r\n        btnOffer.setOnClickListener(v->{\r\n            Intent i = new Intent(this, OfferCreateActivity.class);\r\n            i.putExtra(\"guide\", g);\r\n            startActivity(i);\r\n        });\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/GuideProfileActivity.java b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/GuideProfileActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/GuideProfileActivity.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/GuideProfileActivity.java	(date 1763339941625)
+@@ -5,37 +5,109 @@
+ import android.widget.Button;
+ import android.widget.ImageView;
+ import android.widget.TextView;
++
+ import androidx.appcompat.app.AppCompatActivity;
++
+ import com.bumptech.glide.Glide;
+ import com.example.proyecto_2025.R;
+-import com.example.proyecto_2025.model.Guide;
++import com.example.proyecto_2025.model.Guia;
++
++import java.io.Serializable;
++import java.util.ArrayList;
++import java.util.List;
+ 
+ public class GuideProfileActivity extends AppCompatActivity {
+-    @Override protected void onCreate(Bundle b){
++
++    private Serializable originalExtra; // para reenviar el MISMO tipo a la siguiente pantalla
++    private Guia guia;                  // versión unificada para mostrar en UI
++
++    @Override
++    protected void onCreate(Bundle b) {
+         super.onCreate(b);
+         setContentView(R.layout.guide_profile);
+ 
+-        Guide g = (Guide) getIntent().getSerializableExtra("guide");
++        // 1) Obtener el extra en cualquiera de los dos formatos
++        originalExtra = getIntent().getSerializableExtra("guide");
++        if (originalExtra instanceof Guia) {
++            guia = (Guia) originalExtra;
++        } else if (originalExtra instanceof Guia) {
++            guia = convertOldToNew((Guia) originalExtra);
++        } else {
++            // Sin datos: cerrar o mostrar error
++            finish();
++            return;
++        }
+ 
+-        ImageView img = findViewById(R.id.img);
+-        TextView name = findViewById(R.id.name);
+-        TextView langs = findViewById(R.id.langs);
+-        TextView bio = findViewById(R.id.bio);
+-        TextView zone = findViewById(R.id.zone);
++        // 2) Referencias de vista
++        ImageView img   = findViewById(R.id.img);
++        TextView name   = findViewById(R.id.name);
++        TextView langs  = findViewById(R.id.langs);
++        TextView bio    = findViewById(R.id.bio);
++        TextView zone   = findViewById(R.id.zone);
+         TextView rating = findViewById(R.id.rating);
+         Button btnOffer = findViewById(R.id.btnOffer);
+ 
+-        Glide.with(this).load(g.getPhotoUrl()).into(img);
+-        name.setText(g.getName());
+-        langs.setText("Idiomas: "+g.getLanguages().toString().replace("[","").replace("]","").replace(","," · "));
+-        bio.setText(g.getBio());
+-        zone.setText("Zona: "+g.getZone());
+-        rating.setText(String.format("★ %.1f", g.getRating()));
++        // 3) Pintar datos (con fallbacks seguros)
++        String photo = guia.getPhotoUrl() != null ? guia.getPhotoUrl() : "";
++        Glide.with(this)
++                .load(photo.isEmpty() ? R.drawable.ic_user_placeholder : photo)
++                .into(img);
+ 
+-        btnOffer.setOnClickListener(v->{
++        name.setText(nullSafe(guia.getName()));
++        langs.setText("Idiomas: " + joinLanguages(guia.getLanguages()));
++        bio.setText(nullSafe(guia.getBio()));
++        zone.setText("Zona: " + nullSafe(guia.getZone()));
++        rating.setText(String.format("★ %.1f", guia.getRating()));
++
++        // 4) Reenviar el MISMO tipo de objeto que recibimos (compatibilidad)
++        btnOffer.setOnClickListener(v -> {
+             Intent i = new Intent(this, OfferCreateActivity.class);
+-            i.putExtra("guide", g);
++            i.putExtra("guide", originalExtra != null ? originalExtra : guia);
+             startActivity(i);
+         });
+     }
++
++    // ===== Helpers =====
++
++    private String nullSafe(String s) {
++        return s == null ? "" : s;
++    }
++
++    private String joinLanguages(List<Guia.Language> langs) {
++        if (langs == null || langs.isEmpty()) return "—";
++        List<String> xs = new ArrayList<>();
++        for (Guia.Language l : langs) xs.add(l.name());
++        return String.join(" · ", xs);
++    }
++
++    /** Conversión simple del modelo antiguo Guide -> nuevo Guia (para UI). */
++    private Guia convertOldToNew(Guia oldG) {
++        if (oldG == null) return new Guia();
++
++        // Mapear idiomas del enum antiguo al nuevo
++        List<Guia.Language> newLangs = new ArrayList<>();
++        if (oldG.getLanguages() != null) {
++            for (Guia.Language l : oldG.getLanguages()) {
++                try {
++                    newLangs.add(Guia.Language.valueOf(l.name()));
++                } catch (IllegalArgumentException ignore) {
++                    // idioma no mapeado, lo omitimos
++                }
++            }
++        }
++
++        Guia g = new Guia(
++                oldG.getId(),
++                oldG.getName(),
++                newLangs,
++                oldG.getPhotoUrl(),
++                oldG.getBio(),
++                oldG.getRating(),
++                oldG.getZone()
++        );
++        // Campos de gestión por defecto para guías legados
++        g.setRole("guia");
++        if (g.getStatus() == null) g.setStatus("active"); // si venía de catálogo anterior
++        return g;
++    }
+ }
+Index: app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferDetailActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.Activities_Administrador;\r\n\r\nimport android.os.Bundle;\r\nimport android.view.View;\r\nimport android.widget.EditText;\r\nimport android.widget.TextView;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.recyclerview.widget.LinearLayoutManager;\r\nimport androidx.recyclerview.widget.RecyclerView;\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.adapter.MessageAdapter;\r\nimport com.example.proyecto_2025.data.GuideRepository;\r\nimport com.example.proyecto_2025.data.OfferRepository;\r\nimport com.example.proyecto_2025.data.TourRepository;\r\nimport com.example.proyecto_2025.model.Guide;\r\nimport com.example.proyecto_2025.model.Message;\r\nimport com.example.proyecto_2025.model.Offer;\r\nimport com.example.proyecto_2025.model.Tour;\r\nimport com.google.android.material.appbar.MaterialToolbar;\r\nimport com.google.android.material.chip.Chip;\r\nimport com.google.android.material.floatingactionbutton.FloatingActionButton;\r\nimport com.google.android.material.snackbar.Snackbar;\r\nimport java.text.SimpleDateFormat;\r\nimport java.util.Locale;\r\n\r\npublic class OfferDetailActivity extends AppCompatActivity {\r\n\r\n    private Offer offer;\r\n    private MessageAdapter messageAdapter;\r\n    private RecyclerView rvMensajes;\r\n    private EditText etMensaje;\r\n    private SimpleDateFormat dateFormat;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_offer_detail);\r\n\r\n        dateFormat = new SimpleDateFormat(\"dd MMM yyyy\", Locale.getDefault());\r\n\r\n        // Obtener la oferta\r\n        String offerId = getIntent().getStringExtra(\"offerId\");\r\n        if (offerId == null) {\r\n            finish();\r\n            return;\r\n        }\r\n\r\n        offer = OfferRepository.get().findById(offerId);\r\n        if (offer == null) {\r\n            finish();\r\n            return;\r\n        }\r\n\r\n        // Configurar toolbar\r\n        MaterialToolbar toolbar = findViewById(R.id.toolbar);\r\n        setSupportActionBar(toolbar);\r\n        if (getSupportActionBar() != null) {\r\n            getSupportActionBar().setDisplayHomeAsUpEnabled(true);\r\n        }\r\n        toolbar.setNavigationOnClickListener(v -> finish());\r\n\r\n        // Views\r\n        TextView tvGuiaNombre = findViewById(R.id.tvGuiaNombre);\r\n        TextView tvTourTitulo = findViewById(R.id.tvTourTitulo);\r\n        TextView tvFechaInicio = findViewById(R.id.tvFechaInicio);\r\n        TextView tvFechaFin = findViewById(R.id.tvFechaFin);\r\n        TextView tvMonto = findViewById(R.id.tvMonto);\r\n        Chip chipEstado = findViewById(R.id.chipEstado);\r\n        rvMensajes = findViewById(R.id.rvMensajes);\r\n        etMensaje = findViewById(R.id.etMensaje);\r\n        FloatingActionButton btnEnviar = findViewById(R.id.btnEnviar);\r\n\r\n        // Cargar datos de la oferta\r\n        Guide guia = GuideRepository.get().byId(offer.getGuideId());\r\n        Tour tour = new TourRepository(this).findById(offer.getTourId());\r\n\r\n        tvGuiaNombre.setText(guia != null ? guia.getName() : \"Guía desconocido\");\r\n        tvTourTitulo.setText(tour != null ? tour.titulo : \"Tour desconocido\");\r\n        tvFechaInicio.setText(dateFormat.format(offer.getStartDate()));\r\n        tvFechaFin.setText(dateFormat.format(offer.getEndDate()));\r\n\r\n        String montoText = \"S/ \" + String.format(Locale.getDefault(), \"%.2f\", offer.getAmount())\r\n                + \" (\" + (offer.getPayMode() == Offer.PayMode.FIJO ? \"Fijo\" : \"Por hora\") + \")\";\r\n        tvMonto.setText(montoText);\r\n\r\n        // Estado con colores\r\n        switch (offer.getStatus()) {\r\n            case PENDIENTE:\r\n                chipEstado.setText(\"⏳ Pendiente\");\r\n                chipEstado.setChipBackgroundColorResource(android.R.color.holo_orange_light);\r\n                break;\r\n            case ACEPTADA:\r\n                chipEstado.setText(\"✓ Aceptada\");\r\n                chipEstado.setChipBackgroundColorResource(android.R.color.holo_green_light);\r\n                break;\r\n            case RECHAZADA:\r\n                chipEstado.setText(\"✗ Rechazada\");\r\n                chipEstado.setChipBackgroundColorResource(android.R.color.holo_red_light);\r\n                break;\r\n            case VENCIDA:\r\n                chipEstado.setText(\"⏱ Vencida\");\r\n                chipEstado.setChipBackgroundColorResource(android.R.color.darker_gray);\r\n                break;\r\n        }\r\n\r\n        // Configurar RecyclerView de mensajes\r\n        messageAdapter = new MessageAdapter(offer.getMensajes());\r\n        rvMensajes.setLayoutManager(new LinearLayoutManager(this));\r\n        rvMensajes.setAdapter(messageAdapter);\r\n\r\n        // Scroll al último mensaje\r\n        if (!offer.getMensajes().isEmpty()) {\r\n            rvMensajes.scrollToPosition(offer.getMensajes().size() - 1);\r\n        }\r\n\r\n        // Crear algunos mensajes de ejemplo si está vacío (solo para demo)\r\n        if (offer.getMensajes().isEmpty()) {\r\n            crearMensajesDeEjemplo();\r\n        }\r\n\r\n        // Botón enviar mensaje\r\n        btnEnviar.setOnClickListener(v -> enviarMensaje());\r\n    }\r\n\r\n    private void enviarMensaje() {\r\n        String texto = etMensaje.getText().toString().trim();\r\n        if (texto.isEmpty()) {\r\n            Snackbar.make(findViewById(android.R.id.content),\r\n                    \"Escribe un mensaje\", Snackbar.LENGTH_SHORT).show();\r\n            return;\r\n        }\r\n\r\n        // Crear y agregar el mensaje\r\n        Message mensaje = new Message(offer.getId(), Message.Sender.ADMIN, texto);\r\n        offer.addMensaje(mensaje);\r\n\r\n        // Actualizar en el repositorio\r\n        OfferRepository.get().update(offer);\r\n\r\n        // Actualizar UI\r\n        messageAdapter.notifyItemInserted(offer.getMensajes().size() - 1);\r\n        rvMensajes.scrollToPosition(offer.getMensajes().size() - 1);\r\n\r\n        // Limpiar input\r\n        etMensaje.setText(\"\");\r\n\r\n        Snackbar.make(findViewById(android.R.id.content),\r\n                \"Mensaje enviado ✓\", Snackbar.LENGTH_SHORT).show();\r\n    }\r\n\r\n    /**\r\n     * Crea mensajes de ejemplo para que se vea el chat funcionando\r\n     * ELIMINAR ESTE MÉTODO cuando tengas datos reales\r\n     */\r\n    private void crearMensajesDeEjemplo() {\r\n        Message m1 = new Message(offer.getId(), Message.Sender.GUIDE,\r\n                \"Hola, vi la oferta. ¿Podríamos negociar el precio?\");\r\n        Message m2 = new Message(offer.getId(), Message.Sender.ADMIN,\r\n                \"Claro, ¿cuánto propones?\");\r\n        Message m3 = new Message(offer.getId(), Message.Sender.GUIDE,\r\n                \"¿Qué tal S/ 180? Tengo experiencia en este tipo de tours.\");\r\n\r\n        offer.addMensaje(m1);\r\n        offer.addMensaje(m2);\r\n        offer.addMensaje(m3);\r\n\r\n        OfferRepository.get().update(offer);\r\n        messageAdapter.notifyDataSetChanged();\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferDetailActivity.java b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferDetailActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferDetailActivity.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/OfferDetailActivity.java	(date 1763343850752)
+@@ -1,7 +1,6 @@
+ package com.example.proyecto_2025.Activities_Administrador;
+ 
+ import android.os.Bundle;
+-import android.view.View;
+ import android.widget.EditText;
+ import android.widget.TextView;
+ import androidx.appcompat.app.AppCompatActivity;
+@@ -9,10 +8,10 @@
+ import androidx.recyclerview.widget.RecyclerView;
+ import com.example.proyecto_2025.R;
+ import com.example.proyecto_2025.adapter.MessageAdapter;
+-import com.example.proyecto_2025.data.GuideRepository;
+ import com.example.proyecto_2025.data.OfferRepository;
+ import com.example.proyecto_2025.data.TourRepository;
+-import com.example.proyecto_2025.model.Guide;
++import com.example.proyecto_2025.data.repository.GuiaRepository;
++import com.example.proyecto_2025.model.Guia;
+ import com.example.proyecto_2025.model.Message;
+ import com.example.proyecto_2025.model.Offer;
+ import com.example.proyecto_2025.model.Tour;
+@@ -21,6 +20,7 @@
+ import com.google.android.material.floatingactionbutton.FloatingActionButton;
+ import com.google.android.material.snackbar.Snackbar;
+ import java.text.SimpleDateFormat;
++import java.util.List;
+ import java.util.Locale;
+ 
+ public class OfferDetailActivity extends AppCompatActivity {
+@@ -70,11 +70,11 @@
+         etMensaje = findViewById(R.id.etMensaje);
+         FloatingActionButton btnEnviar = findViewById(R.id.btnEnviar);
+ 
+-        // Cargar datos de la oferta
+-        Guide guia = GuideRepository.get().byId(offer.getGuideId());
++        // ==== Cargar datos de la oferta ====
++
++// 1) Tour (tu TourRepository sí es síncrono)
+         Tour tour = new TourRepository(this).findById(offer.getTourId());
+ 
+-        tvGuiaNombre.setText(guia != null ? guia.getName() : "Guía desconocido");
+         tvTourTitulo.setText(tour != null ? tour.titulo : "Tour desconocido");
+         tvFechaInicio.setText(dateFormat.format(offer.getStartDate()));
+         tvFechaFin.setText(dateFormat.format(offer.getEndDate()));
+@@ -83,6 +83,37 @@
+                 + " (" + (offer.getPayMode() == Offer.PayMode.FIJO ? "Fijo" : "Por hora") + ")";
+         tvMonto.setText(montoText);
+ 
++// 2) Guía (asíncrono con GuiaRepository)
++        GuiaRepository.get().getGuiasActivos(
++                new GuiaRepository.Callback<List<Guia>>() {
++                    @Override
++                    public void onSuccess(List<Guia> result) {
++                        Guia guiaEncontrada = null;
++                        if (result != null && offer.getGuideId() != null) {
++                            for (Guia g : result) {
++                                // OJO: si en tu modelo el id no es getUid(), cámbialo por getId(), getUserId(), etc.
++                                if (g.getUid() != null && g.getUid().equals(offer.getGuideId())) {
++                                    guiaEncontrada = g;
++                                    break;
++                                }
++                            }
++                        }
++
++                        tvGuiaNombre.setText(
++                                guiaEncontrada != null && guiaEncontrada.getName() != null
++                                        ? guiaEncontrada.getName()
++                                        : "Guía desconocido"
++                        );
++                    }
++
++                    @Override
++                    public void onError(Exception e) {
++                        tvGuiaNombre.setText("Guía desconocido");
++                    }
++                }
++        );
++
++
+         // Estado con colores
+         switch (offer.getStatus()) {
+             case PENDIENTE:
+Index: app/src/main/java/com/example/proyecto_2025/Activities_Administrador/Admin_HomeActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.Activities_Administrador;\r\nimport android.app.Activity;\r\nimport android.content.Intent;\r\nimport android.net.Uri;\r\nimport android.os.Bundle;\r\nimport android.util.Patterns;\r\nimport android.view.MenuItem;\r\nimport android.view.View;\r\nimport android.widget.Button;\r\nimport android.widget.EditText;\r\nimport android.widget.TextView;\r\n\r\nimport androidx.activity.result.ActivityResultLauncher;\r\nimport androidx.activity.result.contract.ActivityResultContracts;\r\nimport androidx.annotation.IdRes;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.recyclerview.widget.LinearLayoutManager;\r\nimport androidx.recyclerview.widget.RecyclerView;\r\n\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.adapter.ImageUriAdapter;\r\nimport com.example.proyecto_2025.adapter.GuideAdapter;\r\nimport com.example.proyecto_2025.adapter.TourAdapter;\r\nimport com.example.proyecto_2025.data.EmpresaRepository;\r\nimport com.example.proyecto_2025.data.TourRepository;\r\nimport com.example.proyecto_2025.data.OfferRepository;\r\nimport com.example.proyecto_2025.data.GuideRepository;\r\nimport com.example.proyecto_2025.data.AdminRepository;\r\nimport com.example.proyecto_2025.databinding.ActivityAdminHomeBinding;\r\nimport com.example.proyecto_2025.model.Empresa;\r\nimport com.example.proyecto_2025.model.Guide;\r\nimport com.example.proyecto_2025.model.Offer;\r\nimport com.example.proyecto_2025.model.Tour;\r\nimport com.example.proyecto_2025.model.TourEstado;\r\nimport com.example.proyecto_2025.model.Admin;\r\nimport com.google.android.material.snackbar.Snackbar;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\n\r\n\r\npublic class Admin_HomeActivity extends AppCompatActivity {\r\n\r\n    // ===================== BINDING & CONSTANTS =====================\r\n    private ActivityAdminHomeBinding binding;\r\n\r\n    private static final int SCR_EMPRESA  = R.id.scrEmpresa;\r\n    private static final int SCR_TOURS    = R.id.scrTours;\r\n    private static final int SCR_GUIAS    = R.id.scrGuias;\r\n    private static final int SCR_REPORTES = R.id.scrReportes;\r\n    private static final int SCR_PERFIL   = R.id.scrPerfil;\r\n\r\n    // ===================== REPOSITORIES =====================\r\n    private EmpresaRepository empresaRepo;\r\n    private AdminRepository adminRepo;\r\n\r\n    // ===================== DATA MODELS =====================\r\n    private Empresa empresa;\r\n    private Admin admin;\r\n    private final List<Uri> galeriaUris = new ArrayList<>();\r\n    private final List<Guide> sugeridos = new ArrayList<>();\r\n    private GuideAdapter guiasAdapter;\r\n\r\n    // ===================== LAUNCHERS =====================\r\n    private ActivityResultLauncher<Intent> pickImagesLauncher;\r\n    private ActivityResultLauncher<Intent> pickLocationLauncher;\r\n\r\n    // ===================== LIFECYCLE =====================\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        binding = ActivityAdminHomeBinding.inflate(getLayoutInflater());\r\n        setContentView(binding.getRoot());\r\n\r\n        // Configurar toolbar\r\n        setupToolbar();\r\n\r\n        // Inicializar repositorios y datos\r\n        initializeRepositories();\r\n\r\n        // Configurar launchers\r\n        setupLaunchers();\r\n\r\n        // Configurar bottom navigation\r\n        binding.bottomNav.setOnItemSelectedListener(this::onBottomItemSelected);\r\n\r\n        // Inicializar todas las secciones\r\n        initializeAllSections();\r\n\r\n        // Pantalla inicial\r\n        binding.bottomNav.setSelectedItemId(R.id.nav_empresa);\r\n        showScreen(SCR_EMPRESA);\r\n\r\n        // Datos de prueba (eliminar en producci├│n)\r\n        crearDatosDePruebaSiEsNecesario();\r\n    }\r\n\r\n    // ===================== SETUP METHODS =====================\r\n\r\n    private void setupToolbar() {\r\n        setSupportActionBar(binding.toolbar);\r\n        if (getSupportActionBar() != null) {\r\n            getSupportActionBar().setTitle(\"\");\r\n            getSupportActionBar().setDisplayShowTitleEnabled(false);\r\n        }\r\n    }\r\n\r\n    private void initializeRepositories() {\r\n        GuideRepository.get().seedIfEmpty(this);\r\n        empresaRepo = new EmpresaRepository(this);\r\n        empresa = empresaRepo.load();\r\n        adminRepo = new AdminRepository(this);\r\n        admin = adminRepo.load();\r\n    }\r\n\r\n    private void setupLaunchers() {\r\n        // Launcher para seleccionar im├ígenes\r\n        pickImagesLauncher = registerForActivityResult(\r\n                new ActivityResultContracts.StartActivityForResult(), result -> {\r\n                    if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) return;\r\n                    Intent data = result.getData();\r\n\r\n                    try {\r\n                        if (data.getClipData() != null) {\r\n                            int count = data.getClipData().getItemCount();\r\n                            for (int i = 0; i < count; i++) {\r\n                                Uri u = data.getClipData().getItemAt(i).getUri();\r\n                                getContentResolver().takePersistableUriPermission(\r\n                                        u, Intent.FLAG_GRANT_READ_URI_PERMISSION);\r\n                                galeriaUris.add(u);\r\n                            }\r\n                        } else if (data.getData() != null) {\r\n                            Uri u = data.getData();\r\n                            getContentResolver().takePersistableUriPermission(\r\n                                    u, Intent.FLAG_GRANT_READ_URI_PERMISSION);\r\n                            galeriaUris.add(u);\r\n                        }\r\n                    } catch (SecurityException ignore) {\r\n                        if (data.getData() != null) galeriaUris.add(data.getData());\r\n                    }\r\n\r\n                    if (binding.scrEmpresa.rvGaleria.getAdapter() != null) {\r\n                        binding.scrEmpresa.rvGaleria.getAdapter().notifyDataSetChanged();\r\n                    }\r\n                    actualizarChecklistYEstado();\r\n                });\r\n\r\n        // Launcher para seleccionar ubicaci├│n\r\n        pickLocationLauncher = registerForActivityResult(\r\n                new ActivityResultContracts.StartActivityForResult(), result -> {\r\n                    if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) return;\r\n                    Intent d = result.getData();\r\n\r\n                    empresa.direccion = d.getStringExtra(\"direccion\");\r\n                    empresa.lat = d.getDoubleExtra(\"lat\", 0d);\r\n                    empresa.lon = d.getDoubleExtra(\"lon\", 0d);\r\n\r\n                    binding.scrEmpresa.tvDireccion.setText(\r\n                            (empresa.direccion == null || empresa.direccion.isEmpty())\r\n                                    ? \"Sin direcci├│n\"\r\n                                    : empresa.direccion\r\n                    );\r\n\r\n                    updateMapPreview();\r\n                    actualizarChecklistYEstado();\r\n                });\r\n    }\r\n\r\n    private void initializeAllSections() {\r\n        initEmpresaSection();\r\n        initToursSection();\r\n        initGuiasSection();\r\n        initReportesSection();\r\n        initPerfilSection();\r\n    }\r\n\r\n    // ===================== NAVIGATION =====================\r\n\r\n    private boolean onBottomItemSelected(MenuItem item) {\r\n        int id = item.getItemId();\r\n        if (id == R.id.nav_empresa) { showScreen(SCR_EMPRESA); return true; }\r\n        else if (id == R.id.nav_tours) { showScreen(SCR_TOURS); return true; }\r\n        else if (id == R.id.nav_guias) { showScreen(SCR_GUIAS); return true; }\r\n        else if (id == R.id.nav_reportes) { showScreen(SCR_REPORTES); return true; }\r\n        else if (id == R.id.nav_perfil) { showScreen(SCR_PERFIL); return true; }\r\n        return false;\r\n    }\r\n\r\n    private void showScreen(@IdRes int screenId) {\r\n        // Ocultar todas las pantallas\r\n        binding.scrEmpresa.getRoot().setVisibility(View.GONE);\r\n        binding.scrTours.getRoot().setVisibility(View.GONE);\r\n        binding.scrGuias.getRoot().setVisibility(View.GONE);\r\n        binding.scrReportes.getRoot().setVisibility(View.GONE);\r\n        binding.scrPerfil.getRoot().setVisibility(View.GONE);\r\n\r\n        // Mostrar pantalla seleccionada\r\n        View target =\r\n                (screenId == SCR_EMPRESA)  ? binding.scrEmpresa.getRoot() :\r\n                        (screenId == SCR_TOURS)    ? binding.scrTours.getRoot() :\r\n                                (screenId == SCR_GUIAS)    ? binding.scrGuias.getRoot() :\r\n                                        (screenId == SCR_REPORTES) ? binding.scrReportes.getRoot() : binding.scrPerfil.getRoot();\r\n\r\n        target.setVisibility(View.VISIBLE);\r\n\r\n        // FAB visible solo en ciertas pantallas\r\n        binding.fab.setVisibility(View.GONE);\r\n        binding.fab.setOnClickListener(null);\r\n\r\n        // Actualizar datos si es necesario\r\n        if (screenId == SCR_GUIAS) {\r\n            refreshGuiasDashboard();\r\n        }\r\n    }\r\n\r\n    // ===================== SECTION 1: EMPRESA =====================\r\n\r\n    private void initEmpresaSection() {\r\n        setupMapPreview();\r\n        updateMapPreview();\r\n\r\n        // Cargar datos previos\r\n        binding.scrEmpresa.etNombre.setText(empresa.nombre);\r\n        binding.scrEmpresa.etCorreo.setText(empresa.correo);\r\n        binding.scrEmpresa.etTelefono.setText(empresa.telefono);\r\n        binding.scrEmpresa.etWeb.setText(empresa.web);\r\n        binding.scrEmpresa.etDescripcion.setText(empresa.descripcion);\r\n\r\n        if (empresa.direccion != null && !empresa.direccion.isEmpty()) {\r\n            binding.scrEmpresa.tvDireccion.setText(empresa.direccion);\r\n        }\r\n\r\n        // Configurar galer├¡a\r\n        for (String s : empresa.imagenUris) galeriaUris.add(Uri.parse(s));\r\n        binding.scrEmpresa.rvGaleria.setLayoutManager(\r\n                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));\r\n        binding.scrEmpresa.rvGaleria.setAdapter(new ImageUriAdapter(galeriaUris, pos -> {\r\n            galeriaUris.remove(pos);\r\n            binding.scrEmpresa.rvGaleria.getAdapter().notifyItemRemoved(pos);\r\n            actualizarChecklistYEstado();\r\n        }));\r\n\r\n        // Botones\r\n        binding.scrEmpresa.btnAgregarFotos.setOnClickListener(v -> abrirPickerImagenes());\r\n        binding.scrEmpresa.btnElegirUbicacion.setOnClickListener(v -> abrirPickerUbicacion());\r\n        binding.scrEmpresa.btnGuardar.setOnClickListener(v -> guardarEmpresa(false));\r\n        binding.scrEmpresa.btnPublicar.setOnClickListener(v -> guardarEmpresa(true));\r\n\r\n        actualizarChecklistYEstado();\r\n    }\r\n\r\n    private void setupMapPreview() {\r\n        org.osmdroid.config.Configuration.getInstance().setUserAgentValue(getPackageName());\r\n        binding.scrEmpresa.mapPreview.setMultiTouchControls(false);\r\n        binding.scrEmpresa.mapPreview.setTileSource(\r\n                org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK);\r\n        binding.scrEmpresa.mapPreview.getController().setZoom(4.0);\r\n        binding.scrEmpresa.mapPreview.getController().setCenter(\r\n                new org.osmdroid.util.GeoPoint(-9.19, -75.02)); // Per├║\r\n    }\r\n\r\n    private void updateMapPreview() {\r\n        boolean hasLoc = empresa != null && empresa.lat != 0 && empresa.lon != 0\r\n                && empresa.direccion != null && !empresa.direccion.isEmpty();\r\n\r\n        if (!hasLoc) {\r\n            binding.scrEmpresa.tvDireccion.setText(\"Sin direcci├│n\");\r\n            binding.scrEmpresa.mapPreview.getOverlays().clear();\r\n            binding.scrEmpresa.mapPreview.getController().setZoom(4.0);\r\n            binding.scrEmpresa.mapPreview.getController().setCenter(\r\n                    new org.osmdroid.util.GeoPoint(-9.19, -75.02));\r\n            binding.scrEmpresa.mapPreview.invalidate();\r\n            return;\r\n        }\r\n\r\n        org.osmdroid.util.GeoPoint p = new org.osmdroid.util.GeoPoint(empresa.lat, empresa.lon);\r\n        binding.scrEmpresa.mapPreview.getOverlays().clear();\r\n\r\n        org.osmdroid.views.overlay.Marker m =\r\n                new org.osmdroid.views.overlay.Marker(binding.scrEmpresa.mapPreview);\r\n        m.setPosition(p);\r\n        m.setAnchor(org.osmdroid.views.overlay.Marker.ANCHOR_CENTER,\r\n                org.osmdroid.views.overlay.Marker.ANCHOR_BOTTOM);\r\n        m.setTitle(\"Ubicaci├│n seleccionada\");\r\n        binding.scrEmpresa.mapPreview.getOverlays().add(m);\r\n\r\n        binding.scrEmpresa.mapPreview.getController().setZoom(15.0);\r\n        binding.scrEmpresa.mapPreview.getController().setCenter(p);\r\n        binding.scrEmpresa.tvDireccion.setText(empresa.direccion);\r\n        binding.scrEmpresa.mapPreview.invalidate();\r\n    }\r\n\r\n    private void abrirPickerImagenes() {\r\n        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);\r\n        i.addCategory(Intent.CATEGORY_OPENABLE);\r\n        i.setType(\"image/*\");\r\n        i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);\r\n        i.putExtra(Intent.EXTRA_LOCAL_ONLY, true);\r\n        i.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION |\r\n                Intent.FLAG_GRANT_READ_URI_PERMISSION);\r\n        pickImagesLauncher.launch(Intent.createChooser(i, \"Selecciona im├ígenes\"));\r\n    }\r\n\r\n    private void abrirPickerUbicacion() {\r\n        pickLocationLauncher.launch(new Intent(this, MapPickerActivity.class));\r\n    }\r\n\r\n    private void guardarEmpresa(boolean publicar) {\r\n        if (!capturarFormulario(publicar)) return;\r\n\r\n        if (publicar && !empresa.esCompleta()) {\r\n            Snackbar.make(binding.getRoot(),\r\n                    \"A├║n faltan requisitos para publicar.\", Snackbar.LENGTH_LONG).show();\r\n            return;\r\n        }\r\n\r\n        persistir();\r\n        String msg = publicar ? \"Perfil publicado Ô£à\" : \"Empresa guardada\";\r\n        Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();\r\n    }\r\n\r\n    private boolean capturarFormulario(boolean validarTodo) {\r\n        EditText etNombre = binding.scrEmpresa.etNombre;\r\n        EditText etCorreo = binding.scrEmpresa.etCorreo;\r\n        EditText etTelefono = binding.scrEmpresa.etTelefono;\r\n        EditText etDescripcion = binding.scrEmpresa.etDescripcion;\r\n\r\n        empresa.nombre = etNombre.getText().toString().trim();\r\n        empresa.correo = etCorreo.getText().toString().trim();\r\n        empresa.telefono = etTelefono.getText().toString().trim();\r\n        empresa.web = binding.scrEmpresa.etWeb.getText().toString().trim();\r\n        empresa.descripcion = etDescripcion.getText().toString().trim();\r\n\r\n        // Validaciones\r\n        if (empresa.nombre.isEmpty()) {\r\n            etNombre.setError(\"Requerido\");\r\n            if (validarTodo) return false;\r\n        }\r\n\r\n        if (empresa.correo.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(empresa.correo).matches()) {\r\n            etCorreo.setError(\"Correo inv├ílido\");\r\n            if (validarTodo) return false;\r\n        }\r\n\r\n        if (empresa.telefono.isEmpty()) {\r\n            etTelefono.setError(\"Requerido\");\r\n            if (validarTodo) return false;\r\n        }\r\n\r\n        if (validarTodo && empresa.descripcion.isEmpty()) {\r\n            etDescripcion.setError(\"Requerida\");\r\n            return false;\r\n        }\r\n\r\n        // Guardar URIs de galer├¡a\r\n        empresa.imagenUris.clear();\r\n        for (Uri u : galeriaUris) empresa.imagenUris.add(u.toString());\r\n\r\n        return true;\r\n    }\r\n\r\n    private void persistir() {\r\n        empresaRepo.save(empresa);\r\n        actualizarChecklistYEstado();\r\n    }\r\n\r\n    private void actualizarChecklistYEstado() {\r\n        setCheck(binding.scrEmpresa.chkContacto,\r\n                !empresa.correo.isEmpty() && !empresa.telefono.isEmpty());\r\n        setCheck(binding.scrEmpresa.chkUbicacion,\r\n                empresa.direccion != null && !empresa.direccion.isEmpty());\r\n        setCheck(binding.scrEmpresa.chkFotos, galeriaUris.size() >= 2);\r\n        setCheck(binding.scrEmpresa.chkDescripcion, !empresa.descripcion.isEmpty());\r\n\r\n        TextView tvEstado = binding.scrEmpresa.tvEstado;\r\n        boolean completa = empresa.esCompleta();\r\n        tvEstado.setText(completa ? \"Ô£à Perfil completo\" : \"ÔÜá´©Å Perfil incompleto\");\r\n\r\n        Button btnPublicar = binding.scrEmpresa.btnPublicar;\r\n        btnPublicar.setEnabled(completa);\r\n    }\r\n\r\n    private void setCheck(TextView tv, boolean ok) {\r\n        tv.setText((ok ? \"Ô£ô \" : \"ÔÇó \") + tv.getText().toString().replaceFirst(\"^[Ô£ôÔÇó]\\\\s*\", \"\"));\r\n    }\r\n\r\n    // ===================== SECTION 2: TOURS =====================\r\n\r\n    private void initToursSection() {\r\n        TourRepository repo = new TourRepository(this);\r\n        List<Tour> ultimos = repo.findLastN(3);\r\n        List<Tour> todosTours = repo.findAll();\r\n\r\n        // Configurar RecyclerView horizontal\r\n        LinearLayoutManager lm = new LinearLayoutManager(this,\r\n                LinearLayoutManager.HORIZONTAL, false);\r\n        binding.scrTours.rvUltimos.setLayoutManager(lm);\r\n\r\n        TourAdapter adapter = new TourAdapter(\r\n                ultimos,\r\n                t -> {\r\n                    Intent i = new Intent(this, TourDetalleActivity.class);\r\n                    i.putExtra(\"id\", t.id);\r\n                    startActivity(i);\r\n                },\r\n                (t, anchor) -> {}\r\n        );\r\n        binding.scrTours.rvUltimos.setAdapter(adapter);\r\n\r\n        // Actualizar KPIs\r\n        actualizarKPIsTours(todosTours);\r\n\r\n        // Botones\r\n        binding.scrTours.btnVerTodosUltimos.setOnClickListener(v ->\r\n                startActivity(new Intent(this, TourListActivity.class)));\r\n\r\n        binding.scrTours.fabNuevoTour.setVisibility(View.VISIBLE);\r\n        binding.scrTours.fabNuevoTour.setOnClickListener(v -> {\r\n            if (empresa == null || !empresa.esCompleta()) {\r\n                Snackbar.make(binding.getRoot(),\r\n                        \"Primero completa el perfil de tu empresa\",\r\n                        Snackbar.LENGTH_LONG).show();\r\n                binding.bottomNav.setSelectedItemId(R.id.nav_empresa);\r\n                return;\r\n            }\r\n            startActivity(new Intent(this, TourFormActivity.class));\r\n        });\r\n    }\r\n\r\n    private void actualizarKPIsTours(List<Tour> tours) {\r\n        int publicados = 0, pendientes = 0, borradores = 0;\r\n\r\n        for (Tour tour : tours) {\r\n            if (tour.estado == null) continue;\r\n            switch (tour.estado) {\r\n                case PUBLICADO:\r\n                    publicados++;\r\n                    break;\r\n                case PENDIENTE_GUIA:\r\n                    pendientes++;\r\n                    break;\r\n                case BORRADOR:\r\n                    borradores++;\r\n                    break;\r\n            }\r\n        }\r\n\r\n        binding.scrTours.tvCountPublicados.setText(String.valueOf(publicados));\r\n        binding.scrTours.tvCountPendientes.setText(String.valueOf(pendientes));\r\n        binding.scrTours.tvCountBorradores.setText(String.valueOf(borradores));\r\n    }\r\n\r\n    // ===================== SECTION 3: GU├ìAS =====================\r\n\r\n    private void initGuiasSection() {\r\n        // Acciones r├ípidas\r\n        binding.scrGuias.btnExplorarGuias.setOnClickListener(v ->\r\n                startActivity(new Intent(this, GuideDirectoryActivity.class)));\r\n\r\n        binding.scrGuias.btnOfertasGuias.setOnClickListener(v ->\r\n                startActivity(new Intent(this, OfferInboxActivity.class)));\r\n\r\n        // Carrusel horizontal de gu├¡as sugeridos\r\n        RecyclerView rv = binding.scrGuias.rvGuiasSugeridos;\r\n        rv.setLayoutManager(new LinearLayoutManager(this,\r\n                LinearLayoutManager.HORIZONTAL, false));\r\n\r\n        guiasAdapter = new GuideAdapter(this, sugeridos, new GuideAdapter.OnAction() {\r\n            @Override\r\n            public void onProfile(Guide g) {\r\n                Intent i = new Intent(Admin_HomeActivity.this,\r\n                        GuideProfileActivity.class);\r\n                i.putExtra(\"guide\", g);\r\n                startActivity(i);\r\n            }\r\n\r\n            @Override\r\n            public void onOffer(Guide g) {\r\n                Intent i = new Intent(Admin_HomeActivity.this,\r\n                        OfferCreateActivity.class);\r\n                i.putExtra(\"guide\", g);\r\n                startActivity(i);\r\n            }\r\n        });\r\n        rv.setAdapter(guiasAdapter);\r\n\r\n        refreshGuiasDashboard();\r\n    }\r\n\r\n    private void refreshGuiasDashboard() {\r\n        // Actualizar KPIs\r\n        int pend = OfferRepository.get().byStatus(Offer.Status.PENDIENTE).size();\r\n        int acep = OfferRepository.get().byStatus(Offer.Status.ACEPTADA).size();\r\n        int activos = GuideRepository.get().all().size();\r\n\r\n        binding.scrGuias.kpiOfertasPendientes.setText(String.valueOf(pend));\r\n        binding.scrGuias.kpiOfertasAceptadas.setText(String.valueOf(acep));\r\n        binding.scrGuias.kpiGuiasActivos.setText(String.valueOf(activos));\r\n\r\n        // Actualizar gu├¡as sugeridos\r\n        sugeridos.clear();\r\n        List<Guide> all = GuideRepository.get().all();\r\n        for (int i = 0; i < Math.min(5, all.size()); i++) {\r\n            sugeridos.add(all.get(i));\r\n        }\r\n        guiasAdapter.notifyDataSetChanged();\r\n\r\n        binding.scrGuias.emptyStateGuias.setVisibility(\r\n                sugeridos.isEmpty() ? View.VISIBLE : View.GONE);\r\n    }\r\n\r\n    // ===================== SECTION 4: REPORTES =====================\r\n\r\n    private void initReportesSection() {\r\n        // Filtros de per├¡odo\r\n        binding.scrReportes.chipSemana.setOnClickListener(v -> cargarReportes(\"SEMANA\"));\r\n        binding.scrReportes.chipMes.setOnClickListener(v -> cargarReportes(\"MES\"));\r\n        binding.scrReportes.chipAnio.setOnClickListener(v -> cargarReportes(\"ANIO\"));\r\n\r\n        // Ver todas las transacciones\r\n        binding.scrReportes.btnVerTodasTransacciones.setOnClickListener(v -> {\r\n            Snackbar.make(binding.getRoot(),\r\n                    \"Funcionalidad en desarrollo\", Snackbar.LENGTH_SHORT).show();\r\n        });\r\n\r\n        // Cargar datos iniciales (mes)\r\n        cargarReportes(\"MES\");\r\n    }\r\n\r\n    private void cargarReportes(String periodo) {\r\n        // KPIs principales (datos de ejemplo - reemplazar con BD real)\r\n        switch (periodo) {\r\n            case \"SEMANA\":\r\n                binding.scrReportes.tvIngresosTotales.setText(\"S/ 2,850\");\r\n                binding.scrReportes.tvIngresosCambio.setText(\"Ôåæ +12% vs anterior\");\r\n                binding.scrReportes.tvReservasTotales.setText(\"12\");\r\n                binding.scrReportes.tvReservasCambio.setText(\"Ôåæ +3 vs anterior\");\r\n                break;\r\n            case \"MES\":\r\n                binding.scrReportes.tvIngresosTotales.setText(\"S/ 12,450\");\r\n                binding.scrReportes.tvIngresosCambio.setText(\"Ôåæ +15% vs anterior\");\r\n                binding.scrReportes.tvReservasTotales.setText(\"48\");\r\n                binding.scrReportes.tvReservasCambio.setText(\"Ôåæ +8 vs anterior\");\r\n                break;\r\n            case \"ANIO\":\r\n                binding.scrReportes.tvIngresosTotales.setText(\"S/ 148,900\");\r\n                binding.scrReportes.tvIngresosCambio.setText(\"Ôåæ +23% vs anterior\");\r\n                binding.scrReportes.tvReservasTotales.setText(\"567\");\r\n                binding.scrReportes.tvReservasCambio.setText(\"Ôåæ +89 vs anterior\");\r\n                break;\r\n        }\r\n\r\n        // KPIs secundarios\r\n        TourRepository tourRepo = new TourRepository(this);\r\n        int toursActivos = 0;\r\n        for (Tour t : tourRepo.findAll()) {\r\n            if (t.estado == TourEstado.PUBLICADO) toursActivos++;\r\n        }\r\n\r\n        binding.scrReportes.tvToursActivos.setText(String.valueOf(toursActivos));\r\n        binding.scrReportes.tvGuiasContratados.setText(\r\n                String.valueOf(GuideRepository.get().all().size()));\r\n        binding.scrReportes.tvSatisfaccion.setText(\"4.7\");\r\n    }\r\n\r\n    // ===================== SECTION 5: PERFIL =====================\r\n\r\n    private void initPerfilSection() {\r\n        // Cargar datos del admin\r\n        binding.scrPerfil.tvNombre.setText(admin.getNombre());\r\n        binding.scrPerfil.tvEmail.setText(admin.getEmail());\r\n        binding.scrPerfil.tvTelefono.setText(\"+51 \" + admin.getTelefono());\r\n\r\n        // Datos de empresa\r\n        binding.scrPerfil.tvEmpresaNombre.setText(empresa.nombre);\r\n        binding.scrPerfil.tvRuc.setText(\"20123456789\");\r\n\r\n        // Botones\r\n        binding.scrPerfil.btnEditarPerfil.setOnClickListener(v -> mostrarDialogEditarPerfil());\r\n\r\n        binding.scrPerfil.btnCambiarFoto.setOnClickListener(v -> {\r\n            Snackbar.make(binding.getRoot(),\r\n                    \"Funcionalidad en desarrollo\", Snackbar.LENGTH_SHORT).show();\r\n        });\r\n\r\n        binding.scrPerfil.btnVerEmpresa.setOnClickListener(v -> {\r\n            binding.bottomNav.setSelectedItemId(R.id.nav_empresa);\r\n        });\r\n\r\n        // Switches\r\n        binding.scrPerfil.switchNotificaciones.setOnCheckedChangeListener((buttonView, isChecked) -> {\r\n            String msg = isChecked ? \"Notificaciones activadas\" : \"Notificaciones desactivadas\";\r\n            Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();\r\n        });\r\n\r\n        binding.scrPerfil.switchModoOscuro.setOnCheckedChangeListener((buttonView, isChecked) -> {\r\n            String msg = isChecked ? \"Modo oscuro activado\" : \"Modo oscuro desactivado\";\r\n            Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();\r\n        });\r\n\r\n        binding.scrPerfil.btnIdioma.setOnClickListener(v -> {\r\n            Snackbar.make(binding.getRoot(),\r\n                    \"Funcionalidad en desarrollo\", Snackbar.LENGTH_SHORT).show();\r\n        });\r\n\r\n        // Cerrar sesi├│n\r\n        binding.scrPerfil.btnCerrarSesion.setOnClickListener(v -> {\r\n            new androidx.appcompat.app.AlertDialog.Builder(this)\r\n                    .setTitle(\"Cerrar sesi├│n\")\r\n                    .setMessage(\"┬┐Est├ís seguro de que deseas cerrar sesi├│n?\")\r\n                    .setPositiveButton(\"S├¡\", (dialog, which) -> {\r\n                        adminRepo.clear();\r\n                        Snackbar.make(binding.getRoot(),\r\n                                \"Sesi├│n cerrada\", Snackbar.LENGTH_LONG).show();\r\n                        // TODO: Redirigir al login cuando est├® implementado\r\n                        // startActivity(new Intent(this, LoginActivity.class));\r\n                        // finish();\r\n                    })\r\n                    .setNegativeButton(\"Cancelar\", null)\r\n                    .show();\r\n        });\r\n    }\r\n\r\n    private void mostrarDialogEditarPerfil() {\r\n        View dialogView = getLayoutInflater().inflate(R.layout.dialog_editar_perfil, null);\r\n\r\n        com.google.android.material.textfield.TextInputEditText etNombre =\r\n                dialogView.findViewById(R.id.etNombre);\r\n        com.google.android.material.textfield.TextInputEditText etEmail =\r\n                dialogView.findViewById(R.id.etEmail);\r\n        com.google.android.material.textfield.TextInputEditText etTelefono =\r\n                dialogView.findViewById(R.id.etTelefono);\r\n\r\n        // Llenar con datos actuales\r\n        etNombre.setText(admin.getNombre());\r\n        etEmail.setText(admin.getEmail());\r\n        etTelefono.setText(admin.getTelefono());\r\n\r\n        androidx.appcompat.app.AlertDialog dialog =\r\n                new androidx.appcompat.app.AlertDialog.Builder(this)\r\n                        .setView(dialogView)\r\n                        .create();\r\n\r\n        // Bot├│n cancelar\r\n        dialogView.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());\r\n\r\n        // Bot├│n guardar\r\n        dialogView.findViewById(R.id.btnGuardar).setOnClickListener(v -> {\r\n            String nombre = etNombre.getText().toString().trim();\r\n            String telefono = etTelefono.getText().toString().trim();\r\n\r\n            // Validaciones\r\n            if (nombre.isEmpty()) {\r\n                etNombre.setError(\"El nombre es requerido\");\r\n                return;\r\n            }\r\n\r\n            if (telefono.isEmpty() || telefono.length() < 9) {\r\n                etTelefono.setError(\"Tel├®fono inv├ílido (m├¡nimo 9 d├¡gitos)\");\r\n                return;\r\n            }\r\n\r\n            // Actualizar admin (email NO cambia)\r\n            admin.setNombre(nombre);\r\n            admin.setTelefono(telefono);\r\n            adminRepo.save(admin);\r\n\r\n            // Actualizar UI\r\n            binding.scrPerfil.tvNombre.setText(admin.getNombre());\r\n            binding.scrPerfil.tvTelefono.setText(\"+51 \" + admin.getTelefono());\r\n\r\n            dialog.dismiss();\r\n            Snackbar.make(binding.getRoot(),\r\n                    \"Perfil actualizado Ô£ô\", Snackbar.LENGTH_SHORT).show();\r\n        });\r\n\r\n        dialog.show();\r\n    }\r\n\r\n    // ===================== DATA SEEDING (DEVELOPMENT ONLY) =====================\r\n\r\n    /**\r\n     * Crea tours de prueba si la BD est├í vac├¡a\r\n     * ELIMINAR en producci├│n\r\n     */\r\n    private void crearDatosDePruebaSiEsNecesario() {\r\n        TourRepository repo = new TourRepository(this);\r\n        if (!repo.findAll().isEmpty()) return;\r\n\r\n        // Tour 1\r\n        Tour t1 = new Tour();\r\n        t1.id = \"1\";\r\n        t1.titulo = \"City Tour Lima Centro\";\r\n        t1.descripcionCorta = \"Conoce el centro hist├│rico de Lima\";\r\n        t1.precioPorPersona = 50.0;\r\n        t1.cupos = 15;\r\n        t1.estado = TourEstado.PUBLICADO;\r\n        repo.upsert(t1);\r\n\r\n        // Tour 2\r\n        Tour t2 = new Tour();\r\n        t2.id = \"2\";\r\n        t2.titulo = \"Tour Gastron├│mico Miraflores\";\r\n        t2.descripcionCorta = \"Degusta los mejores platos peruanos\";\r\n        t2.precioPorPersona = 80.0;\r\n        t2.cupos = 10;\r\n        t2.estado = TourEstado.PUBLICADO;\r\n        repo.upsert(t2);\r\n\r\n        // Tour 3\r\n        Tour t3 = new Tour();\r\n        t3.id = \"3\";\r\n        t3.titulo = \"Huacachina Aventura\";\r\n        t3.descripcionCorta = \"Sandboarding en el desierto\";\r\n        t3.precioPorPersona = 120.0;\r\n        t3.cupos = 8;\r\n        t3.estado = TourEstado.EN_CURSO;\r\n        repo.upsert(t3);\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/Admin_HomeActivity.java b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/Admin_HomeActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/Admin_HomeActivity.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/java/com/example/proyecto_2025/Activities_Administrador/Admin_HomeActivity.java	(date 1763339941652)
+@@ -1,4 +1,5 @@
+ package com.example.proyecto_2025.Activities_Administrador;
++
+ import android.app.Activity;
+ import android.content.Intent;
+ import android.net.Uri;
+@@ -19,26 +20,25 @@
+ 
+ import com.example.proyecto_2025.R;
+ import com.example.proyecto_2025.adapter.ImageUriAdapter;
+-import com.example.proyecto_2025.adapter.GuideAdapter;
++import com.example.proyecto_2025.adapter.GuiasAdapter;
+ import com.example.proyecto_2025.adapter.TourAdapter;
++import com.example.proyecto_2025.data.AdminRepository;
+ import com.example.proyecto_2025.data.EmpresaRepository;
+-import com.example.proyecto_2025.data.TourRepository;
+ import com.example.proyecto_2025.data.OfferRepository;
+-import com.example.proyecto_2025.data.GuideRepository;
+-import com.example.proyecto_2025.data.AdminRepository;
++import com.example.proyecto_2025.data.TourRepository;
++import com.example.proyecto_2025.data.repository.GuiaRepository;
+ import com.example.proyecto_2025.databinding.ActivityAdminHomeBinding;
++import com.example.proyecto_2025.model.Admin;
+ import com.example.proyecto_2025.model.Empresa;
+-import com.example.proyecto_2025.model.Guide;
++import com.example.proyecto_2025.model.Guia;
+ import com.example.proyecto_2025.model.Offer;
+ import com.example.proyecto_2025.model.Tour;
+ import com.example.proyecto_2025.model.TourEstado;
+-import com.example.proyecto_2025.model.Admin;
+ import com.google.android.material.snackbar.Snackbar;
+ 
+ import java.util.ArrayList;
+ import java.util.List;
+ 
+-
+ public class Admin_HomeActivity extends AppCompatActivity {
+ 
+     // ===================== BINDING & CONSTANTS =====================
+@@ -58,8 +58,8 @@
+     private Empresa empresa;
+     private Admin admin;
+     private final List<Uri> galeriaUris = new ArrayList<>();
+-    private final List<Guide> sugeridos = new ArrayList<>();
+-    private GuideAdapter guiasAdapter;
++    private final List<Guia> sugeridos = new ArrayList<>();
++    private GuiasAdapter guiasAdapter;
+ 
+     // ===================== LAUNCHERS =====================
+     private ActivityResultLauncher<Intent> pickImagesLauncher;
+@@ -72,26 +72,17 @@
+         binding = ActivityAdminHomeBinding.inflate(getLayoutInflater());
+         setContentView(binding.getRoot());
+ 
+-        // Configurar toolbar
+         setupToolbar();
+-
+-        // Inicializar repositorios y datos
+         initializeRepositories();
+-
+-        // Configurar launchers
+         setupLaunchers();
+ 
+-        // Configurar bottom navigation
+         binding.bottomNav.setOnItemSelectedListener(this::onBottomItemSelected);
+ 
+-        // Inicializar todas las secciones
+         initializeAllSections();
+ 
+-        // Pantalla inicial
+         binding.bottomNav.setSelectedItemId(R.id.nav_empresa);
+         showScreen(SCR_EMPRESA);
+ 
+-        // Datos de prueba (eliminar en producci├│n)
+         crearDatosDePruebaSiEsNecesario();
+     }
+ 
+@@ -106,7 +97,6 @@
+     }
+ 
+     private void initializeRepositories() {
+-        GuideRepository.get().seedIfEmpty(this);
+         empresaRepo = new EmpresaRepository(this);
+         empresa = empresaRepo.load();
+         adminRepo = new AdminRepository(this);
+@@ -114,7 +104,7 @@
+     }
+ 
+     private void setupLaunchers() {
+-        // Launcher para seleccionar im├ígenes
++        // Imágenes
+         pickImagesLauncher = registerForActivityResult(
+                 new ActivityResultContracts.StartActivityForResult(), result -> {
+                     if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) return;
+@@ -145,7 +135,7 @@
+                     actualizarChecklistYEstado();
+                 });
+ 
+-        // Launcher para seleccionar ubicaci├│n
++        // Ubicación
+         pickLocationLauncher = registerForActivityResult(
+                 new ActivityResultContracts.StartActivityForResult(), result -> {
+                     if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) return;
+@@ -157,7 +147,7 @@
+ 
+                     binding.scrEmpresa.tvDireccion.setText(
+                             (empresa.direccion == null || empresa.direccion.isEmpty())
+-                                    ? "Sin direcci├│n"
++                                    ? "Sin dirección"
+                                     : empresa.direccion
+                     );
+ 
+@@ -187,27 +177,24 @@
+     }
+ 
+     private void showScreen(@IdRes int screenId) {
+-        // Ocultar todas las pantallas
+         binding.scrEmpresa.getRoot().setVisibility(View.GONE);
+         binding.scrTours.getRoot().setVisibility(View.GONE);
+         binding.scrGuias.getRoot().setVisibility(View.GONE);
+         binding.scrReportes.getRoot().setVisibility(View.GONE);
+         binding.scrPerfil.getRoot().setVisibility(View.GONE);
+ 
+-        // Mostrar pantalla seleccionada
+         View target =
+                 (screenId == SCR_EMPRESA)  ? binding.scrEmpresa.getRoot() :
+                         (screenId == SCR_TOURS)    ? binding.scrTours.getRoot() :
+                                 (screenId == SCR_GUIAS)    ? binding.scrGuias.getRoot() :
+-                                        (screenId == SCR_REPORTES) ? binding.scrReportes.getRoot() : binding.scrPerfil.getRoot();
++                                        (screenId == SCR_REPORTES) ? binding.scrReportes.getRoot() :
++                                                binding.scrPerfil.getRoot();
+ 
+         target.setVisibility(View.VISIBLE);
+ 
+-        // FAB visible solo en ciertas pantallas
+         binding.fab.setVisibility(View.GONE);
+         binding.fab.setOnClickListener(null);
+ 
+-        // Actualizar datos si es necesario
+         if (screenId == SCR_GUIAS) {
+             refreshGuiasDashboard();
+         }
+@@ -219,7 +206,6 @@
+         setupMapPreview();
+         updateMapPreview();
+ 
+-        // Cargar datos previos
+         binding.scrEmpresa.etNombre.setText(empresa.nombre);
+         binding.scrEmpresa.etCorreo.setText(empresa.correo);
+         binding.scrEmpresa.etTelefono.setText(empresa.telefono);
+@@ -230,7 +216,6 @@
+             binding.scrEmpresa.tvDireccion.setText(empresa.direccion);
+         }
+ 
+-        // Configurar galer├¡a
+         for (String s : empresa.imagenUris) galeriaUris.add(Uri.parse(s));
+         binding.scrEmpresa.rvGaleria.setLayoutManager(
+                 new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+@@ -240,7 +225,6 @@
+             actualizarChecklistYEstado();
+         }));
+ 
+-        // Botones
+         binding.scrEmpresa.btnAgregarFotos.setOnClickListener(v -> abrirPickerImagenes());
+         binding.scrEmpresa.btnElegirUbicacion.setOnClickListener(v -> abrirPickerUbicacion());
+         binding.scrEmpresa.btnGuardar.setOnClickListener(v -> guardarEmpresa(false));
+@@ -256,7 +240,7 @@
+                 org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK);
+         binding.scrEmpresa.mapPreview.getController().setZoom(4.0);
+         binding.scrEmpresa.mapPreview.getController().setCenter(
+-                new org.osmdroid.util.GeoPoint(-9.19, -75.02)); // Per├║
++                new org.osmdroid.util.GeoPoint(-9.19, -75.02)); // Perú
+     }
+ 
+     private void updateMapPreview() {
+@@ -264,7 +248,7 @@
+                 && empresa.direccion != null && !empresa.direccion.isEmpty();
+ 
+         if (!hasLoc) {
+-            binding.scrEmpresa.tvDireccion.setText("Sin direcci├│n");
++            binding.scrEmpresa.tvDireccion.setText("Sin dirección");
+             binding.scrEmpresa.mapPreview.getOverlays().clear();
+             binding.scrEmpresa.mapPreview.getController().setZoom(4.0);
+             binding.scrEmpresa.mapPreview.getController().setCenter(
+@@ -281,7 +265,7 @@
+         m.setPosition(p);
+         m.setAnchor(org.osmdroid.views.overlay.Marker.ANCHOR_CENTER,
+                 org.osmdroid.views.overlay.Marker.ANCHOR_BOTTOM);
+-        m.setTitle("Ubicaci├│n seleccionada");
++        m.setTitle("Ubicación seleccionada");
+         binding.scrEmpresa.mapPreview.getOverlays().add(m);
+ 
+         binding.scrEmpresa.mapPreview.getController().setZoom(15.0);
+@@ -298,7 +282,7 @@
+         i.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+         i.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION |
+                 Intent.FLAG_GRANT_READ_URI_PERMISSION);
+-        pickImagesLauncher.launch(Intent.createChooser(i, "Selecciona im├ígenes"));
++        pickImagesLauncher.launch(Intent.createChooser(i, "Selecciona imágenes"));
+     }
+ 
+     private void abrirPickerUbicacion() {
+@@ -310,12 +294,12 @@
+ 
+         if (publicar && !empresa.esCompleta()) {
+             Snackbar.make(binding.getRoot(),
+-                    "A├║n faltan requisitos para publicar.", Snackbar.LENGTH_LONG).show();
++                    "Aún faltan requisitos para publicar.", Snackbar.LENGTH_LONG).show();
+             return;
+         }
+ 
+         persistir();
+-        String msg = publicar ? "Perfil publicado Ô£à" : "Empresa guardada";
++        String msg = publicar ? "Perfil publicado ✅" : "Empresa guardada";
+         Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
+     }
+ 
+@@ -331,14 +315,14 @@
+         empresa.web = binding.scrEmpresa.etWeb.getText().toString().trim();
+         empresa.descripcion = etDescripcion.getText().toString().trim();
+ 
+-        // Validaciones
+         if (empresa.nombre.isEmpty()) {
+             etNombre.setError("Requerido");
+             if (validarTodo) return false;
+         }
+ 
+-        if (empresa.correo.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(empresa.correo).matches()) {
+-            etCorreo.setError("Correo inv├ílido");
++        if (empresa.correo.isEmpty() ||
++                !Patterns.EMAIL_ADDRESS.matcher(empresa.correo).matches()) {
++            etCorreo.setError("Correo inválido");
+             if (validarTodo) return false;
+         }
+ 
+@@ -352,7 +336,6 @@
+             return false;
+         }
+ 
+-        // Guardar URIs de galer├¡a
+         empresa.imagenUris.clear();
+         for (Uri u : galeriaUris) empresa.imagenUris.add(u.toString());
+ 
+@@ -374,14 +357,14 @@
+ 
+         TextView tvEstado = binding.scrEmpresa.tvEstado;
+         boolean completa = empresa.esCompleta();
+-        tvEstado.setText(completa ? "Ô£à Perfil completo" : "ÔÜá´©Å Perfil incompleto");
++        tvEstado.setText(completa ? "✅ Perfil completo" : "⚠️ Perfil incompleto");
+ 
+         Button btnPublicar = binding.scrEmpresa.btnPublicar;
+         btnPublicar.setEnabled(completa);
+     }
+ 
+     private void setCheck(TextView tv, boolean ok) {
+-        tv.setText((ok ? "Ô£ô " : "ÔÇó ") + tv.getText().toString().replaceFirst("^[Ô£ôÔÇó]\\s*", ""));
++        tv.setText((ok ? "✔ " : "• ") + tv.getText().toString().replaceFirst("^[✔•]\\s*", ""));
+     }
+ 
+     // ===================== SECTION 2: TOURS =====================
+@@ -391,11 +374,11 @@
+         List<Tour> ultimos = repo.findLastN(3);
+         List<Tour> todosTours = repo.findAll();
+ 
+-        // Configurar RecyclerView horizontal
+         LinearLayoutManager lm = new LinearLayoutManager(this,
+                 LinearLayoutManager.HORIZONTAL, false);
+         binding.scrTours.rvUltimos.setLayoutManager(lm);
+ 
++        // Tu TourAdapter tiene 3 parámetros en el constructor
+         TourAdapter adapter = new TourAdapter(
+                 ultimos,
+                 t -> {
+@@ -403,14 +386,14 @@
+                     i.putExtra("id", t.id);
+                     startActivity(i);
+                 },
+-                (t, anchor) -> {}
++                (t, anchor) -> {
++                    // aquí podrías abrir un menú contextual si quieres
++                }
+         );
+         binding.scrTours.rvUltimos.setAdapter(adapter);
+ 
+-        // Actualizar KPIs
+         actualizarKPIsTours(todosTours);
+ 
+-        // Botones
+         binding.scrTours.btnVerTodosUltimos.setOnClickListener(v ->
+                 startActivity(new Intent(this, TourListActivity.class)));
+ 
+@@ -433,15 +416,9 @@
+         for (Tour tour : tours) {
+             if (tour.estado == null) continue;
+             switch (tour.estado) {
+-                case PUBLICADO:
+-                    publicados++;
+-                    break;
+-                case PENDIENTE_GUIA:
+-                    pendientes++;
+-                    break;
+-                case BORRADOR:
+-                    borradores++;
+-                    break;
++                case PUBLICADO:      publicados++; break;
++                case PENDIENTE_GUIA: pendientes++; break;
++                case BORRADOR:       borradores++; break;
+             }
+         }
+ 
+@@ -450,107 +427,117 @@
+         binding.scrTours.tvCountBorradores.setText(String.valueOf(borradores));
+     }
+ 
+-    // ===================== SECTION 3: GU├ìAS =====================
++    // ===================== SECTION 3: GUÍAS =====================
+ 
+     private void initGuiasSection() {
+-        // Acciones r├ípidas
++        // Acciones rápidas
+         binding.scrGuias.btnExplorarGuias.setOnClickListener(v ->
+                 startActivity(new Intent(this, GuideDirectoryActivity.class)));
+ 
+         binding.scrGuias.btnOfertasGuias.setOnClickListener(v ->
+                 startActivity(new Intent(this, OfferInboxActivity.class)));
+ 
+-        // Carrusel horizontal de gu├¡as sugeridos
+         RecyclerView rv = binding.scrGuias.rvGuiasSugeridos;
+         rv.setLayoutManager(new LinearLayoutManager(this,
+                 LinearLayoutManager.HORIZONTAL, false));
+ 
+-        guiasAdapter = new GuideAdapter(this, sugeridos, new GuideAdapter.OnAction() {
+-            @Override
+-            public void onProfile(Guide g) {
+-                Intent i = new Intent(Admin_HomeActivity.this,
+-                        GuideProfileActivity.class);
+-                i.putExtra("guide", g);
+-                startActivity(i);
+-            }
+-
+-            @Override
+-            public void onOffer(Guide g) {
+-                Intent i = new Intent(Admin_HomeActivity.this,
+-                        OfferCreateActivity.class);
+-                i.putExtra("guide", g);
+-                startActivity(i);
+-            }
+-        });
++        // NUEVO constructor de GuiasAdapter: 4 argumentos
++        guiasAdapter = new GuiasAdapter(
++                GuiasAdapter.Mode.APPROVED,
++                // onToggle: abrir perfil del guía
++                g -> {
++                    Intent i = new Intent(Admin_HomeActivity.this,
++                            GuideProfileActivity.class);
++                    i.putExtra("guide", g);
++                    startActivity(i);
++                },
++                // onApprove: crear oferta
++                g -> {
++                    Intent i = new Intent(Admin_HomeActivity.this,
++                            OfferCreateActivity.class);
++                    i.putExtra("guide", g);
++                    startActivity(i);
++                },
++                // onReject: por ahora solo mostramos un mensaje
++                g -> Snackbar.make(binding.getRoot(),
++                        "Acción de rechazo no implementada aún",
++                        Snackbar.LENGTH_SHORT).show()
++        );
+         rv.setAdapter(guiasAdapter);
+ 
+         refreshGuiasDashboard();
+     }
+ 
+     private void refreshGuiasDashboard() {
+-        // Actualizar KPIs
+         int pend = OfferRepository.get().byStatus(Offer.Status.PENDIENTE).size();
+         int acep = OfferRepository.get().byStatus(Offer.Status.ACEPTADA).size();
+-        int activos = GuideRepository.get().all().size();
+ 
+         binding.scrGuias.kpiOfertasPendientes.setText(String.valueOf(pend));
+         binding.scrGuias.kpiOfertasAceptadas.setText(String.valueOf(acep));
+-        binding.scrGuias.kpiGuiasActivos.setText(String.valueOf(activos));
++        binding.scrGuias.kpiGuiasActivos.setText("...");
+ 
+-        // Actualizar gu├¡as sugeridos
+-        sugeridos.clear();
+-        List<Guide> all = GuideRepository.get().all();
+-        for (int i = 0; i < Math.min(5, all.size()); i++) {
+-            sugeridos.add(all.get(i));
+-        }
+-        guiasAdapter.notifyDataSetChanged();
++        // Uso de Callback con clase anónima (no lambda)
++        GuiaRepository.get().getGuiasActivos(
++                new GuiaRepository.Callback<List<Guia>>() {
++                    @Override
++                    public void onSuccess(List<Guia> all) {
++                        binding.scrGuias.kpiGuiasActivos
++                                .setText(String.valueOf(all.size()));
++
++                        sugeridos.clear();
++                        for (int i = 0; i < Math.min(5, all.size()); i++) {
++                            sugeridos.add(all.get(i));
++                        }
++                        guiasAdapter.setData(sugeridos);
+ 
+-        binding.scrGuias.emptyStateGuias.setVisibility(
+-                sugeridos.isEmpty() ? View.VISIBLE : View.GONE);
+-    }
++                        binding.scrGuias.emptyStateGuias.setVisibility(
++                                sugeridos.isEmpty() ? View.VISIBLE : View.GONE);
++                    }
+ 
++                    @Override
++                    public void onError(Exception e) {
++                        binding.scrGuias.kpiGuiasActivos.setText("0");
++                        binding.scrGuias.emptyStateGuias.setVisibility(View.VISIBLE);
++                    }
++                });
++    }
++
+     // ===================== SECTION 4: REPORTES =====================
+ 
+     private void initReportesSection() {
+-        // Filtros de per├¡odo
+         binding.scrReportes.chipSemana.setOnClickListener(v -> cargarReportes("SEMANA"));
+         binding.scrReportes.chipMes.setOnClickListener(v -> cargarReportes("MES"));
+         binding.scrReportes.chipAnio.setOnClickListener(v -> cargarReportes("ANIO"));
+ 
+-        // Ver todas las transacciones
+-        binding.scrReportes.btnVerTodasTransacciones.setOnClickListener(v -> {
+-            Snackbar.make(binding.getRoot(),
+-                    "Funcionalidad en desarrollo", Snackbar.LENGTH_SHORT).show();
+-        });
++        binding.scrReportes.btnVerTodasTransacciones.setOnClickListener(v ->
++                Snackbar.make(binding.getRoot(),
++                        "Funcionalidad en desarrollo", Snackbar.LENGTH_SHORT).show());
+ 
+-        // Cargar datos iniciales (mes)
+         cargarReportes("MES");
+     }
+ 
+     private void cargarReportes(String periodo) {
+-        // KPIs principales (datos de ejemplo - reemplazar con BD real)
+         switch (periodo) {
+             case "SEMANA":
+                 binding.scrReportes.tvIngresosTotales.setText("S/ 2,850");
+-                binding.scrReportes.tvIngresosCambio.setText("Ôåæ +12% vs anterior");
++                binding.scrReportes.tvIngresosCambio.setText("📈 +12% vs anterior");
+                 binding.scrReportes.tvReservasTotales.setText("12");
+-                binding.scrReportes.tvReservasCambio.setText("Ôåæ +3 vs anterior");
++                binding.scrReportes.tvReservasCambio.setText("📈 +3 vs anterior");
+                 break;
+             case "MES":
+                 binding.scrReportes.tvIngresosTotales.setText("S/ 12,450");
+-                binding.scrReportes.tvIngresosCambio.setText("Ôåæ +15% vs anterior");
++                binding.scrReportes.tvIngresosCambio.setText("📈 +15% vs anterior");
+                 binding.scrReportes.tvReservasTotales.setText("48");
+-                binding.scrReportes.tvReservasCambio.setText("Ôåæ +8 vs anterior");
++                binding.scrReportes.tvReservasCambio.setText("📈 +8 vs anterior");
+                 break;
+             case "ANIO":
+                 binding.scrReportes.tvIngresosTotales.setText("S/ 148,900");
+-                binding.scrReportes.tvIngresosCambio.setText("Ôåæ +23% vs anterior");
++                binding.scrReportes.tvIngresosCambio.setText("📈 +23% vs anterior");
+                 binding.scrReportes.tvReservasTotales.setText("567");
+-                binding.scrReportes.tvReservasCambio.setText("Ôåæ +89 vs anterior");
++                binding.scrReportes.tvReservasCambio.setText("📈 +89 vs anterior");
+                 break;
+         }
+ 
+-        // KPIs secundarios
+         TourRepository tourRepo = new TourRepository(this);
+         int toursActivos = 0;
+         for (Tour t : tourRepo.findAll()) {
+@@ -558,36 +545,44 @@
+         }
+ 
+         binding.scrReportes.tvToursActivos.setText(String.valueOf(toursActivos));
+-        binding.scrReportes.tvGuiasContratados.setText(
+-                String.valueOf(GuideRepository.get().all().size()));
++        binding.scrReportes.tvGuiasContratados.setText("0");
+         binding.scrReportes.tvSatisfaccion.setText("4.7");
++
++        // Guias activos para reportes
++        GuiaRepository.get().getGuiasActivos(
++                new GuiaRepository.Callback<List<Guia>>() {
++                    @Override
++                    public void onSuccess(List<Guia> all) {
++                        binding.scrReportes.tvGuiasContratados
++                                .setText(String.valueOf(all.size()));
++                    }
++
++                    @Override
++                    public void onError(Exception e) {
++                        binding.scrReportes.tvGuiasContratados.setText("0");
++                    }
++                });
+     }
+ 
+     // ===================== SECTION 5: PERFIL =====================
+ 
+     private void initPerfilSection() {
+-        // Cargar datos del admin
+         binding.scrPerfil.tvNombre.setText(admin.getNombre());
+         binding.scrPerfil.tvEmail.setText(admin.getEmail());
+         binding.scrPerfil.tvTelefono.setText("+51 " + admin.getTelefono());
+ 
+-        // Datos de empresa
+         binding.scrPerfil.tvEmpresaNombre.setText(empresa.nombre);
+         binding.scrPerfil.tvRuc.setText("20123456789");
+ 
+-        // Botones
+         binding.scrPerfil.btnEditarPerfil.setOnClickListener(v -> mostrarDialogEditarPerfil());
+ 
+-        binding.scrPerfil.btnCambiarFoto.setOnClickListener(v -> {
+-            Snackbar.make(binding.getRoot(),
+-                    "Funcionalidad en desarrollo", Snackbar.LENGTH_SHORT).show();
+-        });
++        binding.scrPerfil.btnCambiarFoto.setOnClickListener(v ->
++                Snackbar.make(binding.getRoot(),
++                        "Funcionalidad en desarrollo", Snackbar.LENGTH_SHORT).show());
+ 
+-        binding.scrPerfil.btnVerEmpresa.setOnClickListener(v -> {
+-            binding.bottomNav.setSelectedItemId(R.id.nav_empresa);
+-        });
++        binding.scrPerfil.btnVerEmpresa.setOnClickListener(v ->
++                binding.bottomNav.setSelectedItemId(R.id.nav_empresa));
+ 
+-        // Switches
+         binding.scrPerfil.switchNotificaciones.setOnCheckedChangeListener((buttonView, isChecked) -> {
+             String msg = isChecked ? "Notificaciones activadas" : "Notificaciones desactivadas";
+             Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
+@@ -598,23 +593,18 @@
+             Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
+         });
+ 
+-        binding.scrPerfil.btnIdioma.setOnClickListener(v -> {
+-            Snackbar.make(binding.getRoot(),
+-                    "Funcionalidad en desarrollo", Snackbar.LENGTH_SHORT).show();
+-        });
++        binding.scrPerfil.btnIdioma.setOnClickListener(v ->
++                Snackbar.make(binding.getRoot(),
++                        "Funcionalidad en desarrollo", Snackbar.LENGTH_SHORT).show());
+ 
+-        // Cerrar sesi├│n
+         binding.scrPerfil.btnCerrarSesion.setOnClickListener(v -> {
+             new androidx.appcompat.app.AlertDialog.Builder(this)
+-                    .setTitle("Cerrar sesi├│n")
+-                    .setMessage("┬┐Est├ís seguro de que deseas cerrar sesi├│n?")
+-                    .setPositiveButton("S├¡", (dialog, which) -> {
++                    .setTitle("Cerrar sesión")
++                    .setMessage("¿Estás seguro de que deseas cerrar sesión?")
++                    .setPositiveButton("Sí", (dialog, which) -> {
+                         adminRepo.clear();
+                         Snackbar.make(binding.getRoot(),
+-                                "Sesi├│n cerrada", Snackbar.LENGTH_LONG).show();
+-                        // TODO: Redirigir al login cuando est├® implementado
+-                        // startActivity(new Intent(this, LoginActivity.class));
+-                        // finish();
++                                "Sesión cerrada", Snackbar.LENGTH_LONG).show();
+                     })
+                     .setNegativeButton("Cancelar", null)
+                     .show();
+@@ -631,7 +621,6 @@
+         com.google.android.material.textfield.TextInputEditText etTelefono =
+                 dialogView.findViewById(R.id.etTelefono);
+ 
+-        // Llenar con datos actuales
+         etNombre.setText(admin.getNombre());
+         etEmail.setText(admin.getEmail());
+         etTelefono.setText(admin.getTelefono());
+@@ -641,73 +630,61 @@
+                         .setView(dialogView)
+                         .create();
+ 
+-        // Bot├│n cancelar
+         dialogView.findViewById(R.id.btnCancelar).setOnClickListener(v -> dialog.dismiss());
+ 
+-        // Bot├│n guardar
+         dialogView.findViewById(R.id.btnGuardar).setOnClickListener(v -> {
+             String nombre = etNombre.getText().toString().trim();
+             String telefono = etTelefono.getText().toString().trim();
+ 
+-            // Validaciones
+             if (nombre.isEmpty()) {
+                 etNombre.setError("El nombre es requerido");
+                 return;
+             }
+ 
+             if (telefono.isEmpty() || telefono.length() < 9) {
+-                etTelefono.setError("Tel├®fono inv├ílido (m├¡nimo 9 d├¡gitos)");
++                etTelefono.setError("Teléfono inválido (mínimo 9 dígitos)");
+                 return;
+             }
+ 
+-            // Actualizar admin (email NO cambia)
+             admin.setNombre(nombre);
+             admin.setTelefono(telefono);
+             adminRepo.save(admin);
+ 
+-            // Actualizar UI
+             binding.scrPerfil.tvNombre.setText(admin.getNombre());
+             binding.scrPerfil.tvTelefono.setText("+51 " + admin.getTelefono());
+ 
+             dialog.dismiss();
+             Snackbar.make(binding.getRoot(),
+-                    "Perfil actualizado Ô£ô", Snackbar.LENGTH_SHORT).show();
++                    "Perfil actualizado ✅", Snackbar.LENGTH_SHORT).show();
+         });
+ 
+         dialog.show();
+     }
+ 
+-    // ===================== DATA SEEDING (DEVELOPMENT ONLY) =====================
++    // ===================== DATA SEEDING (DEV ONLY) =====================
+ 
+-    /**
+-     * Crea tours de prueba si la BD est├í vac├¡a
+-     * ELIMINAR en producci├│n
+-     */
+     private void crearDatosDePruebaSiEsNecesario() {
+         TourRepository repo = new TourRepository(this);
+         if (!repo.findAll().isEmpty()) return;
+ 
+-        // Tour 1
+         Tour t1 = new Tour();
+         t1.id = "1";
+         t1.titulo = "City Tour Lima Centro";
+-        t1.descripcionCorta = "Conoce el centro hist├│rico de Lima";
++        t1.descripcionCorta = "Conoce el centro histórico de Lima";
+         t1.precioPorPersona = 50.0;
+         t1.cupos = 15;
+         t1.estado = TourEstado.PUBLICADO;
+         repo.upsert(t1);
+ 
+-        // Tour 2
+         Tour t2 = new Tour();
+         t2.id = "2";
+-        t2.titulo = "Tour Gastron├│mico Miraflores";
++        t2.titulo = "Tour Gastronómico Miraflores";
+         t2.descripcionCorta = "Degusta los mejores platos peruanos";
+         t2.precioPorPersona = 80.0;
+         t2.cupos = 10;
+         t2.estado = TourEstado.PUBLICADO;
+         repo.upsert(t2);
+ 
+-        // Tour 3
+         Tour t3 = new Tour();
+         t3.id = "3";
+         t3.titulo = "Huacachina Aventura";
+Index: app/src/main/java/com/example/proyecto_2025/adapter/OfferAdapter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.adapter;\r\n\r\nimport android.content.Context;\r\nimport android.view.*;\r\nimport android.widget.*;\r\nimport androidx.annotation.NonNull;\r\nimport androidx.recyclerview.widget.RecyclerView;\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.data.GuideRepository;\r\nimport com.example.proyecto_2025.data.TourRepository;\r\nimport com.example.proyecto_2025.model.Offer;\r\nimport java.text.SimpleDateFormat;\r\nimport java.util.*;\r\n\r\npublic class OfferAdapter extends RecyclerView.Adapter<OfferAdapter.VH> {\r\n    public interface OnAction { void onAssign(Offer o); void onDetail(Offer o); }\r\n    private final List<Offer> data; private final Context ctx; private final OnAction listener;\r\n    private final SimpleDateFormat sdf = new SimpleDateFormat(\"dd MMM HH:mm\", Locale.getDefault());\r\n\r\n    public OfferAdapter(Context c, List<Offer> d, OnAction l){ctx=c; data=d; listener=l;}\r\n\r\n    @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup p, int v) {\r\n        return new VH(LayoutInflater.from(ctx).inflate(R.layout.item_offer_card, p, false));\r\n    }\r\n\r\n    @Override public void onBindViewHolder(@NonNull VH h, int i) {\r\n        Offer o = data.get(i);\r\n        String gName = GuideRepository.get().byId(o.getGuideId()).getName();\r\n        String tTitle = o.getTourId();        h.title.setText(tTitle);\r\n        h.subtitle.setText(gName+\" • \"+o.getPayMode()+\" • S/\"+String.format(Locale.getDefault(),\"%.2f\", o.getAmount()));\r\n        h.dates.setText(sdf.format(o.getStartDate())+\" — \"+sdf.format(o.getEndDate()));\r\n        h.status.setText(o.getStatus().name());\r\n\r\n        h.btnDetail.setOnClickListener(v->listener.onDetail(o));\r\n        h.btnAssign.setVisibility(o.getStatus()== Offer.Status.ACEPTADA ? View.VISIBLE : View.GONE);\r\n        h.btnAssign.setOnClickListener(v->listener.onAssign(o));\r\n    }\r\n\r\n    @Override public int getItemCount(){ return data.size(); }\r\n\r\n    static class VH extends RecyclerView.ViewHolder{\r\n        TextView title, subtitle, dates, status; Button btnDetail, btnAssign;\r\n        VH(@NonNull View v){\r\n            super(v);\r\n            title=v.findViewById(R.id.tvOfferTitle);\r\n            subtitle=v.findViewById(R.id.tvOfferSub);\r\n            dates=v.findViewById(R.id.tvOfferDates);\r\n            status=v.findViewById(R.id.tvOfferStatus);\r\n            btnDetail=v.findViewById(R.id.btnOfferDetail);\r\n            btnAssign=v.findViewById(R.id.btnOfferAssign);\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/adapter/OfferAdapter.java b/app/src/main/java/com/example/proyecto_2025/adapter/OfferAdapter.java
+--- a/app/src/main/java/com/example/proyecto_2025/adapter/OfferAdapter.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/java/com/example/proyecto_2025/adapter/OfferAdapter.java	(date 1763348185159)
+@@ -1,53 +1,113 @@
+ package com.example.proyecto_2025.adapter;
+ 
+ import android.content.Context;
+-import android.view.*;
+-import android.widget.*;
++import android.view.LayoutInflater;
++import android.view.View;
++import android.view.ViewGroup;
++import android.widget.Button;
++import android.widget.TextView;
++
+ import androidx.annotation.NonNull;
+ import androidx.recyclerview.widget.RecyclerView;
++
+ import com.example.proyecto_2025.R;
+-import com.example.proyecto_2025.data.GuideRepository;
+-import com.example.proyecto_2025.data.TourRepository;
++import com.example.proyecto_2025.model.Guia;
+ import com.example.proyecto_2025.model.Offer;
++
+ import java.text.SimpleDateFormat;
+-import java.util.*;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Locale;
++import java.util.Map;
+ 
+ public class OfferAdapter extends RecyclerView.Adapter<OfferAdapter.VH> {
+-    public interface OnAction { void onAssign(Offer o); void onDetail(Offer o); }
+-    private final List<Offer> data; private final Context ctx; private final OnAction listener;
++
++    public interface OnAction {
++        void onAssign(Offer o);
++        void onDetail(Offer o);
++    }
++
++    private final List<Offer> data;
++    private final Context ctx;
++    private final OnAction listener;
+     private final SimpleDateFormat sdf = new SimpleDateFormat("dd MMM HH:mm", Locale.getDefault());
+ 
+-    public OfferAdapter(Context c, List<Offer> d, OnAction l){ctx=c; data=d; listener=l;}
++    // Mapa de guías precargados: guideId -> Guia
++    private Map<String, Guia> guiaMap = new HashMap<>();
++
++    public OfferAdapter(Context c, List<Offer> d, OnAction l) {
++        ctx = c;
++        data = d;
++        listener = l;
++    }
++
++    /**
++     * Permite inyectar/actualizar el mapa de guías desde afuera (Activity/Fragment).
++     * Luego de llamarlo, se refresca la lista.
++     */
++    public void setGuiaMap(Map<String, Guia> map) {
++        this.guiaMap = (map != null) ? map : new HashMap<>();
++        notifyDataSetChanged();
++    }
+ 
+-    @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup p, int v) {
+-        return new VH(LayoutInflater.from(ctx).inflate(R.layout.item_offer_card, p, false));
++    @NonNull
++    @Override
++    public VH onCreateViewHolder(@NonNull ViewGroup p, int v) {
++        View view = LayoutInflater.from(ctx).inflate(R.layout.item_offer_card, p, false);
++        return new VH(view);
+     }
+ 
+-    @Override public void onBindViewHolder(@NonNull VH h, int i) {
++    @Override
++    public void onBindViewHolder(@NonNull VH h, int i) {
+         Offer o = data.get(i);
+-        String gName = GuideRepository.get().byId(o.getGuideId()).getName();
+-        String tTitle = o.getTourId();        h.title.setText(tTitle);
+-        h.subtitle.setText(gName+" • "+o.getPayMode()+" • S/"+String.format(Locale.getDefault(),"%.2f", o.getAmount()));
+-        h.dates.setText(sdf.format(o.getStartDate())+" — "+sdf.format(o.getEndDate()));
++
++        // Obtener guía desde el mapa (NO llamar a Firestore aquí)
++        Guia g = guiaMap.get(o.getGuideId());
++        String gName = (g != null && g.getName() != null && !g.getName().isEmpty())
++                ? g.getName()
++                : "Guía desconocido";
++
++        // Por ahora el título es el ID del tour; se puede mejorar luego con TourRepository
++        String tTitle = o.getTourId();
++        h.title.setText(tTitle != null ? tTitle : "Tour desconocido");
++
++        // Subtítulo: guía + modo de pago + monto
++        h.subtitle.setText(
++                gName + " • " + o.getPayMode() + " • S/" +
++                        String.format(Locale.getDefault(), "%.2f", o.getAmount())
++        );
++
++        // Fechas
++        h.dates.setText(
++                sdf.format(o.getStartDate()) + " — " + sdf.format(o.getEndDate())
++        );
++
++        // Estado
+         h.status.setText(o.getStatus().name());
+ 
+-        h.btnDetail.setOnClickListener(v->listener.onDetail(o));
+-        h.btnAssign.setVisibility(o.getStatus()== Offer.Status.ACEPTADA ? View.VISIBLE : View.GONE);
+-        h.btnAssign.setOnClickListener(v->listener.onAssign(o));
++        // Acciones
++        h.btnDetail.setOnClickListener(v -> listener.onDetail(o));
++        h.btnAssign.setVisibility(o.getStatus() == Offer.Status.ACEPTADA ? View.VISIBLE : View.GONE);
++        h.btnAssign.setOnClickListener(v -> listener.onAssign(o));
+     }
+ 
+-    @Override public int getItemCount(){ return data.size(); }
++    @Override
++    public int getItemCount() {
++        return data.size();
++    }
+ 
+-    static class VH extends RecyclerView.ViewHolder{
+-        TextView title, subtitle, dates, status; Button btnDetail, btnAssign;
+-        VH(@NonNull View v){
++    static class VH extends RecyclerView.ViewHolder {
++        TextView title, subtitle, dates, status;
++        Button btnDetail, btnAssign;
++
++        VH(@NonNull View v) {
+             super(v);
+-            title=v.findViewById(R.id.tvOfferTitle);
+-            subtitle=v.findViewById(R.id.tvOfferSub);
+-            dates=v.findViewById(R.id.tvOfferDates);
+-            status=v.findViewById(R.id.tvOfferStatus);
+-            btnDetail=v.findViewById(R.id.btnOfferDetail);
+-            btnAssign=v.findViewById(R.id.btnOfferAssign);
++            title = v.findViewById(R.id.tvOfferTitle);
++            subtitle = v.findViewById(R.id.tvOfferSub);
++            dates = v.findViewById(R.id.tvOfferDates);
++            status = v.findViewById(R.id.tvOfferStatus);
++            btnDetail = v.findViewById(R.id.btnOfferDetail);
++            btnAssign = v.findViewById(R.id.btnOfferAssign);
+         }
+     }
+ }
+Index: app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_HomeActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.proyecto_2025.Activities_Superadmin;\r\n\r\nimport android.content.Intent;\r\nimport android.content.res.ColorStateList;\r\nimport android.os.Bundle;\r\nimport android.util.Log;\r\nimport android.view.MenuItem;\r\nimport android.view.View;\r\nimport android.widget.ImageView;\r\nimport android.widget.TextView;\r\nimport android.widget.Toast;\r\n\r\nimport androidx.annotation.IdRes;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.core.content.ContextCompat;\r\nimport androidx.recyclerview.widget.LinearLayoutManager;\r\n\r\nimport com.bumptech.glide.Glide;\r\nimport com.example.proyecto_2025.R;\r\nimport com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;\r\nimport com.github.mikephil.charting.data.PieData;\r\nimport com.github.mikephil.charting.data.PieDataSet;\r\nimport com.github.mikephil.charting.data.PieEntry;\r\nimport com.google.firebase.auth.FirebaseAuth;\r\nimport com.google.firebase.firestore.DocumentSnapshot;\r\nimport com.google.firebase.firestore.FirebaseFirestore;\r\n\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\n\r\nimport retrofit2.Retrofit;\r\nimport retrofit2.converter.gson.GsonConverterFactory;\r\n\r\n/**\r\n * HomeView Superadmin (sin fragments):\r\n * Bottom bar fija: Dashboard, Admins, Guías, Clientes, Registros, Perfil\r\n * FAB contextual sólo en Admins (Registrar Admin) y Guías (Registrar Guías).\r\n * Ahora también: Carga los datos del usuario logueado desde Firestore.\r\n */\r\npublic class Superadmin_HomeActivity extends AppCompatActivity {\r\n\r\n    private ActivitySuperadminVistaInicialBinding binding;\r\n\r\n    // Firebase\r\n    private final FirebaseAuth auth = FirebaseAuth.getInstance();\r\n    private final FirebaseFirestore db = FirebaseFirestore.getInstance();\r\n\r\n    // Retrofit (dejas tu servicio como lo tengas)\r\n    private EmployeeService employeeService;\r\n\r\n    // IDs de raíces (coinciden con los android:id de cada <include/>)\r\n    private static final int SCR_DASHBOARD = R.id.scrDashboard;\r\n    private static final int SCR_ADMINS    = R.id.scrAdmins;\r\n    private static final int SCR_GUIAS     = R.id.scrGuias;\r\n    private static final int SCR_CLIENTES  = R.id.scrClientes;\r\n    private static final int SCR_REGISTROS = R.id.scrRegistros;\r\n    private static final int SCR_PERFIL    = R.id.scrPerfil;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        binding = ActivitySuperadminVistaInicialBinding.inflate(getLayoutInflater());\r\n        setContentView(binding.getRoot());\r\n\r\n        // Si no usarás \"Registros\" aún:\r\n        binding.bottomNav.getMenu().findItem(R.id.nav_registros).setVisible(false);\r\n\r\n        setSupportActionBar(binding.toolbar);\r\n        if (getSupportActionBar() != null) {\r\n            getSupportActionBar().setTitle(\"\");\r\n            getSupportActionBar().setDisplayShowTitleEnabled(false);\r\n        }\r\n\r\n        // Navegación inferior\r\n        binding.bottomNav.setOnItemSelectedListener(this::onBottomItemSelected);\r\n\r\n        // Estado inicial\r\n        binding.bottomNav.setSelectedItemId(R.id.nav_dashboard);\r\n        showScreen(SCR_DASHBOARD);\r\n\r\n        // Acciones rápidas Dashboard\r\n        binding.scrDashboard.btnRegistrarAdmin.setOnClickListener(v ->\r\n                startActivity(new Intent(this, Superadmin_Registrar_Administrador.class)));\r\n        binding.scrDashboard.btnRegistrarGuias.setOnClickListener(v ->\r\n                startActivity(new Intent(this, Superadmin_Registrar_Guias_Turismo.class)));\r\n\r\n        // Imágenes Dashboard\r\n        Glide.with(this).load(\"https://cdn-icons-png.flaticon.com/512/190/190411.png\")\r\n                .into(binding.scrDashboard.imgRegistrarAdmin);\r\n        Glide.with(this).load(\"https://cdn-icons-png.flaticon.com/512/2922/2922510.png\")\r\n                .into(binding.scrDashboard.imgRegistrarGuias);\r\n        Glide.with(this).load(\"https://cdn-icons-png.flaticon.com/512/29/29302.png\")\r\n                .into(binding.scrDashboard.imgDescargarCSV);\r\n        Glide.with(this).load(\"https://cdn-icons-png.flaticon.com/512/337/337946.png\")\r\n                .into(binding.scrDashboard.imgDescargarPDF);\r\n\r\n        // Cargar datos del usuario logueado (desde Auth/Firestore)\r\n        loadLoggedUser();\r\n\r\n        // Mantengo tu lógica de listas/gráficos:\r\n        createRetrofitService();\r\n        cargarListaWebService();\r\n    }\r\n\r\n    // ==== CARGAR USUARIO LOGUEADO (desde Firestore) ====\r\n    private void loadLoggedUser() {\r\n        if (auth.getCurrentUser() == null) {\r\n            Toast.makeText(this, \"Sesión expirada. Inicia sesión nuevamente.\", Toast.LENGTH_LONG).show();\r\n            finish();\r\n            return;\r\n        }\r\n        String uid = auth.getCurrentUser().getUid();\r\n        db.collection(\"users\").document(uid).get()\r\n                .addOnSuccessListener(this::bindUserToUI)\r\n                .addOnFailureListener(e -> {\r\n                    Log.e(\"superadmin\", \"No se pudo leer el perfil: \" + e.getMessage());\r\n                    Toast.makeText(this, \"No se pudo cargar tu perfil.\", Toast.LENGTH_LONG).show();\r\n                });\r\n    }\r\n\r\n    private void bindUserToUI(DocumentSnapshot snap) {\r\n        if (!snap.exists()) return;\r\n        String displayName = safe(snap.getString(\"displayName\"), \"Superadmin\");\r\n        String email       = safe(snap.getString(\"email\"), \"\");\r\n        String role        = safe(snap.getString(\"role\"), \"superadmin\");\r\n        String dni         = safe(snap.getString(\"dni\"), \"\");\r\n        String photoUrl    = safe(snap.getString(\"photoUrl\"),\r\n                \"https://i.pravatar.cc/200?img=3\"); // fallback\r\n\r\n        // Toolbar\r\n        binding.toolbar.setTitle(\"Hola, \" + displayName);\r\n\r\n        // ====== Perfil (si existen los IDs, se llenan; si no, no pasa nada) ======\r\n        TextView tvNombre = binding.getRoot().findViewById(R.id.tvNombrePerfil);\r\n        TextView tvCorreo = binding.getRoot().findViewById(R.id.tvCorreoPerfil);\r\n        TextView tvRol    = binding.getRoot().findViewById(R.id.tvRolPerfil);\r\n        TextView tvDni    = binding.getRoot().findViewById(R.id.tvDniPerfil);\r\n        ImageView imgFoto = binding.getRoot().findViewById(R.id.imgFotoPerfil);\r\n\r\n        if (tvNombre != null) tvNombre.setText(displayName);\r\n        if (tvCorreo != null) tvCorreo.setText(email);\r\n        if (tvRol    != null) tvRol.setText(role);\r\n        if (tvDni    != null) tvDni.setText(dni);\r\n        if (imgFoto  != null) Glide.with(this).load(photoUrl).into(imgFoto);\r\n    }\r\n\r\n    private String safe(String s, String def) { return (s == null || s.trim().isEmpty()) ? def : s; }\r\n\r\n    // ==== Navegación bottom ====\r\n    private boolean onBottomItemSelected(MenuItem item) {\r\n        int id = item.getItemId();\r\n        if (id == R.id.nav_dashboard) { showScreen(SCR_DASHBOARD); return true; }\r\n        else if (id == R.id.nav_admins) { showScreen(SCR_ADMINS); return true; }\r\n        else if (id == R.id.nav_guias) { showScreen(SCR_GUIAS); return true; }\r\n        else if (id == R.id.nav_clientes) { showScreen(SCR_CLIENTES); return true; }\r\n        else if (id == R.id.nav_registros) { showScreen(SCR_REGISTROS); return true; }\r\n        else if (id == R.id.nav_perfil) { showScreen(SCR_PERFIL); return true; }\r\n        return false;\r\n    }\r\n\r\n    private void showScreen(@IdRes int screenId) {\r\n        View vDash     = binding.scrDashboard.getRoot();\r\n        View vAdmins   = binding.scrAdmins.getRoot();\r\n        View vGuias    = binding.scrGuias.getRoot();\r\n        View vClientes = binding.scrClientes.getRoot();\r\n        View vReg      = binding.scrRegistros.getRoot();\r\n        View vPerfil   = binding.scrPerfil.getRoot();\r\n\r\n        vDash.setVisibility(View.GONE);\r\n        vAdmins.setVisibility(View.GONE);\r\n        vGuias.setVisibility(View.GONE);\r\n        vClientes.setVisibility(View.GONE);\r\n        vReg.setVisibility(View.GONE);\r\n        vPerfil.setVisibility(View.GONE);\r\n\r\n        View target =\r\n                (screenId == SCR_DASHBOARD) ? vDash :\r\n                        (screenId == SCR_ADMINS)    ? vAdmins :\r\n                                (screenId == SCR_GUIAS)     ? vGuias :\r\n                                        (screenId == SCR_CLIENTES)  ? vClientes :\r\n                                                (screenId == SCR_REGISTROS) ? vReg : vPerfil;\r\n        target.setVisibility(View.VISIBLE);\r\n\r\n        // FAB contextual\r\n        if (screenId == SCR_ADMINS) {\r\n            binding.fab.setVisibility(View.VISIBLE);\r\n            binding.fab.setImageResource(R.drawable.ic_person_add_24);\r\n            binding.fab.setBackgroundTintList(\r\n                    ContextCompat.getColorStateList(this, R.color.teal_700));\r\n            binding.fab.setImageTintList(\r\n                    ColorStateList.valueOf(ContextCompat.getColor(this, R.color.white)));\r\n            binding.fab.setOnClickListener(v ->\r\n                    startActivity(new Intent(this, Superadmin_Registrar_Administrador.class)));\r\n        } else if (screenId == SCR_GUIAS) {\r\n            binding.fab.setVisibility(View.VISIBLE);\r\n            binding.fab.setImageResource(R.drawable.ic_person_add_24);\r\n            binding.fab.setOnClickListener(v ->\r\n                    startActivity(new Intent(this, Superadmin_Registrar_Guias_Turismo.class)));\r\n        } else if (screenId == SCR_CLIENTES) {\r\n            binding.fab.setVisibility(View.VISIBLE);\r\n            binding.fab.setImageResource(R.drawable.ic_person_add_24);\r\n            binding.fab.setOnClickListener(v ->\r\n                    startActivity(new Intent(this, Superadmin_Ver_Cliente.class)));\r\n        } else {\r\n            binding.fab.setVisibility(View.GONE);\r\n            binding.fab.setOnClickListener(null);\r\n        }\r\n    }\r\n\r\n    // ================== Retrofit (tu setup) ==================\r\n    public void createRetrofitService() {\r\n        employeeService = new Retrofit.Builder()\r\n                .baseUrl(\"http://10.0.2.2:8080\")\r\n                .addConverterFactory(GsonConverterFactory.create())\r\n                .build()\r\n                .create(EmployeeService.class);\r\n    }\r\n\r\n    public void cargarListaWebService() {\r\n        // \uD83D\uDD38 Mantengo tu ejemplo de repositorio local. Ajusta a tu implementación real.\r\n        UserRepository repo = UserRepository.get();\r\n        repo.seedIfEmpty(this);\r\n\r\n        List<User> listaAdmins = repo.allAdmins();\r\n        List<User> listaGuias = repo.allGuias();\r\n        List<User> listaClientes = repo.allClientes();\r\n\r\n        configurarGrafico(binding.scrDashboard.chartAdmins, \"Administradores\", listaAdmins);\r\n        configurarGrafico(binding.scrDashboard.chartGuias,  \"Guías\",           listaGuias);\r\n        configurarGrafico(binding.scrDashboard.chartClientes,\"Clientes\",        listaClientes);\r\n\r\n        EmployeeAdapter adapterAdmins = new EmployeeAdapter();\r\n        adapterAdmins.setListaEmpleados(listaAdmins);\r\n        adapterAdmins.setContext(this);\r\n        binding.scrAdmins.recyclerView.setAdapter(adapterAdmins);\r\n        binding.scrAdmins.recyclerView.setLayoutManager(new LinearLayoutManager(this));\r\n\r\n        EmployeeAdapter adapterGuias = new EmployeeAdapter();\r\n        adapterGuias.setListaEmpleados(listaGuias);\r\n        adapterGuias.setContext(this);\r\n        binding.scrGuias.recyclerView.setAdapter(adapterGuias);\r\n        binding.scrGuias.recyclerView.setLayoutManager(new LinearLayoutManager(this));\r\n\r\n        EmployeeAdapter adapterClientes = new EmployeeAdapter();\r\n        adapterClientes.setListaEmpleados(listaClientes);\r\n        adapterClientes.setContext(this);\r\n        binding.scrClientes.recyclerView.setAdapter(adapterClientes);\r\n        binding.scrClientes.recyclerView.setLayoutManager(new LinearLayoutManager(this));\r\n\r\n        Log.d(\"msg-superadmin\", \"Lista cargada desde UserRepository: \" +\r\n                (listaAdmins.size() + listaGuias.size() + listaClientes.size()));\r\n    }\r\n\r\n    private void configurarGrafico(com.github.mikephil.charting.charts.PieChart chart,\r\n                                   String titulo, List<User> lista) {\r\n\r\n        long activos = 0;\r\n        for (User u : lista) if (u.isActivo()) activos++;\r\n        long inactivos = lista.size() - activos;\r\n\r\n        List<PieEntry> entries = new ArrayList<>();\r\n        entries.add(new PieEntry(activos, \"Activos\"));\r\n        entries.add(new PieEntry(inactivos, \"Inactivos\"));\r\n\r\n        PieDataSet dataSet = new PieDataSet(entries, titulo);\r\n        dataSet.setColors(\r\n                ContextCompat.getColor(this, R.color.teal_700),\r\n                ContextCompat.getColor(this, R.color.gray)\r\n        );\r\n\r\n        PieData data = new PieData(dataSet);\r\n        data.setValueTextSize(14f);\r\n        data.setValueTextColor(ContextCompat.getColor(this, R.color.black));\r\n\r\n        chart.setData(data);\r\n        chart.setCenterText(titulo);\r\n        chart.setCenterTextSize(16f);\r\n        chart.getDescription().setEnabled(false);\r\n        chart.getLegend().setEnabled(true);\r\n        chart.animateY(1000);\r\n        chart.invalidate();\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_HomeActivity.java b/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_HomeActivity.java
+--- a/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_HomeActivity.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_HomeActivity.java	(date 1763350350597)
+@@ -14,6 +14,7 @@
+ import androidx.appcompat.app.AppCompatActivity;
+ import androidx.core.content.ContextCompat;
+ import androidx.recyclerview.widget.LinearLayoutManager;
++import androidx.recyclerview.widget.RecyclerView;
+ 
+ import com.bumptech.glide.Glide;
+ import com.example.proyecto_2025.R;
+@@ -31,24 +32,15 @@
+ import retrofit2.Retrofit;
+ import retrofit2.converter.gson.GsonConverterFactory;
+ 
+-/**
+- * HomeView Superadmin (sin fragments):
+- * Bottom bar fija: Dashboard, Admins, Guías, Clientes, Registros, Perfil
+- * FAB contextual sólo en Admins (Registrar Admin) y Guías (Registrar Guías).
+- * Ahora también: Carga los datos del usuario logueado desde Firestore.
+- */
+ public class Superadmin_HomeActivity extends AppCompatActivity {
+ 
+     private ActivitySuperadminVistaInicialBinding binding;
+ 
+-    // Firebase
+     private final FirebaseAuth auth = FirebaseAuth.getInstance();
+     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+ 
+-    // Retrofit (dejas tu servicio como lo tengas)
+     private EmployeeService employeeService;
+ 
+-    // IDs de raíces (coinciden con los android:id de cada <include/>)
+     private static final int SCR_DASHBOARD = R.id.scrDashboard;
+     private static final int SCR_ADMINS    = R.id.scrAdmins;
+     private static final int SCR_GUIAS     = R.id.scrGuias;
+@@ -62,7 +54,6 @@
+         binding = ActivitySuperadminVistaInicialBinding.inflate(getLayoutInflater());
+         setContentView(binding.getRoot());
+ 
+-        // Si no usarás "Registros" aún:
+         binding.bottomNav.getMenu().findItem(R.id.nav_registros).setVisible(false);
+ 
+         setSupportActionBar(binding.toolbar);
+@@ -71,20 +62,16 @@
+             getSupportActionBar().setDisplayShowTitleEnabled(false);
+         }
+ 
+-        // Navegación inferior
+         binding.bottomNav.setOnItemSelectedListener(this::onBottomItemSelected);
+ 
+-        // Estado inicial
+         binding.bottomNav.setSelectedItemId(R.id.nav_dashboard);
+         showScreen(SCR_DASHBOARD);
+ 
+-        // Acciones rápidas Dashboard
+         binding.scrDashboard.btnRegistrarAdmin.setOnClickListener(v ->
+                 startActivity(new Intent(this, Superadmin_Registrar_Administrador.class)));
+         binding.scrDashboard.btnRegistrarGuias.setOnClickListener(v ->
+                 startActivity(new Intent(this, Superadmin_Registrar_Guias_Turismo.class)));
+ 
+-        // Imágenes Dashboard
+         Glide.with(this).load("https://cdn-icons-png.flaticon.com/512/190/190411.png")
+                 .into(binding.scrDashboard.imgRegistrarAdmin);
+         Glide.with(this).load("https://cdn-icons-png.flaticon.com/512/2922/2922510.png")
+@@ -94,15 +81,12 @@
+         Glide.with(this).load("https://cdn-icons-png.flaticon.com/512/337/337946.png")
+                 .into(binding.scrDashboard.imgDescargarPDF);
+ 
+-        // Cargar datos del usuario logueado (desde Auth/Firestore)
+         loadLoggedUser();
+ 
+-        // Mantengo tu lógica de listas/gráficos:
+         createRetrofitService();
+         cargarListaWebService();
+     }
+ 
+-    // ==== CARGAR USUARIO LOGUEADO (desde Firestore) ====
+     private void loadLoggedUser() {
+         if (auth.getCurrentUser() == null) {
+             Toast.makeText(this, "Sesión expirada. Inicia sesión nuevamente.", Toast.LENGTH_LONG).show();
+@@ -125,12 +109,10 @@
+         String role        = safe(snap.getString("role"), "superadmin");
+         String dni         = safe(snap.getString("dni"), "");
+         String photoUrl    = safe(snap.getString("photoUrl"),
+-                "https://i.pravatar.cc/200?img=3"); // fallback
++                "https://i.pravatar.cc/200?img=3");
+ 
+-        // Toolbar
+         binding.toolbar.setTitle("Hola, " + displayName);
+ 
+-        // ====== Perfil (si existen los IDs, se llenan; si no, no pasa nada) ======
+         TextView tvNombre = binding.getRoot().findViewById(R.id.tvNombrePerfil);
+         TextView tvCorreo = binding.getRoot().findViewById(R.id.tvCorreoPerfil);
+         TextView tvRol    = binding.getRoot().findViewById(R.id.tvRolPerfil);
+@@ -144,9 +126,10 @@
+         if (imgFoto  != null) Glide.with(this).load(photoUrl).into(imgFoto);
+     }
+ 
+-    private String safe(String s, String def) { return (s == null || s.trim().isEmpty()) ? def : s; }
++    private String safe(String s, String def) {
++        return (s == null || s.trim().isEmpty()) ? def : s;
++    }
+ 
+-    // ==== Navegación bottom ====
+     private boolean onBottomItemSelected(MenuItem item) {
+         int id = item.getItemId();
+         if (id == R.id.nav_dashboard) { showScreen(SCR_DASHBOARD); return true; }
+@@ -181,7 +164,6 @@
+                                                 (screenId == SCR_REGISTROS) ? vReg : vPerfil;
+         target.setVisibility(View.VISIBLE);
+ 
+-        // FAB contextual
+         if (screenId == SCR_ADMINS) {
+             binding.fab.setVisibility(View.VISIBLE);
+             binding.fab.setImageResource(R.drawable.ic_person_add_24);
+@@ -207,7 +189,6 @@
+         }
+     }
+ 
+-    // ================== Retrofit (tu setup) ==================
+     public void createRetrofitService() {
+         employeeService = new Retrofit.Builder()
+                 .baseUrl("http://10.0.2.2:8080")
+@@ -217,40 +198,50 @@
+     }
+ 
+     public void cargarListaWebService() {
+-        // 🔸 Mantengo tu ejemplo de repositorio local. Ajusta a tu implementación real.
+         UserRepository repo = UserRepository.get();
+         repo.seedIfEmpty(this);
+ 
+-        List<User> listaAdmins = repo.allAdmins();
+-        List<User> listaGuias = repo.allGuias();
++        List<User> listaAdmins   = repo.allAdmins();
++        List<User> listaGuias    = repo.allGuias();
+         List<User> listaClientes = repo.allClientes();
+ 
+-        configurarGrafico(binding.scrDashboard.chartAdmins, "Administradores", listaAdmins);
+-        configurarGrafico(binding.scrDashboard.chartGuias,  "Guías",           listaGuias);
+-        configurarGrafico(binding.scrDashboard.chartClientes,"Clientes",        listaClientes);
++        // Gráficos del dashboard
++        configurarGrafico(binding.scrDashboard.chartAdmins,   "Administradores", listaAdmins);
++        configurarGrafico(binding.scrDashboard.chartGuias,    "Guías",           listaGuias);
++        configurarGrafico(binding.scrDashboard.chartClientes, "Clientes",        listaClientes);
+ 
++        // ================= ADMINS =================
++        RecyclerView rvAdmins = binding.scrAdmins.getRoot()
++                .findViewById(R.id.recyclerView);   // id en screen_superadmin_admins.xml
+         EmployeeAdapter adapterAdmins = new EmployeeAdapter();
+         adapterAdmins.setListaEmpleados(listaAdmins);
+         adapterAdmins.setContext(this);
+-        binding.scrAdmins.recyclerView.setAdapter(adapterAdmins);
+-        binding.scrAdmins.recyclerView.setLayoutManager(new LinearLayoutManager(this));
++        rvAdmins.setLayoutManager(new LinearLayoutManager(this));
++        rvAdmins.setAdapter(adapterAdmins);
+ 
++        // ================= GUÍAS =================
++        RecyclerView rvGuias = binding.scrGuias.getRoot()
++                .findViewById(R.id.rvGuias);        // id en screen_superadmin_guias.xml
+         EmployeeAdapter adapterGuias = new EmployeeAdapter();
+         adapterGuias.setListaEmpleados(listaGuias);
+         adapterGuias.setContext(this);
+-        binding.scrGuias.recyclerView.setAdapter(adapterGuias);
+-        binding.scrGuias.recyclerView.setLayoutManager(new LinearLayoutManager(this));
++        rvGuias.setLayoutManager(new LinearLayoutManager(this));
++        rvGuias.setAdapter(adapterGuias);
+ 
++        // ================= CLIENTES =================
++        RecyclerView rvClientes = binding.scrClientes.getRoot()
++                .findViewById(R.id.recyclerView);   // id en screen_superadmin_clientes.xml
+         EmployeeAdapter adapterClientes = new EmployeeAdapter();
+         adapterClientes.setListaEmpleados(listaClientes);
+         adapterClientes.setContext(this);
+-        binding.scrClientes.recyclerView.setAdapter(adapterClientes);
+-        binding.scrClientes.recyclerView.setLayoutManager(new LinearLayoutManager(this));
++        rvClientes.setLayoutManager(new LinearLayoutManager(this));
++        rvClientes.setAdapter(adapterClientes);
+ 
+         Log.d("msg-superadmin", "Lista cargada desde UserRepository: " +
+                 (listaAdmins.size() + listaGuias.size() + listaClientes.size()));
+     }
+ 
++
+     private void configurarGrafico(com.github.mikephil.charting.charts.PieChart chart,
+                                    String titulo, List<User> lista) {
+ 
+Index: app/src/main/java/com/example/proyecto_2025/data/GuideRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/data/GuideRepository.java b/app/src/main/java/com/example/proyecto_2025/data/GuideRepository.java
+deleted file mode 100644
+--- a/app/src/main/java/com/example/proyecto_2025/data/GuideRepository.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ /dev/null	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
+@@ -1,45 +0,0 @@
+-package com.example.proyecto_2025.data;
+-
+-import android.content.Context;
+-import com.example.proyecto_2025.model.Guide;
+-import java.util.*;
+-
+-public class GuideRepository {
+-    private static GuideRepository instance;
+-    private final List<Guide> guides = new ArrayList<>();
+-
+-    private GuideRepository(){}
+-
+-    public static GuideRepository get(){
+-        if (instance == null) instance = new GuideRepository();
+-        return instance;
+-    }
+-
+-    /** Carga data de demo si no hay guías aún */
+-    public void seedIfEmpty(Context ctx){
+-        if (!guides.isEmpty()) return;
+-        guides.add(new Guide("g1","María Quispe",
+-                Arrays.asList(Guide.Language.ES, Guide.Language.EN),
+-                "https://picsum.photos/seed/guide1/400",
+-                "Guía certificada con 5 años en Cusco y Valle Sagrado.",4.8f,"Cusco"));
+-        guides.add(new Guide("g2","José Huamán",
+-                Arrays.asList(Guide.Language.ES, Guide.Language.FR),
+-                "https://picsum.photos/seed/guide2/400",
+-                "Especialista en turismo vivencial y trekking.",4.6f,"Valle Sagrado"));
+-        guides.add(new Guide("g3","Ana Poma",
+-                Arrays.asList(Guide.Language.ES, Guide.Language.EN, Guide.Language.DE),
+-                "https://picsum.photos/seed/guide3/400",
+-                "Arqueóloga y guía con enfoque histórico.",4.9f,"Machu Picchu"));
+-        guides.add(new Guide("g4","Luis Ccapa",
+-                Arrays.asList(Guide.Language.ES, Guide.Language.PT),
+-                "https://picsum.photos/seed/guide4/400",
+-                "Conductor-guía para tours full day.",4.5f,"Montaña de 7 Colores"));
+-        guides.add(new Guide("g5","Rosa Ñusta",
+-                Arrays.asList(Guide.Language.ES, Guide.Language.EN),
+-                "https://picsum.photos/seed/guide5/400",
+-                "Experta en gastronomía y cultura local.",4.7f,"Cusco Centro"));
+-    }
+-
+-    public List<Guide> all(){ return new ArrayList<>(guides); }
+-    public Guide byId(String id){ for (Guide g: guides) if (g.getId().equals(id)) return g; return null; }
+-}
+Index: app/src/main/java/com/example/proyecto_2025/adapter/GuideAdapter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/adapter/GuideAdapter.java b/app/src/main/java/com/example/proyecto_2025/adapter/GuideAdapter.java
+deleted file mode 100644
+--- a/app/src/main/java/com/example/proyecto_2025/adapter/GuideAdapter.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ /dev/null	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
+@@ -1,78 +0,0 @@
+-package com.example.proyecto_2025.adapter;
+-
+-import android.content.Context;
+-import android.view.*;
+-import android.widget.*;
+-import androidx.annotation.NonNull;
+-import androidx.recyclerview.widget.RecyclerView;
+-import com.bumptech.glide.Glide;
+-import com.example.proyecto_2025.R;
+-import com.example.proyecto_2025.model.Guide;
+-import java.util.*;
+-
+-public class GuideAdapter extends RecyclerView.Adapter<GuideAdapter.VH> {
+-    public interface OnAction {
+-        void onProfile(Guide g);
+-        void onOffer(Guide g);
+-    }
+-
+-    private final List<Guide> data;
+-    private final OnAction listener;
+-
+-    public GuideAdapter(Context ctx, List<Guide> data, OnAction l){
+-        this.data = data;
+-        this.listener = l;
+-    }
+-
+-    @NonNull @Override
+-    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+-        View v = LayoutInflater.from(parent.getContext())
+-                .inflate(R.layout.item_guide_card, parent, false);
+-        return new VH(v);
+-    }
+-
+-    @Override
+-    public void onBindViewHolder(@NonNull VH h, int i) {
+-        Guide g = data.get(i);
+-        h.name.setText(g.getName());
+-        h.zone.setText(g.getZone());
+-        h.rating.setText(String.format(Locale.getDefault(),"%.1f ★", g.getRating()));
+-        h.langs.setText(g.getLanguages().toString()
+-                .replace("[","").replace("]","").replace(","," · "));
+-
+-        Glide.with(h.itemView.getContext())
+-                .load(g.getPhotoUrl())
+-                .placeholder(R.drawable.ic_user_placeholder) // opcional
+-                .error(R.drawable.ic_user_placeholder)       // opcional
+-                .into(h.photo);
+-
+-        h.btnMore.setOnClickListener(v -> {
+-            PopupMenu menu = new PopupMenu(v.getContext(), h.btnMore);
+-            menu.getMenu().add(0, 1, 0, "Ver perfil");
+-            menu.getMenu().add(0, 2, 1, "Ofertar");
+-            menu.setOnMenuItemClickListener(mi -> {
+-                int id = mi.getItemId();
+-                if (id == 1) listener.onProfile(g);
+-                else if (id == 2) listener.onOffer(g);
+-                return true;
+-            });
+-            menu.show();
+-        });
+-    }
+-
+-    @Override public int getItemCount(){ return data.size(); }
+-
+-    static class VH extends RecyclerView.ViewHolder{
+-        ImageView photo; TextView name, zone, rating, langs; ImageButton btnMore;
+-        VH(@NonNull View v){
+-            super(v);
+-            photo   = v.findViewById(R.id.imgGuide);
+-            name    = v.findViewById(R.id.tvName);
+-            zone    = v.findViewById(R.id.tvZone);
+-            rating  = v.findViewById(R.id.tvRating);
+-            langs   = v.findViewById(R.id.tvLangs);
+-            btnMore = v.findViewById(R.id.btnMore);
+-        }
+-    }
+-}
+-
+Index: app/src/main/java/com/example/proyecto_2025/model/Guide.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/model/Guide.java b/app/src/main/java/com/example/proyecto_2025/model/Guide.java
+deleted file mode 100644
+--- a/app/src/main/java/com/example/proyecto_2025/model/Guide.java	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ /dev/null	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
+@@ -1,27 +0,0 @@
+-package com.example.proyecto_2025.model;
+-
+-import java.io.Serializable;
+-import java.util.List;
+-
+-public class Guide implements Serializable {
+-    public enum Language {ES, EN, FR, PT, DE}
+-    private String id;
+-    private String name;
+-    private List<Language> languages;
+-    private String photoUrl;
+-    private String bio;
+-    private float rating;
+-    private String zone;
+-
+-    public Guide(String id, String name, List<Language> languages, String photoUrl, String bio, float rating, String zone) {
+-        this.id = id; this.name = name; this.languages = languages;
+-        this.photoUrl = photoUrl; this.bio = bio; this.rating = rating; this.zone = zone;
+-    }
+-    public String getId(){return id;}
+-    public String getName(){return name;}
+-    public List<Language> getLanguages(){return languages;}
+-    public String getPhotoUrl(){return photoUrl;}
+-    public String getBio(){return bio;}
+-    public float getRating(){return rating;}
+-    public String getZone(){return zone;}
+-}
+Index: app/src/main/res/layout/activity_superadmin_registrar_administrador.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:id=\"@+id/main\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    android:padding=\"16dp\"\r\n    tools:context=\".Activities_Superadmin.Superadmin_Registrar_Administrador\">\r\n\r\n    <!-- Título -->\r\n\r\n    <!-- Contenedor de campos -->\r\n    <TextView\r\n        android:id=\"@+id/Etiqueta1\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:text=\"Registrar Nuevo Administrador\"\r\n        android:textColor=\"#000000\"\r\n        android:textSize=\"18sp\"\r\n        android:textStyle=\"bold\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\"\r\n        app:layout_constraintHorizontal_bias=\"0.0\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintTop_toTopOf=\"parent\" />\r\n\r\n    <LinearLayout\r\n        android:id=\"@+id/contenedorCampos\"\r\n        android:layout_width=\"0dp\"\r\n        android:layout_height=\"0dp\"\r\n        android:orientation=\"vertical\"\r\n        android:layout_marginTop=\"16dp\"\r\n        app:layout_constraintTop_toBottomOf=\"@id/Etiqueta1\"\r\n        app:layout_constraintBottom_toTopOf=\"@id/btnRegistrarAdministrador\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\">\r\n\r\n        <!-- Campo Nombre -->\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:hint=\"Nombre\">\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:inputType=\"textPersonName\" />\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Campo Apellidos -->\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:hint=\"Apellidos\"\r\n            android:layout_marginTop=\"8dp\">\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:inputType=\"textPersonName\" />\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Campo Número de Documento -->\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:hint=\"Número de Documento de Identidad\"\r\n            android:layout_marginTop=\"8dp\">\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:inputType=\"number\" />\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Campo Fecha de Nacimiento -->\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:hint=\"Fecha de Nacimiento\"\r\n            android:layout_marginTop=\"8dp\">\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:inputType=\"date\" />\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Campo Edad -->\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:id=\"@+id/textFieldEdad\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:hint=\"Edad\"\r\n            android:layout_marginTop=\"8dp\">\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:inputType=\"number\" />\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Campo Correo Electrónico -->\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:hint=\"Correo Electrónico\"\r\n            android:layout_marginTop=\"8dp\">\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:inputType=\"textEmailAddress\" />\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Campo Teléfono -->\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:hint=\"Teléfono\"\r\n            android:layout_marginTop=\"8dp\">\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:inputType=\"phone\" />\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n        <!-- Campo Domicilio -->\r\n        <com.google.android.material.textfield.TextInputLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:hint=\"Domicilio\"\r\n            android:layout_marginTop=\"8dp\">\r\n            <com.google.android.material.textfield.TextInputEditText\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:inputType=\"textPostalAddress\" />\r\n        </com.google.android.material.textfield.TextInputLayout>\r\n\r\n    </LinearLayout>\r\n\r\n    <!-- Botón Registrar -->\r\n    <Button\r\n        android:id=\"@+id/btnRegistrarAdministrador\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:backgroundTint=\"#007AFF\"\r\n        android:minHeight=\"40dp\"\r\n        android:paddingHorizontal=\"16dp\"\r\n        android:text=\"Registrar\"\r\n        android:textAllCaps=\"false\"\r\n        android:textColor=\"#FFFFFF\"\r\n        app:layout_constraintBottom_toBottomOf=\"parent\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\"\r\n        android:layout_marginTop=\"16dp\" />\r\n\r\n</androidx.constraintlayout.widget.ConstraintLayout>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_superadmin_registrar_administrador.xml b/app/src/main/res/layout/activity_superadmin_registrar_administrador.xml
+--- a/app/src/main/res/layout/activity_superadmin_registrar_administrador.xml	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/src/main/res/layout/activity_superadmin_registrar_administrador.xml	(date 1763339941698)
+@@ -1,28 +1,21 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+-    xmlns:tools="http://schemas.android.com/tools"
+-    android:id="@+id/main"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+-    android:padding="16dp"
+-    tools:context=".Activities_Superadmin.Superadmin_Registrar_Administrador">
++    android:padding="16dp">
+ 
+-    <!-- Título -->
+-
+-    <!-- Contenedor de campos -->
+     <TextView
+-        android:id="@+id/Etiqueta1"
++        android:id="@+id/tvTitulo"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="Registrar Nuevo Administrador"
+         android:textColor="#000000"
+         android:textSize="18sp"
+         android:textStyle="bold"
+-        app:layout_constraintEnd_toEndOf="parent"
+-        app:layout_constraintHorizontal_bias="0.0"
++        app:layout_constraintTop_toTopOf="parent"
+         app:layout_constraintStart_toStartOf="parent"
+-        app:layout_constraintTop_toTopOf="parent" />
++        app:layout_constraintEnd_toEndOf="parent"/>
+ 
+     <LinearLayout
+         android:id="@+id/contenedorCampos"
+@@ -30,123 +23,113 @@
+         android:layout_height="0dp"
+         android:orientation="vertical"
+         android:layout_marginTop="16dp"
+-        app:layout_constraintTop_toBottomOf="@id/Etiqueta1"
++        app:layout_constraintTop_toBottomOf="@id/tvTitulo"
+         app:layout_constraintBottom_toTopOf="@id/btnRegistrarAdministrador"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent">
+ 
+-        <!-- Campo Nombre -->
+-        <com.google.android.material.textfield.TextInputLayout
+-            android:layout_width="match_parent"
+-            android:layout_height="wrap_content"
+-            android:hint="Nombre">
+-            <com.google.android.material.textfield.TextInputEditText
+-                android:layout_width="match_parent"
+-                android:layout_height="wrap_content"
+-                android:inputType="textPersonName" />
+-        </com.google.android.material.textfield.TextInputLayout>
+-
+-        <!-- Campo Apellidos -->
++        <!-- Nombre -->
+         <com.google.android.material.textfield.TextInputLayout
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+-            android:hint="Apellidos"
+-            android:layout_marginTop="8dp">
++            android:hint="Nombre completo">
+             <com.google.android.material.textfield.TextInputEditText
++                android:id="@+id/etNombre"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+-                android:inputType="textPersonName" />
++                android:inputType="textPersonName"/>
+         </com.google.android.material.textfield.TextInputLayout>
+ 
+-        <!-- Campo Número de Documento -->
++        <!-- DNI -->
+         <com.google.android.material.textfield.TextInputLayout
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+-            android:hint="Número de Documento de Identidad"
++            android:hint="DNI (8 dígitos)"
+             android:layout_marginTop="8dp">
+             <com.google.android.material.textfield.TextInputEditText
++                android:id="@+id/etDni"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+-                android:inputType="number" />
++                android:maxLength="8"
++                android:inputType="number"/>
+         </com.google.android.material.textfield.TextInputLayout>
+ 
+-        <!-- Campo Fecha de Nacimiento -->
++        <!-- Email -->
+         <com.google.android.material.textfield.TextInputLayout
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+-            android:hint="Fecha de Nacimiento"
++            android:hint="Correo electrónico"
+             android:layout_marginTop="8dp">
+             <com.google.android.material.textfield.TextInputEditText
++                android:id="@+id/etEmail"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+-                android:inputType="date" />
++                android:inputType="textEmailAddress"/>
+         </com.google.android.material.textfield.TextInputLayout>
+ 
+-        <!-- Campo Edad -->
++        <!-- Password inicial -->
+         <com.google.android.material.textfield.TextInputLayout
+-            android:id="@+id/textFieldEdad"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+-            android:hint="Edad"
+-            android:layout_marginTop="8dp">
++            android:hint="Contraseña inicial"
++            android:layout_marginTop="8dp"
++            app:passwordToggleEnabled="true">
+             <com.google.android.material.textfield.TextInputEditText
++                android:id="@+id/etPassword"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+-                android:inputType="number" />
++                android:inputType="textPassword"/>
+         </com.google.android.material.textfield.TextInputLayout>
+ 
+-        <!-- Campo Correo Electrónico -->
++        <!-- CompanyId (obligatorio para admin) -->
+         <com.google.android.material.textfield.TextInputLayout
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+-            android:hint="Correo Electrónico"
++            android:hint="companyId (obligatorio)"
+             android:layout_marginTop="8dp">
+             <com.google.android.material.textfield.TextInputEditText
++                android:id="@+id/etCompanyId"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+-                android:inputType="textEmailAddress" />
++                android:inputType="text"/>
+         </com.google.android.material.textfield.TextInputLayout>
+ 
+-        <!-- Campo Teléfono -->
++        <!-- Teléfono (opcional) -->
+         <com.google.android.material.textfield.TextInputLayout
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+-            android:hint="Teléfono"
++            android:hint="Teléfono (opcional)"
+             android:layout_marginTop="8dp">
+             <com.google.android.material.textfield.TextInputEditText
++                android:id="@+id/etTelefono"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+-                android:inputType="phone" />
++                android:inputType="phone"/>
+         </com.google.android.material.textfield.TextInputLayout>
+ 
+-        <!-- Campo Domicilio -->
++        <!-- Domicilio (opcional) -->
+         <com.google.android.material.textfield.TextInputLayout
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+-            android:hint="Domicilio"
++            android:hint="Domicilio (opcional)"
+             android:layout_marginTop="8dp">
+             <com.google.android.material.textfield.TextInputEditText
++                android:id="@+id/etDomicilio"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+-                android:inputType="textPostalAddress" />
++                android:inputType="textPostalAddress"/>
+         </com.google.android.material.textfield.TextInputLayout>
+ 
+     </LinearLayout>
+ 
+-    <!-- Botón Registrar -->
+-    <Button
++    <com.google.android.material.button.MaterialButton
+         android:id="@+id/btnRegistrarAdministrador"
+-        android:layout_width="wrap_content"
++        android:layout_width="0dp"
+         android:layout_height="wrap_content"
+-        android:backgroundTint="#007AFF"
+-        android:minHeight="40dp"
+-        android:paddingHorizontal="16dp"
+         android:text="Registrar"
+         android:textAllCaps="false"
+-        android:textColor="#FFFFFF"
+-        app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+-        android:layout_marginTop="16dp" />
++        app:layout_constraintBottom_toBottomOf="parent"/>
+ 
+ </androidx.constraintlayout.widget.ConstraintLayout>
+Index: app/src/main/java/com/example/proyecto_2025/adapter/GuiasAdapter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/adapter/GuiasAdapter.java b/app/src/main/java/com/example/proyecto_2025/adapter/GuiasAdapter.java
+new file mode 100644
+--- /dev/null	(date 1763339941762)
++++ b/app/src/main/java/com/example/proyecto_2025/adapter/GuiasAdapter.java	(date 1763339941762)
+@@ -0,0 +1,123 @@
++package com.example.proyecto_2025.adapter;
++
++import android.view.LayoutInflater;
++import android.view.View;
++import android.view.ViewGroup;
++import android.widget.TextView;
++
++import androidx.annotation.NonNull;
++import androidx.recyclerview.widget.RecyclerView;
++
++import com.example.proyecto_2025.R;
++import com.example.proyecto_2025.model.Guia;
++import com.google.android.material.button.MaterialButton;
++
++import java.util.ArrayList;
++import java.util.List;
++
++
++public class GuiasAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
++
++    public enum Mode { APPROVED, PENDING }
++
++    public interface Action<T> { void call(T t); }
++
++    private final List<Guia> data = new ArrayList<>();
++    private Mode mode = Mode.APPROVED;
++
++    private final Action<Guia> onToggle;   // activar/desactivar operatividad de guias
++    private final Action<Guia> onApprove;  // aprobar
++    private final Action<Guia> onReject;   // rechazar
++
++    public GuiasAdapter(Mode mode,
++                        Action<Guia> onToggle,
++                        Action<Guia> onApprove,
++                        Action<Guia> onReject) {
++        this.mode = mode;
++        this.onToggle = onToggle;
++        this.onApprove = onApprove;
++        this.onReject = onReject;
++    }
++
++    public void setMode(Mode m) {
++        this.mode = m;
++        notifyDataSetChanged();
++    }
++
++    public void setData(List<Guia> d) {
++        data.clear();
++        if (d != null) data.addAll(d);
++        notifyDataSetChanged();
++    }
++
++    @Override public int getItemViewType(int position) {
++        return mode == Mode.APPROVED ? 1 : 2;
++    }
++
++    @NonNull
++    @Override public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
++        LayoutInflater inf = LayoutInflater.from(parent.getContext());
++        if (viewType == 1) {
++            View v = inf.inflate(R.layout.item_guia_aprobado, parent, false);
++            return new VHApproved(v);
++        } else {
++            View v = inf.inflate(R.layout.item_guia_pendiente, parent, false);
++            return new VHPending(v);
++        }
++    }
++
++    @Override public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
++        Guia g = data.get(position);
++        if (holder instanceof VHApproved) {
++            VHApproved h = (VHApproved) holder;
++            h.tvNombre.setText(g.getDisplayName() == null ? "(sin nombre)" : g.getDisplayName());
++            h.tvEmail.setText(g.getEmail() == null ? "" : g.getEmail());
++            h.tvStatus.setText("status: " + (g.getStatus() == null ? "-" : g.getStatus()));
++
++            boolean isActive = "active".equalsIgnoreCase(g.getStatus());
++            h.btnToggle.setText(isActive ? "Desactivar" : "Activar");
++            h.btnToggle.setOnClickListener(v -> { if (onToggle != null) onToggle.call(g); });
++
++        } else if (holder instanceof VHPending) {
++            VHPending h = (VHPending) holder;
++            h.tvNombre.setText(g.getDisplayName() == null ? "(sin nombre)" : g.getDisplayName());
++            h.tvEmail.setText(g.getEmail() == null ? "" : g.getEmail());
++
++            h.btnAprobar.setOnClickListener(v -> { if (onApprove != null) onApprove.call(g); });
++            h.btnRechazar.setOnClickListener(v -> { if (onReject != null) onReject.call(g); });
++        }
++    }
++
++    @Override public int getItemCount() { return data.size(); }
++
++    public interface OnAction {
++        void onProfile(Guia g);
++
++        void onOffer(Guia g);
++    }
++
++    // --- ViewHolders ---
++    static class VHApproved extends RecyclerView.ViewHolder {
++        TextView tvNombre, tvEmail, tvStatus;
++        MaterialButton btnToggle;
++        VHApproved(View v){
++            super(v);
++            tvNombre = v.findViewById(R.id.tvNombre);
++            tvEmail  = v.findViewById(R.id.tvEmail);
++            tvStatus = v.findViewById(R.id.tvStatus);
++            btnToggle= v.findViewById(R.id.btnToggle);
++        }
++    }
++
++    static class VHPending extends RecyclerView.ViewHolder {
++        TextView tvNombre, tvEmail;
++        MaterialButton btnAprobar, btnRechazar;
++        VHPending(View v){
++            super(v);
++            tvNombre    = v.findViewById(R.id.tvNombre);
++            tvEmail     = v.findViewById(R.id.tvEmail);
++            btnAprobar  = v.findViewById(R.id.btnAprobar);
++            btnRechazar = v.findViewById(R.id.btnRechazar);
++        }
++    }
++}
+Index: app/src/main/res/layout/item_guia_aprobado.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/item_guia_aprobado.xml b/app/src/main/res/layout/item_guia_aprobado.xml
+new file mode 100644
+--- /dev/null	(date 1763339941714)
++++ b/app/src/main/res/layout/item_guia_aprobado.xml	(date 1763339941714)
+@@ -0,0 +1,38 @@
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:padding="12dp"
++    android:orientation="vertical"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content">
++
++    <TextView android:id="@+id/tvNombre"
++        android:textStyle="bold"
++        android:textSize="16sp"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"/>
++
++    <TextView android:id="@+id/tvEmail"
++        android:textColor="#666"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"/>
++
++    <LinearLayout
++        android:layout_marginTop="8dp"
++        android:orientation="horizontal"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content">
++
++        <TextView
++            android:id="@+id/tvStatus"
++            android:layout_width="0dp"
++            android:layout_height="wrap_content"
++            android:layout_weight="1"
++            android:text="status: active"/>
++
++        <com.google.android.material.button.MaterialButton
++            android:id="@+id/btnToggle"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:text="Desactivar"
++            style="@style/Widget.Material3.Button.OutlinedButton"/>
++    </LinearLayout>
++</LinearLayout>
+Index: app/src/main/res/layout/item_guia_pendiente.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/item_guia_pendiente.xml b/app/src/main/res/layout/item_guia_pendiente.xml
+new file mode 100644
+--- /dev/null	(date 1763339941706)
++++ b/app/src/main/res/layout/item_guia_pendiente.xml	(date 1763339941706)
+@@ -0,0 +1,43 @@
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    android:padding="12dp"
++    android:orientation="vertical"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content">
++
++    <TextView android:id="@+id/tvNombre"
++        android:textStyle="bold"
++        android:textSize="16sp"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"/>
++
++    <TextView android:id="@+id/tvEmail"
++        android:textColor="#666"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"/>
++
++    <LinearLayout
++        android:layout_marginTop="8dp"
++        android:orientation="horizontal"
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content">
++
++        <com.google.android.material.button.MaterialButton
++            android:id="@+id/btnAprobar"
++            android:layout_width="0dp"
++            android:layout_height="wrap_content"
++            android:layout_weight="1"
++            android:text="Aprobar"/>
++
++        <View
++            android:layout_width="8dp"
++            android:layout_height="0dp"/>
++
++        <com.google.android.material.button.MaterialButton
++            android:id="@+id/btnRechazar"
++            android:layout_width="0dp"
++            android:layout_height="wrap_content"
++            android:layout_weight="1"
++            android:text="Rechazar"
++            style="@style/Widget.Material3.Button.OutlinedButton"/>
++    </LinearLayout>
++</LinearLayout>
+Index: app/src/main/java/com/example/proyecto_2025/model/Guia.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/model/Guia.java b/app/src/main/java/com/example/proyecto_2025/model/Guia.java
+new file mode 100644
+--- /dev/null	(date 1763339941681)
++++ b/app/src/main/java/com/example/proyecto_2025/model/Guia.java	(date 1763339941681)
+@@ -0,0 +1,164 @@
++package com.example.proyecto_2025.model;
++
++import com.google.firebase.Timestamp;
++import com.google.firebase.firestore.Exclude;
++import com.google.firebase.firestore.IgnoreExtraProperties;
++
++import java.io.Serializable;
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++
++/**
++ * Modelo unificado de Guía (compatibilidad con la clase anterior "Guide" + Firestore).
++ * - Conserva getters como getId(), getName(), getLanguages(), etc.
++ * - Incluye campos de control usados en Firestore (role/status/verificación).
++ */
++@IgnoreExtraProperties
++public class Guia implements Serializable {
++
++    // === Compatibilidad con el modelo anterior ===
++    public enum Language { ES, EN, FR, PT, DE }
++
++    // --- Identidad y perfil ---
++    private String uid;            // == id anterior
++    private String displayName;    // == name anterior
++    private String email;
++    private String phone;
++    private String dni;
++    private String bio;            // igual al anterior
++    private String photoUrl;       // igual al anterior
++    private List<Language> languages = new ArrayList<>();  // igual al anterior
++    private float rating = 0f;     // igual al anterior
++    private String zone;           // igual al anterior
++
++    // --- Gestión de acceso ---
++    private String role = "guia";          // "guia" siempre
++    private String status = "pending";     // "pending" | "active" | "disabled"
++    private Boolean emailVerified = false; // verificación de correo (si usas link de Firebase)
++    private Boolean verificationRequired = true;
++
++    // --- Auditoría ---
++    private Timestamp createdAt;
++    private Timestamp updatedAt;
++
++    // ===== Constructores =====
++    public Guia() {
++        // Requerido por Firestore
++    }
++
++    /** Constructor de compatibilidad con el modelo anterior Guide */
++    public Guia(String id,
++                String name,
++                List<Language> languages,
++                String photoUrl,
++                String bio,
++                float rating,
++                String zone) {
++        this.uid = id;
++        this.displayName = name;
++        if (languages != null) this.languages = languages;
++        this.photoUrl = photoUrl;
++        this.bio = bio;
++        this.rating = rating;
++        this.zone = zone;
++        // por defecto: role="guia", status="pending"
++    }
++
++    /** Constructor recomendado para registro (con email, teléfono y al menos 1 idioma) */
++    public Guia(String name,
++                String email,
++                String phone,
++                List<Language> languages) {
++        this.displayName = name;
++        this.email = email;
++        this.phone = phone;
++        if (languages != null) this.languages = languages;
++        // por defecto: role="guia", status="pending"
++    }
++
++    // ===== Getters/Setters (nuevos nombres) =====
++    public String getUid() { return uid; }
++    public void setUid(String uid) { this.uid = uid; }
++
++    public String getDisplayName() { return displayName; }
++    public void setDisplayName(String displayName) { this.displayName = displayName; }
++
++    public String getEmail() { return email; }
++    public void setEmail(String email) { this.email = email; }
++
++    public String getPhone() { return phone; }
++    public void setPhone(String phone) { this.phone = phone; }
++
++    public String getDni() { return dni; }
++    public void setDni(String dni) { this.dni = dni; }
++
++    public String getBio() { return bio; }
++    public void setBio(String bio) { this.bio = bio; }
++
++    public String getPhotoUrl() { return photoUrl; }
++    public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }
++
++    public List<Language> getLanguages() { return languages; }
++    public void setLanguages(List<Language> languages) {
++        this.languages = languages != null ? languages : new ArrayList<>();
++    }
++
++    public float getRating() { return rating; }
++    public void setRating(float rating) { this.rating = rating; }
++
++    public String getZone() { return zone; }
++    public void setZone(String zone) { this.zone = zone; }
++
++    public String getRole() { return role; }
++    public void setRole(String role) { this.role = role; }
++
++    public String getStatus() { return status; }
++    public void setStatus(String status) { this.status = status; }
++
++    public Boolean getEmailVerified() { return emailVerified; }
++    public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
++
++    public Boolean getVerificationRequired() { return verificationRequired; }
++    public void setVerificationRequired(Boolean verificationRequired) { this.verificationRequired = verificationRequired; }
++
++    public Timestamp getCreatedAt() { return createdAt; }
++    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
++
++    public Timestamp getUpdatedAt() { return updatedAt; }
++    public void setUpdatedAt(Timestamp updatedAt) { this.updatedAt = updatedAt; }
++
++    // ===== Getters de COMPATIBILIDAD con el modelo anterior =====
++    public String getId() { return uid; }
++    public String getName() { return displayName; }
++
++    // ===== Helpers =====
++    @Exclude
++    public boolean isActive() { return "active".equalsIgnoreCase(status); }
++
++    @Exclude
++    public boolean isPending() { return "pending".equalsIgnoreCase(status); }
++
++    @Exclude
++    public Map<String, Object> toFirestoreMap() {
++        Map<String, Object> m = new HashMap<>();
++        m.put("uid", uid);
++        m.put("displayName", displayName);
++        m.put("email", email);
++        m.put("phone", phone);
++        m.put("dni", dni);
++        m.put("bio", bio);
++        m.put("photoUrl", photoUrl);
++        m.put("languages", languages); // Firestore guarda enums como strings
++        m.put("rating", rating);
++        m.put("zone", zone);
++        m.put("role", role);
++        m.put("status", status);
++        m.put("emailVerified", emailVerified);
++        m.put("verificationRequired", verificationRequired);
++        m.put("createdAt", createdAt);
++        m.put("updatedAt", updatedAt);
++        return m;
++    }
++}
+Index: app/src/main/java/com/example/proyecto_2025/data/repository/GuiaRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/data/repository/GuiaRepository.java b/app/src/main/java/com/example/proyecto_2025/data/repository/GuiaRepository.java
+new file mode 100644
+--- /dev/null	(date 1763341011436)
++++ b/app/src/main/java/com/example/proyecto_2025/data/repository/GuiaRepository.java	(date 1763341011436)
+@@ -0,0 +1,83 @@
++package com.example.proyecto_2025.data.repository;
++
++import com.example.proyecto_2025.model.Guia;
++import com.google.firebase.firestore.FirebaseFirestore;
++import com.google.firebase.firestore.QueryDocumentSnapshot;
++
++import java.util.ArrayList;
++import java.util.List;
++
++public class GuiaRepository {
++
++    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
++    private static GuiaRepository instance;
++
++    public static GuiaRepository get() {
++        if (instance == null) instance = new GuiaRepository();
++        return instance;
++    }
++
++    // === Listar guías activos ===
++    public void getGuiasActivos(Callback<List<Guia>> cb) {
++        db.collection("users")
++                .whereEqualTo("role", "guia")
++                .whereEqualTo("status", "active")
++                .get()
++                .addOnSuccessListener(snaps -> {
++                    List<Guia> list = new ArrayList<>();
++                    for (QueryDocumentSnapshot d : snaps) {
++                        Guia g = d.toObject(Guia.class);
++                        list.add(g);
++                    }
++                    cb.onSuccess(list);
++                })
++                .addOnFailureListener(cb::onError);
++    }
++
++    // === Listar guías pendientes ===
++    public void getGuiasPendientes(Callback<List<Guia>> cb) {
++        db.collection("users")
++                .whereEqualTo("role", "guia")
++                .whereEqualTo("status", "pending")
++                .get()
++                .addOnSuccessListener(snaps -> {
++                    List<Guia> list = new ArrayList<>();
++                    for (QueryDocumentSnapshot d : snaps) {
++                        Guia g = d.toObject(Guia.class);
++                        list.add(g);
++                    }
++                    cb.onSuccess(list);
++                })
++                .addOnFailureListener(cb::onError);
++    }
++
++    // === Cambiar estado (activar/desactivar/rechazar) ===
++    public void updateStatus(String uid, String status, Callback<Void> cb) {
++        db.collection("users").document(uid)
++                .update("status", status)
++                .addOnSuccessListener(x -> cb.onSuccess(null))
++                .addOnFailureListener(cb::onError);
++    }
++    public void getById(String uid, Callback<Guia> cb) {
++        db.collection("users")
++                .document(uid)
++                .get()
++                .addOnSuccessListener(doc -> {
++                    if (doc.exists()) {
++                        Guia g = doc.toObject(Guia.class);
++                        cb.onSuccess(g);
++                    } else {
++                        cb.onError(new Exception("Guía no existe"));
++                    }
++                })
++                .addOnFailureListener(cb::onError);
++    }
++
++
++
++    // === Callback genérico ===
++    public interface Callback<T> {
++        void onSuccess(T result);
++        void onError(Exception e);
++    }
++}
+Index: app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_GestionGuiasActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_GestionGuiasActivity.java b/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_GestionGuiasActivity.java
+new file mode 100644
+--- /dev/null	(date 1763339941722)
++++ b/app/src/main/java/com/example/proyecto_2025/Activities_Superadmin/Superadmin_GestionGuiasActivity.java	(date 1763339941722)
+@@ -0,0 +1,143 @@
++package com.example.proyecto_2025.Activities_Superadmin;
++
++import android.os.Bundle;
++import android.text.Editable;
++import android.text.TextWatcher;
++import android.widget.EditText;
++import android.widget.TextView;
++import android.widget.Toast;
++
++import androidx.annotation.Nullable;
++import androidx.appcompat.app.AppCompatActivity;
++import androidx.recyclerview.widget.LinearLayoutManager;
++import androidx.recyclerview.widget.RecyclerView;
++
++import com.example.proyecto_2025.R;
++import com.example.proyecto_2025.adapter.GuiasAdapter;
++import com.example.proyecto_2025.model.Guia;
++import com.google.android.material.button.MaterialButton;
++import com.google.firebase.firestore.DocumentSnapshot;
++import com.google.firebase.firestore.FieldValue;
++import com.google.firebase.firestore.FirebaseFirestore;
++import com.google.firebase.firestore.ListenerRegistration;
++import com.google.firebase.firestore.Query;
++
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.List;
++import java.util.Locale;
++
++public class Superadmin_GestionGuiasActivity extends AppCompatActivity {
++
++    private RecyclerView rv;
++    private EditText etBuscar;
++    private MaterialButton btnAprobados, btnPendientes;
++    private TextView tvTitulo;
++
++    private GuiasAdapter adapter;
++    private GuiasAdapter.Mode mode = GuiasAdapter.Mode.APPROVED;
++
++    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
++    private ListenerRegistration reg;
++    private final List<Guia> source = new ArrayList<>();
++
++    @Override
++    protected void onCreate(@Nullable Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        setContentView(R.layout.screen_superadmin_guias);
++
++        rv          = findViewById(R.id.rvGuias);
++        etBuscar    = findViewById(R.id.etBuscarGuia);
++        btnAprobados= findViewById(R.id.btnAprobados);
++        btnPendientes=findViewById(R.id.btnPendientes);
++        tvTitulo    = findViewById(R.id.tvTituloLista);
++
++        rv.setLayoutManager(new LinearLayoutManager(this));
++        adapter = new GuiasAdapter(mode, this::onToggle, this::onApprove, this::onReject);
++        rv.setAdapter(adapter);
++
++        btnAprobados.setOnClickListener(v -> switchMode(GuiasAdapter.Mode.APPROVED));
++        btnPendientes.setOnClickListener(v -> switchMode(GuiasAdapter.Mode.PENDING));
++
++        etBuscar.addTextChangedListener(new TextWatcher() {
++            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
++            @Override public void onTextChanged(CharSequence s, int st, int b, int c) {}
++            @Override public void afterTextChanged(Editable s) { applyFilter(s.toString()); }
++        });
++
++        switchMode(GuiasAdapter.Mode.APPROVED);
++    }
++
++    private void switchMode(GuiasAdapter.Mode m) {
++        mode = m;
++        tvTitulo.setText(m == GuiasAdapter.Mode.APPROVED ? "Guías registrados" : "Guías pendientes");
++        adapter.setMode(mode);
++        listenRealtime();
++    }
++
++    private void listenRealtime() {
++        if (reg != null) { reg.remove(); reg = null; }
++
++        Query q = db.collection("users").whereEqualTo("role", "guia");
++        if (mode == GuiasAdapter.Mode.APPROVED) {
++            q = q.whereIn("status", Arrays.asList("active","disabled"));
++        } else {
++            q = q.whereEqualTo("status", "pending");
++        }
++
++        reg = q.addSnapshotListener((snap, err) -> {
++            if (err != null) { toast(err.getMessage()); return; }
++            source.clear();
++            if (snap != null) {
++                for (DocumentSnapshot d : snap.getDocuments()) {
++                    Guia g = d.toObject(Guia.class);
++                    if (g != null) { g.setUid(d.getId()); source.add(g); }
++                }
++            }
++            applyFilter(etBuscar.getText()==null? "" : etBuscar.getText().toString());
++        });
++    }
++
++    private void applyFilter(String text) {
++        String f = text.toLowerCase(Locale.ROOT).trim();
++        List<Guia> out = new ArrayList<>();
++        for (Guia g : source) {
++            boolean ok = f.isEmpty()
++                    || (g.getDisplayName() != null && g.getDisplayName().toLowerCase().contains(f))
++                    || (g.getEmail() != null && g.getEmail().toLowerCase().contains(f));
++            if (ok) out.add(g);
++        }
++        adapter.setData(out);
++    }
++
++    // --- Actions ---
++
++    // Alterna active <-> disabled
++    private void onToggle(Guia g) {
++        String next = "active".equalsIgnoreCase(g.getStatus()) ? "disabled" : "active";
++        db.collection("users").document(g.getUid())
++                .update("status", next, "updatedAt", FieldValue.serverTimestamp())
++                .addOnFailureListener(e -> toast(e.getMessage()));
++    }
++
++    // Pasa pending -> active
++    private void onApprove(Guia g) {
++        db.collection("users").document(g.getUid())
++                .update("status", "active", "updatedAt", FieldValue.serverTimestamp())
++                .addOnFailureListener(e -> toast(e.getMessage()));
++    }
++
++    // Rechaza: elimina doc (si quieres, elimina también del Auth via Cloud Function)
++    private void onReject(Guia g) {
++        db.collection("users").document(g.getUid())
++                .delete()
++                .addOnFailureListener(e -> toast(e.getMessage()));
++    }
++
++    private void toast(String m) { Toast.makeText(this, m, Toast.LENGTH_LONG).show(); }
++
++    @Override protected void onDestroy() {
++        super.onDestroy();
++        if (reg != null) { reg.remove(); reg = null; }
++    }
++}
+Index: gradle/libs.versions.toml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>[versions]\r\nagp = \"8.12.3\"\r\ncompiler = \"5.0.5\"\r\ncoreKtx = \"1.17.0\"\r\nfirebaseBom = \"34.4.0\"\r\nglide = \"5.0.5\"\r\ngson = \"2.13.2\"\r\ngsonVersion = \"2.13.2\"\r\njunit = \"4.13.2\"\r\njunitVersion = \"1.3.0\"\r\nespressoCore = \"3.7.0\"\r\nappcompat = \"1.7.1\"\r\nmaterial = \"1.13.0\"\r\nactivity = \"1.11.0\"\r\nconstraintlayout = \"2.2.1\"\r\nmaterialVersion = \"1.12.0\"\r\nmpandroidchart = \"v3.1.0\"\r\nnavigationFragment = \"2.9.5\"\r\nnavigationUi = \"2.9.5\"\r\nosmdroidAndroid = \"6.1.20\"\r\npreference = \"1.2.1\"\r\nrecyclerview = \"1.4.0\"\r\nretrofit = \"3.0.0\"\r\nroomCompiler = \"2.8.2\"\r\nworkRuntime = \"2.10.5\"\r\n\r\n[libraries]\r\ncompiler = { module = \"com.github.bumptech.glide:compiler\", version.ref = \"compiler\" }\r\nconverter-gson = { module = \"com.squareup.retrofit2:converter-gson\", version.ref = \"retrofit\" }\r\ncore-ktx = { module = \"androidx.core:core-ktx\", version.ref = \"coreKtx\" }\r\nfirebase-analytics = { module = \"com.google.firebase:firebase-analytics\" }\r\nfirebase-auth = { module = \"com.google.firebase:firebase-auth\" }\r\nfirebase-bom = { module = \"com.google.firebase:firebase-bom\", version.ref = \"firebaseBom\" }\r\nfirebase-firestore = { module = \"com.google.firebase:firebase-firestore\" }\r\nglide = { module = \"com.github.bumptech.glide:glide\", version.ref = \"glide\" }\r\ngson = { module = \"com.google.code.gson:gson\", version.ref = \"gson\" }\r\ngson-v2101 = { module = \"com.google.code.gson:gson\", version.ref = \"gsonVersion\" }\r\njunit = { group = \"junit\", name = \"junit\", version.ref = \"junit\" }\r\next-junit = { group = \"androidx.test.ext\", name = \"junit\", version.ref = \"junitVersion\" }\r\nespresso-core = { group = \"androidx.test.espresso\", name = \"espresso-core\", version.ref = \"espressoCore\" }\r\nappcompat = { group = \"androidx.appcompat\", name = \"appcompat\", version.ref = \"appcompat\" }\r\nmaterial = { group = \"com.google.android.material\", name = \"material\", version.ref = \"material\" }\r\nactivity = { group = \"androidx.activity\", name = \"activity\", version.ref = \"activity\" }\r\nconstraintlayout = { group = \"androidx.constraintlayout\", name = \"constraintlayout\", version.ref = \"constraintlayout\" }\r\nmaterial-v1120 = { module = \"com.google.android.material:material\", version.ref = \"materialVersion\" }\r\nmpandroidchart = { module = \"com.github.PhilJay:MPAndroidChart\", version.ref = \"mpandroidchart\" }\r\nnavigation-fragment = { group = \"androidx.navigation\", name = \"navigation-fragment\", version.ref = \"navigationFragment\" }\r\nnavigation-ui = { group = \"androidx.navigation\", name = \"navigation-ui\", version.ref = \"navigationUi\" }\r\nosmdroid-android = { module = \"org.osmdroid:osmdroid-android\", version.ref = \"osmdroidAndroid\" }\r\npreference = { group = \"androidx.preference\", name = \"preference\", version.ref = \"preference\" }\r\nrecyclerview = { module = \"androidx.recyclerview:recyclerview\", version.ref = \"recyclerview\" }\r\nretrofit = { module = \"com.squareup.retrofit2:retrofit\", version.ref = \"retrofit\" }\r\nroom-compiler = { module = \"androidx.room:room-compiler\", version.ref = \"roomCompiler\" }\r\nroom-runtime = { module = \"androidx.room:room-runtime\", version.ref = \"roomCompiler\" }\r\nwork-runtime = { module = \"androidx.work:work-runtime\", version.ref = \"workRuntime\" }\r\n\r\n[plugins]\r\nandroid-application = { id = \"com.android.application\", version.ref = \"agp\" }\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
+--- a/gradle/libs.versions.toml	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/gradle/libs.versions.toml	(date 1763339941801)
+@@ -32,6 +32,7 @@
+ firebase-auth = { module = "com.google.firebase:firebase-auth" }
+ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+ firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
++firebase-functions = { module = "com.google.firebase:firebase-functions" }
+ glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+ gson-v2101 = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
+Index: app/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    alias(libs.plugins.android.application)\r\n    id 'com.google.gms.google-services'\r\n}\r\n\r\nandroid {\r\n    namespace 'com.example.proyecto_2025'\r\n    compileSdk 36\r\n\r\n    defaultConfig {\r\n        applicationId \"com.example.proyecto_2025\"\r\n        minSdk 31\r\n        targetSdk 36\r\n        versionCode 1\r\n        versionName \"1.0\"\r\n\r\n        testInstrumentationRunner \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            minifyEnabled false\r\n            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility JavaVersion.VERSION_11\r\n        targetCompatibility JavaVersion.VERSION_11\r\n    }\r\n    buildFeatures { viewBinding true } // si aún no lo tienes\r\n    sourceSets {\r\n        main {\r\n            res.srcDirs = [\r\n                    \"src/main/res\",\r\n            ]\r\n        }\r\n    }\r\n}\r\n\r\ndependencies {\r\n\r\n    implementation libs.appcompat\r\n    implementation libs.material\r\n    implementation libs.activity\r\n    implementation libs.constraintlayout\r\n    implementation libs.navigation.fragment\r\n    implementation libs.navigation.ui\r\n    implementation libs.preference\r\n    testImplementation libs.junit\r\n    androidTestImplementation libs.ext.junit\r\n    androidTestImplementation libs.espresso.core\r\n    implementation libs.osmdroid.android\r\n    implementation libs.glide\r\n\r\n    implementation libs.retrofit\r\n    implementation libs.converter.gson\r\n    implementation libs.gson\r\n    annotationProcessor libs.compiler // ✅ necesario para Glide\r\n    implementation libs.mpandroidchart\r\n\r\n    implementation libs.core.ktx\r\n    implementation libs.recyclerview\r\n\r\n    // ROOM\r\n    implementation libs.room.runtime\r\n    annotationProcessor libs.room.compiler\r\n\r\n    // WORKMANAGER (recordatorios)\r\n    implementation libs.work.runtime\r\n\r\n    implementation platform(libs.firebase.bom)\r\n    implementation libs.firebase.analytics\r\n    implementation libs.firebase.auth\r\n    implementation libs.firebase.firestore\r\n\r\n    implementation libs.material.v1120\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle b/app/build.gradle
+--- a/app/build.gradle	(revision 733feaf55ac5fc4b53ac43a82a34322bd3fca414)
++++ b/app/build.gradle	(date 1763339941809)
+@@ -69,6 +69,7 @@
+     implementation libs.work.runtime
+ 
+     implementation platform(libs.firebase.bom)
++    implementation libs.firebase.functions
+     implementation libs.firebase.analytics
+     implementation libs.firebase.auth
+     implementation libs.firebase.firestore

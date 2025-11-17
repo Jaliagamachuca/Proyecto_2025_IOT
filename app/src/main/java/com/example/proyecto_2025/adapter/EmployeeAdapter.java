@@ -1,4 +1,4 @@
-package com.example.proyecto_2025.Activities_Superadmin;
+package com.example.proyecto_2025.adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Administrador;
+import com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Cliente;
+import com.example.proyecto_2025.Activities_Superadmin.Superadmin_Ver_Guia_Turismo;
+import com.example.proyecto_2025.model.User;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.IrvEmployeeBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;

@@ -7,7 +7,7 @@ import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_2025.R;
-import com.example.proyecto_2025.data.TourRepository;
+import com.example.proyecto_2025.data.repository.TourRepository;
 import com.example.proyecto_2025.databinding.ActivityTourDetalleBinding;
 import com.example.proyecto_2025.model.Tour;
 import com.example.proyecto_2025.model.TourEstado;
