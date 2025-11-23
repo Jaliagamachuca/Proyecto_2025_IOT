@@ -3,6 +3,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.MenuItem;
 import android.view.View;
@@ -348,6 +349,10 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
         // Definir estado lógico según acción
         empresa.status = publicar ? "active" : "pending";
+        Log.d("EMPRESA_DEBUG", "guardarEmpresa(publicar=" + publicar + ")");
+        if (!capturarFormulario(publicar)) return;
+        empresa.status = publicar ? "active" : "pending";
+        persistir();
 
         if (publicar && !empresa.esCompleta()) {
             Snackbar.make(binding.getRoot(),
@@ -405,6 +410,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
         empresaRepo.save(empresa);
         actualizarChecklistYEstado();
     }
+
 
     private void actualizarChecklistYEstado() {
         setCheck(binding.scrEmpresa.chkContacto,
