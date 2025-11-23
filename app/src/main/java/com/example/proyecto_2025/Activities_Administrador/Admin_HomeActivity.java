@@ -29,6 +29,7 @@ import com.example.proyecto_2025.data.repository.OfferRepository;
 import com.example.proyecto_2025.data.repository.GuideRepository;
 import com.example.proyecto_2025.data.repository.AdminRepository;
 import com.example.proyecto_2025.databinding.ActivityAdminHomeBinding;
+import com.example.proyecto_2025.login.LoginActivity;
 import com.example.proyecto_2025.model.Empresa;
 import com.example.proyecto_2025.model.Guide;
 import com.example.proyecto_2025.model.Offer;
@@ -36,6 +37,9 @@ import com.example.proyecto_2025.model.Tour;
 import com.example.proyecto_2025.model.TourEstado;
 import com.example.proyecto_2025.model.Admin;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import android.content.Intent;
+import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -685,20 +689,32 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
         // Cerrar sesi├│n
         binding.scrPerfil.btnCerrarSesion.setOnClickListener(v -> {
-            new androidx.appcompat.app.AlertDialog.Builder(this)
+            new AlertDialog.Builder(this)
                     .setTitle("Cerrar sesión")
-                    .setMessage("┬┐Est├ís seguro de que deseas cerrar sesi├│n?")
-                    .setPositiveButton("S├¡", (dialog, which) -> {
+                    .setMessage("¿Estás seguro de que deseas cerrar sesión?")
+                    .setPositiveButton("Sí", (dialog, which) -> {
+
+                        // 1) Cerrar sesión en Firebase
+                        FirebaseAuth.getInstance().signOut();
+
+                        // 2) Limpiar repos locales
                         adminRepo.clear();
-                        Snackbar.make(binding.getRoot(),
-                                "Sesi├│n cerrada", Snackbar.LENGTH_LONG).show();
-                        // TODO: Redirigir al login cuando est├® implementado
-                        // startActivity(new Intent(this, LoginActivity.class));
-                        // finish();
+                        // si no tienes este método aún, créalo en EmpresaRepository
+                        empresaRepo.clear();
+
+                        // 3) Ir al login y limpiar historial
+                        Intent i = new Intent(this, LoginActivity.class);
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                                | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(i);
+
+                        finish();
                     })
                     .setNegativeButton("Cancelar", null)
                     .show();
         });
+
     }
 
     private void mostrarDialogEditarPerfil() {

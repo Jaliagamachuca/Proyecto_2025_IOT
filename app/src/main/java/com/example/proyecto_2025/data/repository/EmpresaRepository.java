@@ -277,4 +277,11 @@ public class EmpresaRepository {
                 .addOnFailureListener(err ->
                         Log.e(TAG, "Error actualizando companyId del usuario", err));
     }
+
+    
+
+    // ================== LIMPIAR CACHE LOCAL ==================
+    public void clear() {
+        sp.edit().remove(KEY).apply();
+    }
 }
