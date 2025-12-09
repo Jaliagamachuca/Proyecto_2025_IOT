@@ -15,10 +15,17 @@ import java.util.ArrayList;
 import java.util.List;
 import com.google.android.material.tabs.TabLayout;
 
+import com.example.proyecto_2025.adapter.EmpresasAdapter;
+import com.example.proyecto_2025.Activities_Usuario.EmpresaTurismo;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 public class Cliente_HomeActivity extends AppCompatActivity {
 
     private ActivityUsuarioVistaInicialBinding binding;
+
+    private FirebaseFirestore db;
 
     // Raíces (ids de cada <include/>)
     private static final int SCR_DASHBOARD = R.id.scrDashboard;
@@ -34,6 +41,8 @@ public class Cliente_HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityUsuarioVistaInicialBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        db = FirebaseFirestore.getInstance();
 
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
@@ -128,27 +137,71 @@ public class Cliente_HomeActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerViewEmpresas() {
-        // Crear datos de prueba
-        List<EmpresaTurismo> empresas = crearDatosPrueba();
 
-        // Configurar el RecyclerView
-        EmpresasAdapter adapter = new EmpresasAdapter(empresas, new EmpresasAdapter.OnEmpresaClickListener() {
-            @Override
-            public void onEmpresaClick(EmpresaTurismo empresa) {
-                // Click en toda la card - mostrar detalles
-                // TODO: Implementar navegación a detalles de empresa
-            }
+        binding.scrExplorar.rvEmpresasTurismo
+                .setLayoutManager(new LinearLayoutManager(this));
 
-            @Override
-            public void onVerToursClick(EmpresaTurismo empresa) {
-                // Click en botón "Ver tours"
-                // TODO: Implementar navegación a tours de la empresa
-            }
-        });
+        // Muestra un pequeño loader si quieres (puede ser un ProgressBar en el layout)
+        // binding.scrExplorar.progressEmpresas.setVisibility(View.VISIBLE);
 
-        binding.scrExplorar.rvEmpresasTurismo.setLayoutManager(new LinearLayoutManager(this));
-        binding.scrExplorar.rvEmpresasTurismo.setAdapter(adapter);
+        db.collection("empresas")
+                .whereEqualTo("status", "active")      // solo empresas publicadas
+                .get()
+                .addOnSuccessListener(snaps -> {
+                    List<EmpresaTurismo> empresas = new ArrayList<>();
+
+                    for (DocumentSnapshot doc : snaps.getDocuments()) {
+                        String nombre       = doc.getString("nombre");
+                        String descripcion  = doc.getString("descripcionCorta");
+                        String direccion    = doc.getString("direccion");
+
+                        Double ratingDb     = doc.getDouble("ratingPromedio");
+                        Double totalResDb   = doc.getDouble("totalReservas");
+                        Double totalToursDb = doc.getDouble("totalToursActivos"); // si lo agregas luego
+
+                        float rating        = ratingDb   != null ? ratingDb.floatValue() : 0f;
+                        int totalResenas    = totalResDb != null ? totalResDb.intValue() : 0;
+                        int totalTours      = totalToursDb != null ? totalToursDb.intValue() : 0;
+
+                        // Usa el mismo modelo visual que ya tienes
+                        EmpresaTurismo e = new EmpresaTurismo(
+                                nombre != null ? nombre : "Sin nombre",
+                                descripcion != null ? descripcion : "",
+                                rating,
+                                totalResenas,
+                                totalTours,
+                                direccion != null ? direccion : "Sin dirección",
+                                R.drawable.ic_business_24   // icono default
+                        );
+                        empresas.add(e);
+                    }
+
+                    EmpresasAdapter adapter = new EmpresasAdapter(
+                            empresas,
+                            new EmpresasAdapter.OnEmpresaClickListener() {
+                                @Override
+                                public void onEmpresaClick(EmpresaTurismo empresa) {
+                                    // TODO: abrir detalles de la empresa (otra activity)
+                                }
+
+                                @Override
+                                public void onVerToursClick(EmpresaTurismo empresa) {
+                                    // TODO: navegar a lista de tours de esa empresa
+                                }
+                            }
+                    );
+
+                    binding.scrExplorar.rvEmpresasTurismo.setAdapter(adapter);
+                    // binding.scrExplorar.progressEmpresas.setVisibility(View.GONE);
+                })
+                .addOnFailureListener(err -> {
+                    Toast.makeText(this,
+                            "Error cargando empresas: " + err.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                    // binding.scrExplorar.progressEmpresas.setVisibility(View.GONE);
+                });
     }
+
 
     private List<EmpresaTurismo> crearDatosPrueba() {
         List<EmpresaTurismo> empresas = new ArrayList<>();

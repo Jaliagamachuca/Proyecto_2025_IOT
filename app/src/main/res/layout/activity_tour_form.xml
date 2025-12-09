@@ -119,6 +119,69 @@
                     android:layout_height="wrap_content"
                     android:text="Cena" />
 
+                <!-- 🚩 NUEVO: Idiomas del tour -->
+                <TextView
+                    android:id="@+id/tvIdiomasLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Idiomas del tour"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp" />
+
+                <LinearLayout
+                    android:id="@+id/layoutIdiomas"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/chkIdiomaEspanol"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Español" />
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/chkIdiomaIngles"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Inglés"
+                        android:layout_marginStart="8dp" />
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/chkIdiomaPortugues"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Portugués"
+                        android:layout_marginStart="8dp" />
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/chkIdiomaFrances"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Francés" />
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/chkIdiomaAleman"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Alemán" />
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/chkIdiomaItaliano"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Italiano" />
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/chkIdiomaJapones"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Japonés" />
+
+                </LinearLayout>
+
+
                 <!-- Botón imágenes -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPickImgs"

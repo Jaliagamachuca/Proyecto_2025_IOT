@@ -30,9 +30,7 @@
         <activity
             android:name=".Activities_Usuario.Cliente_HomeActivity"
             android:exported="false" />
-        <activity
-            android:name=".Activities_Administrador.EmpresaFormPruebaActivity"
-            android:exported="false" />
+
 
         <activity android:name=".Activities_Administrador.TourListActivity" />
         <activity android:name=".Activities_Administrador.TourFormActivity" />
@@ -54,21 +52,7 @@
         <activity
             android:name=".Activities_Superadmin.EmployeeDetailActivity"
             android:exported="false" />
-        <activity
-            android:name=".Activities_Superadmin.Superadmin_Administradores_Sede"
-            android:exported="false" />
-        <activity
-            android:name=".Activities_Superadmin.Superadmin_Clientes"
-            android:exported="false" />
-        <activity
-            android:name=".Activities_Superadmin.Superadmin_Clientes1"
-            android:exported="false" />
-        <activity
-            android:name=".Activities_Superadmin.Superadmin_Guias_Turismo"
-            android:exported="false" />
-        <activity
-            android:name=".Activities_Superadmin.Superadmin_Rechazar_Guia_Turismo"
-            android:exported="false" />
+
         <activity
             android:name=".Activities_Superadmin.Superadmin_Registrar_Administrador"
             android:exported="false" />
@@ -160,6 +144,11 @@
         <activity
             android:name=".login.CrearPasswordActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".Activities_Administrador.TourRutaMapActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

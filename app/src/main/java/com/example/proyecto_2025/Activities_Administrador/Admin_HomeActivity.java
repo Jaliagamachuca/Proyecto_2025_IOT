@@ -36,8 +36,8 @@ import com.example.proyecto_2025.model.Tour;
 import com.example.proyecto_2025.model.TourEstado;
 import com.example.proyecto_2025.model.Admin;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseAuth;
-import android.content.Intent;
 import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
@@ -70,6 +70,12 @@ public class Admin_HomeActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> pickImagesLauncher;
     private ActivityResultLauncher<Intent> pickLocationLauncher;
 
+    // ===================== TOURS (ADMIN) =====================
+    private TourRepository tourRepo;
+    private TourAdapter tourAdapter;
+    private final List<Tour> allTours = new ArrayList<>();
+    private String empresaId;
+
     // ===================== LIFECYCLE =====================
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +104,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
         showScreen(SCR_EMPRESA);
 
         // Datos de prueba (eliminar en producci├│n)
-        crearDatosDePruebaSiEsNecesario();
+        //crearDatosDePruebaSiEsNecesario();
     }
 
     // ===================== SETUP METHODS =====================
@@ -117,6 +123,15 @@ public class Admin_HomeActivity extends AppCompatActivity {
         empresa = empresaRepo.load();
         adminRepo = new AdminRepository(this);
         admin = adminRepo.load();
+
+        // TOURS
+        tourRepo = new TourRepository(this);
+
+        // Usamos el UID del usuario logueado como empresaId (coincide con TourFormActivity)
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (fbUser != null) {
+            empresaId = fbUser.getUid();
+        }
     }
     private void syncEmpresaFromRemote() {
         empresaRepo.loadFromRemote(remoteEmpresa -> {
@@ -252,6 +267,10 @@ public class Admin_HomeActivity extends AppCompatActivity {
         // Actualizar datos si es necesario
         if (screenId == SCR_GUIAS) {
             refreshGuiasDashboard();
+        }
+
+        if (screenId == SCR_TOURS) {
+            loadToursEmpresa();
         }
     }
 
@@ -441,33 +460,31 @@ public class Admin_HomeActivity extends AppCompatActivity {
     // ===================== SECTION 2: TOURS =====================
 
     private void initToursSection() {
-        TourRepository repo = new TourRepository(this);
-        List<Tour> ultimos = repo.findLastN(3);
-        List<Tour> todosTours = repo.findAll();
 
-        // Configurar RecyclerView horizontal
+        // Configurar RecyclerView (vertical, últimos tours)
         LinearLayoutManager lm = new LinearLayoutManager(this,
-                LinearLayoutManager.HORIZONTAL, false);
+                LinearLayoutManager.VERTICAL, false);
         binding.scrTours.rvUltimos.setLayoutManager(lm);
 
-        TourAdapter adapter = new TourAdapter(
-                ultimos,
+        tourAdapter = new TourAdapter(
+                new ArrayList<>(),
                 t -> {
+                    // Ir al detalle del tour
                     Intent i = new Intent(this, TourDetalleActivity.class);
                     i.putExtra("id", t.id);
                     startActivity(i);
                 },
-                (t, anchor) -> {}
+                (t, anchor) -> {
+                    // menú "more" si quieres más adelante
+                }
         );
-        binding.scrTours.rvUltimos.setAdapter(adapter);
+        binding.scrTours.rvUltimos.setAdapter(tourAdapter);
 
-        // Actualizar KPIs
-        actualizarKPIsTours(todosTours);
-
-        // Botones
+        // Botón "Ver todos"
         binding.scrTours.btnVerTodosUltimos.setOnClickListener(v ->
                 startActivity(new Intent(this, TourListActivity.class)));
 
+        // FAB "Nuevo tour"
         binding.scrTours.fabNuevoTour.setVisibility(View.VISIBLE);
         binding.scrTours.fabNuevoTour.setOnClickListener(v -> {
             if (empresa == null || !empresa.esCompleta()) {
@@ -478,6 +495,40 @@ public class Admin_HomeActivity extends AppCompatActivity {
                 return;
             }
             startActivity(new Intent(this, TourFormActivity.class));
+        });
+
+        // Filtros (chips)
+        binding.scrTours.chipTodos.setOnClickListener(v -> applyTourFilter());
+        binding.scrTours.chipFiltroPublicados.setOnClickListener(v -> applyTourFilter());
+        binding.scrTours.chipFiltroPendientes.setOnClickListener(v -> applyTourFilter());
+
+        // Cargar datos iniciales
+        loadToursEmpresa();
+    }
+
+    private void loadToursEmpresa() {
+        if (empresaId == null || empresaId.isEmpty()) {
+            // Si por alguna razón no hay sesión, no hacemos nada
+            return;
+        }
+
+        tourRepo.fetchToursByEmpresa(empresaId, new TourRepository.ToursCallback() {
+            @Override
+            public void onSuccess(List<Tour> tours) {
+                allTours.clear();
+                allTours.addAll(tours);
+
+                // Actualizar KPIs y filtros
+                actualizarKPIsTours(allTours);
+                applyTourFilter();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Snackbar.make(binding.getRoot(),
+                        "Error al cargar tours: " + e.getMessage(),
+                        Snackbar.LENGTH_LONG).show();
+            }
         });
     }
 
@@ -502,6 +553,38 @@ public class Admin_HomeActivity extends AppCompatActivity {
         binding.scrTours.tvCountPublicados.setText(String.valueOf(publicados));
         binding.scrTours.tvCountPendientes.setText(String.valueOf(pendientes));
         binding.scrTours.tvCountBorradores.setText(String.valueOf(borradores));
+    }
+
+    private void applyTourFilter() {
+        List<Tour> filtered = new ArrayList<>();
+
+        boolean filterPublicados = binding.scrTours.chipFiltroPublicados.isChecked();
+        boolean filterPendientes = binding.scrTours.chipFiltroPendientes.isChecked();
+        boolean filterTodos      = binding.scrTours.chipTodos.isChecked()
+                || (!filterPublicados && !filterPendientes);
+
+        for (Tour t : allTours) {
+            if (t.estado == null) continue;
+
+            if (filterTodos) {
+                filtered.add(t);
+            } else if (filterPublicados && t.estado == TourEstado.PUBLICADO) {
+                filtered.add(t);
+            } else if (filterPendientes && t.estado == TourEstado.PENDIENTE_GUIA) {
+                filtered.add(t);
+            }
+        }
+
+        tourAdapter.replaceData(filtered);
+
+        // Empty state vs lista
+        if (filtered.isEmpty()) {
+            binding.scrTours.emptyState.setVisibility(View.VISIBLE);
+            binding.scrTours.rvUltimos.setVisibility(View.GONE);
+        } else {
+            binding.scrTours.emptyState.setVisibility(View.GONE);
+            binding.scrTours.rvUltimos.setVisibility(View.VISIBLE);
+        }
     }
 
     // ===================== SECTION 3: GU├ìAS =====================
@@ -830,7 +913,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
      * Crea tours de prueba si la BD est├í vac├¡a
      * ELIMINAR en producci├│n
      */
-    private void crearDatosDePruebaSiEsNecesario() {
+    /*private void crearDatosDePruebaSiEsNecesario() {
         TourRepository repo = new TourRepository(this);
         if (!repo.findAll().isEmpty()) return;
 
@@ -863,5 +946,5 @@ public class Admin_HomeActivity extends AppCompatActivity {
         t3.cupos = 8;
         t3.estado = TourEstado.EN_CURSO;
         repo.upsert(t3);
-    }
+    }*/
 }

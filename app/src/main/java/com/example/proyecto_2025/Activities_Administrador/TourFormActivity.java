@@ -13,7 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.proyecto_2025.R;
-import com.example.proyecto_2025.data.repository.TourRemoteDataSource; // ⭐ NUEVO
+//import com.example.proyecto_2025.data.repository.TourRemoteDataSource; // ⭐ NUEVO
 import com.example.proyecto_2025.data.repository.TourRepository;
 import com.example.proyecto_2025.databinding.ActivityTourFormBinding;
 import com.example.proyecto_2025.model.PuntoRuta;
@@ -39,13 +39,16 @@ public class TourFormActivity extends AppCompatActivity {
 
     private MaterialCheckBox chkDesayuno, chkAlmuerzo, chkCena;
 
+    private MaterialCheckBox chkIdiomaEspanol, chkIdiomaIngles, chkIdiomaPortugues,
+            chkIdiomaFrances, chkIdiomaAleman, chkIdiomaItaliano, chkIdiomaJapones;
+
     private final Calendar calInicio = Calendar.getInstance();
     private final Calendar calFin    = Calendar.getInstance();
     private ActivityResultLauncher<Intent> pickImagesLauncher;
     private ActivityResultLauncher<Intent> pickPointLauncher;
 
     // ⭐ NUEVO: remote (Firestore)
-    private TourRemoteDataSource tourRemote;
+    //private TourRemoteDataSource tourRemote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +65,17 @@ public class TourFormActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Nuevo tour");
         }
 
+        chkIdiomaEspanol   = findViewById(R.id.chkIdiomaEspanol);
+        chkIdiomaIngles    = findViewById(R.id.chkIdiomaIngles);
+        chkIdiomaPortugues = findViewById(R.id.chkIdiomaPortugues);
+        chkIdiomaFrances   = findViewById(R.id.chkIdiomaFrances);
+        chkIdiomaAleman    = findViewById(R.id.chkIdiomaAleman);
+        chkIdiomaItaliano  = findViewById(R.id.chkIdiomaItaliano);
+        chkIdiomaJapones   = findViewById(R.id.chkIdiomaJapones);
+
+
         repo = new TourRepository(this);
-        tourRemote = new TourRemoteDataSource();     // ⭐ NUEVO
+        //tourRemote = new TourRemoteDataSource();     // ⭐ NUEVO
 
         // ================== HORA INICIO ==================
         binding.tvHoraInicio.setOnClickListener(v -> {
@@ -197,23 +209,46 @@ public class TourFormActivity extends AppCompatActivity {
         tour.imagenUris.clear();
         tour.imagenUris.addAll(imagenes);
 
+        // ===== Idiomas seleccionados =====
+        tour.idiomas.clear();
+        if (chkIdiomaEspanol.isChecked())   tour.idiomas.add("Español");
+        if (chkIdiomaIngles.isChecked())    tour.idiomas.add("Inglés");
+        if (chkIdiomaPortugues.isChecked()) tour.idiomas.add("Portugués");
+        if (chkIdiomaFrances.isChecked())   tour.idiomas.add("Francés");
+        if (chkIdiomaAleman.isChecked())    tour.idiomas.add("Alemán");
+        if (chkIdiomaItaliano.isChecked())  tour.idiomas.add("Italiano");
+        if (chkIdiomaJapones.isChecked())   tour.idiomas.add("Japonés");
+
+
         // Paso 2: ruta y fechas
         tour.ruta.clear();
         tour.ruta.addAll(ruta);
 
         // ===== FECHA + HORA DE INICIO =====
+        int hIni = calInicio.get(Calendar.HOUR_OF_DAY);
+        int mIni = calInicio.get(Calendar.MINUTE);
+
         calInicio.set(
                 binding.dpInicio.getYear(),
                 binding.dpInicio.getMonth(),
-                binding.dpInicio.getDayOfMonth()
+                binding.dpInicio.getDayOfMonth(),
+                hIni,
+                mIni,
+                0
         );
         tour.fechaInicioUtc = calInicio.getTimeInMillis();
 
-        // ===== FECHA + HORA DE FIN =====
+// ===== FECHA + HORA DE FIN =====
+        int hFin = calFin.get(Calendar.HOUR_OF_DAY);
+        int mFin = calFin.get(Calendar.MINUTE);
+
         calFin.set(
                 binding.dpFin.getYear(),
                 binding.dpFin.getMonth(),
-                binding.dpFin.getDayOfMonth()
+                binding.dpFin.getDayOfMonth(),
+                hFin,
+                mFin,
+                0
         );
         tour.fechaFinUtc = calFin.getTimeInMillis();
 
