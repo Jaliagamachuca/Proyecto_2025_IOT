@@ -51,7 +51,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Lista de solicitudes (solo guías con status=pending) -->
+    <!-- Lista -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvSolicitudesGuias"
         android:layout_width="0dp"
@@ -60,6 +60,20 @@
         app:layout_constraintTop_toBottomOf="@id/etBuscarGuiaSolicitud"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnVolverHome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Volver"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="60dp"
+        android:backgroundTint="#D50000"
+        app:tint="@android:color/white"
+        app:srcCompat="@android:drawable/ic_menu_revert"
+
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

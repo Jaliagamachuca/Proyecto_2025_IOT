@@ -35,6 +35,13 @@ public class Superadmin_Registrar_Guias_Turismo extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
+        binding.btnVolverHome.setOnClickListener(v -> {
+            Intent i = new Intent(this, Superadmin_HomeActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // para evitar pantallas duplicadas
+            startActivity(i);
+            finish();
+        });
+
         // Recycler
         adapter = new GuideRequestAdapter(this, guia -> {
             // Abrir pantalla de revisión / edición
