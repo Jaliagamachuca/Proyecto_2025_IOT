@@ -21,6 +21,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="33">
         <activity
+            android:name=".Activities_Guia.EditarPerfilActivityGuia"
+            android:exported="false" />
+        <activity
             android:name=".Activities_Superadmin.EditarPerfilActivity"
             android:exported="false" />
         <activity
