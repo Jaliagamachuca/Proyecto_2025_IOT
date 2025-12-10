@@ -1,5 +1,6 @@
 package com.example.proyecto_2025.Activities_Usuario;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -8,16 +9,22 @@ import android.widget.Toast;
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.proyecto_2025.Activities_Guia.EditarPerfilActivityGuia;
 import com.example.proyecto_2025.R;
+import com.example.proyecto_2025.data.auth.AuthRepository;
 import com.example.proyecto_2025.databinding.ActivityUsuarioVistaInicialBinding;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.example.proyecto_2025.login.LoginActivity;
+import com.example.proyecto_2025.model.User;
 import com.google.android.material.tabs.TabLayout;
 
 import com.example.proyecto_2025.adapter.EmpresasAdapter;
 import com.example.proyecto_2025.Activities_Usuario.EmpresaTurismo;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -77,6 +84,10 @@ public class Cliente_HomeActivity extends AppCompatActivity {
         binding.bottomNav.setSelectedItemId(R.id.nav_dashboard);
         showScreen(SCR_DASHBOARD);
         cargarKpisDesdeLocal();   // <--- NUEVO
+
+        // Perfil (datos del usuario actual)
+        cargarPerfilActual();
+        configurarAccionesPerfil();
     }
 
 
@@ -405,6 +416,64 @@ public class Cliente_HomeActivity extends AppCompatActivity {
         lugares.add(new LugarItinerario("Q'enqo", "14:00", false, false));
         lugares.add(new LugarItinerario("Tambomachay", "15:30", false, false));
         return lugares;
+    }
+
+    // ================== PERFIL (SCR_PERFIL) ==================
+
+    /** Carga los datos del usuario logueado y los muestra en el screen Perfil */
+    private void cargarPerfilActual() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        db.collection("users").document(uid)
+                .addSnapshotListener((doc, error) -> {
+                    if (error != null || doc == null || !doc.exists()) return;
+
+                    User u = doc.toObject(User.class);
+                    if (u == null) return;
+
+                    // Actualizar la UI en tiempo real
+                    binding.scrPerfil.tvNombre.setText(
+                            u.getDisplayName() != null ? u.getDisplayName() : "-");
+                    binding.scrPerfil.tvEmail.setText(
+                            u.getEmail() != null ? u.getEmail() : "-");
+                    binding.scrPerfil.tvTelefono.setText(
+                            u.getPhone() != null ? u.getPhone() : "-");
+                    binding.scrPerfil.tvDni.setText(
+                            u.getDni() != null ? u.getDni() : "-");
+                    binding.scrPerfil.tvFechaNacimiento.setText(
+                            u.getFechaNacimiento() != null ? u.getFechaNacimiento() : "-");
+                    binding.scrPerfil.tvDomicilio.setText(
+                            u.getDomicilio() != null ? u.getDomicilio() : "-");
+                });
+    }
+
+    /** Listeners básicos del screen Perfil (cerrar sesión, etc.) */
+    private void configurarAccionesPerfil() {
+        // Cerrar sesión
+        binding.scrPerfil.btnCerrarSesion.setOnClickListener(v -> {
+            new AuthRepository().signOut();
+
+            Intent i = new Intent(this, LoginActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        });
+
+        binding.scrPerfil.btnEditarPerfil.setOnClickListener(v -> {
+            Intent i = new Intent(this, EditarPerfilActivityCliente.class);
+
+            i.putExtra("nombre", binding.scrPerfil.tvNombre.getText().toString());
+            i.putExtra("email", binding.scrPerfil.tvEmail.getText().toString());
+            i.putExtra("telefono", binding.scrPerfil.tvTelefono.getText().toString());
+            i.putExtra("dni", binding.scrPerfil.tvDni.getText().toString());
+            i.putExtra("fechaNacimiento", binding.scrPerfil.tvFechaNacimiento.getText().toString());
+            i.putExtra("domicilio", binding.scrPerfil.tvDomicilio.getText().toString());
+
+            startActivity(i);
+        });
+
+        // Otros botones (editar perfil, cambiar foto, etc.) se pueden agregar luego.
     }
 
 }

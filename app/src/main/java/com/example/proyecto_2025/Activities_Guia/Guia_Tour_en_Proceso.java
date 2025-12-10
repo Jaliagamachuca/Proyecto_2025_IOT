@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
+import com.example.proyecto_2025.Activities_Superadmin.Superadmin_HomeActivity;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.databinding.ActivityGuiaTourEnProcesoBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -71,6 +72,13 @@ public class Guia_Tour_en_Proceso extends AppCompatActivity {
             Intent i = new Intent(this, Guia_Registrar_CheckOut.class);
             i.putExtra("tour", tour);
             startActivity(i);
+        });
+
+        binding.btnVolverHome.setOnClickListener(v -> {
+            Intent i = new Intent(this, Superadmin_HomeActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // para evitar pantallas duplicadas
+            startActivity(i);
+            finish();
         });
 
         // 🔹 Finalizar tour
