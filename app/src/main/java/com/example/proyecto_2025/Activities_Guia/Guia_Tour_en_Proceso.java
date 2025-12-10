@@ -74,13 +74,6 @@ public class Guia_Tour_en_Proceso extends AppCompatActivity {
             startActivity(i);
         });
 
-        binding.btnVolverHome.setOnClickListener(v -> {
-            Intent i = new Intent(this, Superadmin_HomeActivity.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // para evitar pantallas duplicadas
-            startActivity(i);
-            finish();
-        });
-
         // 🔹 Finalizar tour
         binding.btnFinaliarTour.setOnClickListener(view -> finalizarTour());
     }
