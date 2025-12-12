@@ -17,11 +17,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.proyecto_2025.Activities_Guia.EditarPerfilActivityGuia;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.adapter.ImageUriAdapter;
 import com.example.proyecto_2025.adapter.GuideAdapter;
 import com.example.proyecto_2025.adapter.OfferAdapter;
 import com.example.proyecto_2025.adapter.TourAdapter;
+import com.example.proyecto_2025.data.auth.AuthRepository;
 import com.example.proyecto_2025.data.repository.EmpresaRepository;
 import com.example.proyecto_2025.data.repository.TourRepository;
 import com.example.proyecto_2025.data.repository.OfferRepository;
@@ -35,9 +37,12 @@ import com.example.proyecto_2025.model.Offer;
 import com.example.proyecto_2025.model.Tour;
 import com.example.proyecto_2025.model.TourEstado;
 import com.example.proyecto_2025.model.Admin;
+import com.example.proyecto_2025.model.User;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
@@ -75,6 +80,9 @@ public class Admin_HomeActivity extends AppCompatActivity {
     private TourAdapter tourAdapter;
     private final List<Tour> allTours = new ArrayList<>();
     private String empresaId;
+
+    // Para extraer el guia actual y poner sus datos en el perfil
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     // ===================== LIFECYCLE =====================
     @Override
@@ -228,7 +236,9 @@ public class Admin_HomeActivity extends AppCompatActivity {
         initToursSection();
         initGuiasSection();
         initReportesSection();
-        initPerfilSection();
+        //initPerfilSection();
+        cargarPerfilActual();
+        configurarAccionesPerfil();
     }
 
     // ===================== NAVIGATION =====================
@@ -725,7 +735,67 @@ public class Admin_HomeActivity extends AppCompatActivity {
     }
 
     // ===================== SECTION 5: PERFIL =====================
+    private void cargarPerfilActual() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
 
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        db.collection("users").document(uid)
+                .addSnapshotListener((doc, error) -> {
+                    if (error != null || doc == null || !doc.exists()) return;
+
+                    User u = doc.toObject(User.class);
+                    if (u == null) return;
+
+                    // Actualizar la UI en tiempo real
+                    binding.scrPerfil.tvNombre.setText(
+                            u.getDisplayName() != null ? u.getDisplayName() : "-");
+                    binding.scrPerfil.tvEmail.setText(
+                            u.getEmail() != null ? u.getEmail() : "-");
+                    binding.scrPerfil.tvTelefono.setText(
+                            u.getPhone() != null ? u.getPhone() : "-");
+                    binding.scrPerfil.tvDni.setText(
+                            u.getDni() != null ? u.getDni() : "-");
+                    binding.scrPerfil.tvFechaNacimiento.setText(
+                            u.getFechaNacimiento() != null ? u.getFechaNacimiento() : "-");
+                    binding.scrPerfil.tvDomicilio.setText(
+                            u.getDomicilio() != null ? u.getDomicilio() : "-");
+
+                    String company = u.getCompanyId() != null ? u.getCompanyId() : "Sin empresa";
+                    binding.scrPerfil.tvEmpresaNombre.setText(company);
+
+                    binding.scrPerfil.tvRuc.setText("—");
+                });
+    }
+
+    /** Listeners básicos del screen Perfil (cerrar sesión, etc.) */
+    private void configurarAccionesPerfil() {
+        // Cerrar sesión
+        binding.scrPerfil.btnCerrarSesion.setOnClickListener(v -> {
+            new AuthRepository().signOut();
+
+            Intent i = new Intent(this, LoginActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        });
+
+        binding.scrPerfil.btnEditarPerfil.setOnClickListener(v -> {
+            Intent i = new Intent(this, EditarPerfilActivityAdmin.class);
+
+            i.putExtra("nombre", binding.scrPerfil.tvNombre.getText().toString());
+            i.putExtra("email", binding.scrPerfil.tvEmail.getText().toString());
+            i.putExtra("telefono", binding.scrPerfil.tvTelefono.getText().toString());
+            i.putExtra("empresa", binding.scrPerfil.tvEmpresaNombre.getText().toString());
+            i.putExtra("dni", binding.scrPerfil.tvDni.getText().toString());
+            i.putExtra("fechaNacimiento", binding.scrPerfil.tvFechaNacimiento.getText().toString());
+            i.putExtra("domicilio", binding.scrPerfil.tvDomicilio.getText().toString());
+
+            startActivity(i);
+        });
+
+        // Otros botones (editar perfil, cambiar foto, etc.) se pueden agregar luego.
+    }
+    /*
     private void initPerfilSection() {
         // Cargar datos del admin
         binding.scrPerfil.tvNombre.setText(admin.getNombre());
@@ -792,7 +862,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
                     .show();
         });
 
-    }
+    } */
 
     private void mostrarDialogEditarPerfil() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_editar_perfil, null);
