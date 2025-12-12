@@ -13,15 +13,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
+import com.example.proyecto_2025.Activities_Superadmin.EditarPerfilActivity;
 import com.example.proyecto_2025.R;
+import com.example.proyecto_2025.data.auth.AuthRepository;
 import com.example.proyecto_2025.databinding.ActivityGuiaVistaInicialBinding;
 import com.example.proyecto_2025.Activities_Guia.TourRepository;
+import com.example.proyecto_2025.login.LoginActivity;
+import com.example.proyecto_2025.model.User;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +52,9 @@ public class Guia_HomeActivity extends AppCompatActivity {
     private TourAdapter tourAdapter;
     private List<Tour> tourList;
     private List<Tour> tourListOriginal;
+
+    // Para extraer el guia actual y poner sus datos en el perfil
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,6 +174,10 @@ public class Guia_HomeActivity extends AppCompatActivity {
         configurarGraficoDisponibles(binding.scrDashboard.chartDisponibles);
         configurarGraficoPendientes(binding.scrDashboard.chartPendientes);
         configurarGraficoFinalizados(binding.scrDashboard.chartFinalizados);
+
+        // Perfil (datos del usuario actual)
+        cargarPerfilActual();
+        configurarAccionesPerfil();
     }
 
     // 🔹 Configurar gráfico principal del Dashboard (tours por estado)
@@ -421,5 +434,69 @@ public class Guia_HomeActivity extends AppCompatActivity {
         dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
         dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
         dialogBuilder.show();
+    }
+
+    // ================== PERFIL (SCR_PERFIL) ==================
+
+    /** Carga los datos del usuario logueado y los muestra en el screen Perfil */
+    private void cargarPerfilActual() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        db.collection("users").document(uid)
+                .addSnapshotListener((doc, error) -> {
+                    if (error != null || doc == null || !doc.exists()) return;
+
+                    User u = doc.toObject(User.class);
+                    if (u == null) return;
+
+                    // Actualizar la UI en tiempo real
+                    binding.scrPerfil.tvNombre.setText(
+                            u.getDisplayName() != null ? u.getDisplayName() : "-");
+                    binding.scrPerfil.tvEmail.setText(
+                            u.getEmail() != null ? u.getEmail() : "-");
+                    binding.scrPerfil.tvTelefono.setText(
+                            u.getPhone() != null ? u.getPhone() : "-");
+                    binding.scrPerfil.tvDni.setText(
+                            u.getDni() != null ? u.getDni() : "-");
+                    binding.scrPerfil.tvFechaNacimiento.setText(
+                            u.getFechaNacimiento() != null ? u.getFechaNacimiento() : "-");
+                    binding.scrPerfil.tvDomicilio.setText(
+                            u.getDomicilio() != null ? u.getDomicilio() : "-");
+
+                    String company = u.getCompanyId() != null ? u.getCompanyId() : "Sin empresa";
+                    binding.scrPerfil.tvEmpresaNombre.setText(company);
+
+                    binding.scrPerfil.tvRuc.setText("—");
+                });
+    }
+
+    /** Listeners básicos del screen Perfil (cerrar sesión, etc.) */
+    private void configurarAccionesPerfil() {
+        // Cerrar sesión
+        binding.scrPerfil.btnCerrarSesion.setOnClickListener(v -> {
+            new AuthRepository().signOut();
+
+            Intent i = new Intent(this, LoginActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        });
+
+        binding.scrPerfil.btnEditarPerfil.setOnClickListener(v -> {
+            Intent i = new Intent(this, EditarPerfilActivityGuia.class);
+
+            i.putExtra("nombre", binding.scrPerfil.tvNombre.getText().toString());
+            i.putExtra("email", binding.scrPerfil.tvEmail.getText().toString());
+            i.putExtra("telefono", binding.scrPerfil.tvTelefono.getText().toString());
+            i.putExtra("empresa", binding.scrPerfil.tvEmpresaNombre.getText().toString());
+            i.putExtra("dni", binding.scrPerfil.tvDni.getText().toString());
+            i.putExtra("fechaNacimiento", binding.scrPerfil.tvFechaNacimiento.getText().toString());
+            i.putExtra("domicilio", binding.scrPerfil.tvDomicilio.getText().toString());
+
+            startActivity(i);
+        });
+
+        // Otros botones (editar perfil, cambiar foto, etc.) se pueden agregar luego.
     }
 }

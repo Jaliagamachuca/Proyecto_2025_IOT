@@ -25,15 +25,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <!-- Carrusel de imágenes -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvImagenes"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:overScrollMode="never"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Mensaje si no hay imágenes -->
+            <TextView
+                android:id="@+id/tvSinImagenes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Este tour aún no tiene imágenes"
+                android:visibility="gone"
+                android:layout_marginBottom="12dp"/>
+
             <!-- Título -->
             <TextView
                 android:id="@+id/tvTitulo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Título"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="4dp"/>
+                android:layout_marginBottom="2dp"/>
 
             <!-- Estado -->
             <TextView
@@ -43,51 +59,125 @@
                 android:text="Estado"
                 android:layout_marginBottom="8dp"/>
 
+            <!-- ==== Bloque fechas / horario / duración ==== -->
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Fechas del tour"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp"/>
+
             <TextView
                 android:id="@+id/tvFechas"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fechas" />
+                android:text="Del --/--/---- al --/--/----" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Horario diario"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"/>
 
             <TextView
                 android:id="@+id/tvHorario"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Horario"
+                android:text="--:-- - --:--" />
+
+            <TextView
+                android:id="@+id/tvDuracion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Duración total: no definida"
                 android:layout_marginTop="8dp"/>
 
-
             <!-- Precio -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Precio por persona"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"/>
+
             <TextView
                 android:id="@+id/tvPrecio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Precio"
+                android:text="S/ 0.00"
                 android:layout_marginBottom="4dp"/>
 
+            <!-- Idiomas -->
+            <TextView
+                android:id="@+id/labelIdiomas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Idiomas del tour:"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:id="@+id/tvIdiomas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sin idiomas definidos"/>
+
             <!-- Descripción -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Descripción del tour"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"/>
+
             <TextView
                 android:id="@+id/tvDesc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Descripción"
+                android:text="Sin descripción"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"/>
+
+            <!-- Info general -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Información general"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"/>
 
             <!-- Cupos -->
             <TextView
                 android:id="@+id/tvCupos"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cupos"
-                android:layout_marginBottom="4dp"/>
+                android:text="Cupos disponibles: 0"
+                android:layout_marginTop="4dp"/>
 
             <!-- Ruta -->
             <TextView
                 android:id="@+id/tvRuta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ruta (0 puntos)"
+                android:text="Puntos en la ruta: 0"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:id="@+id/tvListaPuntos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sin puntos definidos"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp"/>
+
+            <Button
+                android:id="@+id/btnVerMapa"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ver ruta en mapa"
                 android:layout_marginBottom="12dp"/>
 
             <!-- Servicios adicionales -->
@@ -114,7 +204,7 @@
                 android:id="@+id/btnPublicar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Publicar"
+                android:text="Enviar a guías"
                 android:layout_marginTop="8dp"/>
 
             <Button

@@ -45,13 +45,14 @@ public class Tour implements Serializable {
         return (precioPorPersona <= 0) ? "—" : "S/ " + String.format("%.2f", precioPorPersona);
     }
 
-    public boolean isIncluyeDesayuno() { return incluyeDesayuno; }
+    public boolean isIncluyeDesayuno() { return Boolean.TRUE.equals(incluyeDesayuno); }
     public void setIncluyeDesayuno(boolean incluyeDesayuno) { this.incluyeDesayuno = incluyeDesayuno; }
 
-    public boolean isIncluyeAlmuerzo() { return incluyeAlmuerzo; }
+    public boolean isIncluyeAlmuerzo() { return Boolean.TRUE.equals(incluyeAlmuerzo); }
     public void setIncluyeAlmuerzo(boolean incluyeAlmuerzo) { this.incluyeAlmuerzo = incluyeAlmuerzo; }
 
-    public boolean isIncluyeCena() { return incluyeCena; }
+    public boolean isIncluyeCena() { return Boolean.TRUE.equals(incluyeCena); }
     public void setIncluyeCena(boolean incluyeCena) { this.incluyeCena = incluyeCena; }
+
 
 }

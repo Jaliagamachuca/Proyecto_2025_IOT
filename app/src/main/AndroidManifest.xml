@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -17,10 +17,21 @@
         android:localeConfig="@xml/locales_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-
         android:theme="@style/Theme.Proyecto_2025"
+        android:usesCleartextTraffic="true"
         tools:targetApi="33">
+        <activity
+            android:name=".Activities_Administrador.EditarPerfilActivityAdmin"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Usuario.EditarPerfilActivityCliente"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.EditarPerfilActivityGuia"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Superadmin.EditarPerfilActivity"
+            android:exported="false" />
         <activity
             android:name=".Activities_Administrador.Admin_HomeActivity"
             android:exported="false" />
@@ -30,44 +41,35 @@
         <activity
             android:name=".Activities_Usuario.Cliente_HomeActivity"
             android:exported="false" />
-        <activity
-            android:name=".Activities_Administrador.EmpresaFormPruebaActivity"
-            android:exported="false" />
-
         <activity android:name=".Activities_Administrador.TourListActivity" />
         <activity android:name=".Activities_Administrador.TourFormActivity" />
         <activity android:name=".Activities_Administrador.TourDetalleActivity" />
-        <activity android:name=".Activities_Administrador.Admin_Guias_HomeActivity" android:exported="false"/>
-        <activity android:name=".Activities_Administrador.GuideDirectoryActivity" android:exported="false"/>
+        <activity
+            android:name=".Activities_Administrador.Admin_Guias_HomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Administrador.GuideDirectoryActivity"
+            android:exported="false" />
         <activity
             android:name=".Activities_Administrador.GuiaFormActivity"
             android:exported="false" />
-
-        <activity android:name=".Activities_Administrador.GuideProfileActivity" android:exported="false"/>
-        <activity android:name=".Activities_Administrador.OfferCreateActivity" android:exported="false"/>
-        <activity android:name=".Activities_Administrador.OfferInboxActivity" android:exported="false"/>
-        <activity android:name=".Activities_Administrador.OfferDetailActivity" android:exported="false"/>
-        <activity android:name=".Activities_Administrador.AssignGuideActivity" android:exported="false"/>
-
-
-
+        <activity
+            android:name=".Activities_Administrador.GuideProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Administrador.OfferCreateActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Administrador.OfferInboxActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Administrador.OfferDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Administrador.AssignGuideActivity"
+            android:exported="false" />
         <activity
             android:name=".Activities_Superadmin.EmployeeDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Activities_Superadmin.Superadmin_Administradores_Sede"
-            android:exported="false" />
-        <activity
-            android:name=".Activities_Superadmin.Superadmin_Clientes"
-            android:exported="false" />
-        <activity
-            android:name=".Activities_Superadmin.Superadmin_Clientes1"
-            android:exported="false" />
-        <activity
-            android:name=".Activities_Superadmin.Superadmin_Guias_Turismo"
-            android:exported="false" />
-        <activity
-            android:name=".Activities_Superadmin.Superadmin_Rechazar_Guia_Turismo"
             android:exported="false" />
         <activity
             android:name=".Activities_Superadmin.Superadmin_Registrar_Administrador"
@@ -90,13 +92,10 @@
         <activity
             android:name=".Activities_Guia.Guia_HomeActivity"
             android:exported="false" />
-
         <activity
             android:name=".Activities_Superadmin.Superadmin_HomeActivity"
             android:exported="false" />
-
         <activity
-
             android:name=".Activities_Guia.Guia_Historial_Tours"
             android:exported="false" />
         <activity
@@ -114,7 +113,6 @@
         <activity
             android:name=".Activities_Guia.Vista_Detalles_Tour_Sin_Botones"
             android:exported="false" />
-
         <activity
             android:name=".login.LoginActivity"
             android:exported="true">
@@ -159,6 +157,9 @@
             android:exported="false" />
         <activity
             android:name=".login.CrearPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Administrador.TourRutaMapActivity"
             android:exported="false" />
     </application>
 

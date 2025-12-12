@@ -143,7 +143,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp">
 
                     <TextView
                         android:layout_width="100dp"
@@ -153,6 +154,27 @@
 
                     <TextView
                         android:id="@+id/tvTelefono"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+51 987 654 321"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
+
+                <!-- DNI -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:text="DNI:"
+                        android:textColor="#757575"/>
+
+                    <TextView
+                        android:id="@+id/tvDni"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="+51 987 654 321"
@@ -229,13 +251,6 @@
                         android:textStyle="bold"/>
 
                 </LinearLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnVerEmpresa"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Ver perfil de empresa"
-                    style="@style/Widget.Material3.Button.OutlinedButton"/>
 
             </LinearLayout>
 
@@ -326,42 +341,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#E0E0E0"/>
-
-                <!-- Idioma -->
-                <LinearLayout
-                    android:id="@+id/btnIdioma"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="12dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?attr/selectableItemBackground">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="🌐 Idioma"
-                        android:textSize="15sp"/>
-
-                    <TextView
-                        android:id="@+id/tvIdiomaActual"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Español"
-                        android:textColor="#757575"
-                        android:layout_marginEnd="8dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="›"
-                        android:textSize="20sp"
-                        android:textColor="#757575"/>
-
-                </LinearLayout>
 
             </LinearLayout>
 

@@ -20,6 +20,7 @@ import com.example.proyecto_2025.adapter.UserAdapter;
 import com.example.proyecto_2025.data.auth.AuthRepository;
 import com.example.proyecto_2025.data.repository.UserRepository;
 import com.example.proyecto_2025.databinding.ActivitySuperadminVistaInicialBinding;
+import com.example.proyecto_2025.login.LoginActivity;
 import com.example.proyecto_2025.model.User;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
@@ -371,30 +372,29 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
 
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        db.collection("users").document(uid).get()
-                .addOnSuccessListener(doc -> {
-                    if (!doc.exists()) return;
+
+        db.collection("users").document(uid)
+                .addSnapshotListener((doc, error) -> {
+                    if (error != null || doc == null || !doc.exists()) return;
 
                     User u = doc.toObject(User.class);
                     if (u == null) return;
 
-                    // Nombre, email, teléfono
+                    // Actualizar la UI en tiempo real
                     binding.scrPerfil.tvNombre.setText(
-                            u.getNombreCompleto() != null ? u.getNombreCompleto() : "-");
+                            u.getDisplayName() != null ? u.getDisplayName() : "-");
                     binding.scrPerfil.tvEmail.setText(
                             u.getEmail() != null ? u.getEmail() : "-");
                     binding.scrPerfil.tvTelefono.setText(
                             u.getPhone() != null ? u.getPhone() : "-");
+                    binding.scrPerfil.tvDni.setText(
+                            u.getDni() != null ? u.getDni() : "-");
 
-                    // Empresa (por ahora mostramos companyId como identificador)
                     String company = u.getCompanyId() != null ? u.getCompanyId() : "Sin empresa";
                     binding.scrPerfil.tvEmpresaNombre.setText(company);
 
-                    // RUC: si en el futuro tienes colección Empresa, aquí se consulta.
                     binding.scrPerfil.tvRuc.setText("—");
-                })
-                .addOnFailureListener(e ->
-                        Log.e("superadmin-perfil", "Error cargando perfil", e));
+                });
     }
 
     /** Listeners básicos del screen Perfil (cerrar sesión, etc.) */
@@ -402,7 +402,22 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
         // Cerrar sesión
         binding.scrPerfil.btnCerrarSesion.setOnClickListener(v -> {
             new AuthRepository().signOut();
-            finish(); // vuelves a la pantalla anterior (login)
+
+            Intent i = new Intent(this, LoginActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+        });
+
+        binding.scrPerfil.btnEditarPerfil.setOnClickListener(v -> {
+            Intent i = new Intent(this, EditarPerfilActivity.class);
+
+            i.putExtra("nombre", binding.scrPerfil.tvNombre.getText().toString());
+            i.putExtra("email", binding.scrPerfil.tvEmail.getText().toString());
+            i.putExtra("telefono", binding.scrPerfil.tvTelefono.getText().toString());
+            i.putExtra("empresa", binding.scrPerfil.tvEmpresaNombre.getText().toString());
+            i.putExtra("dni", binding.scrPerfil.tvDni.getText().toString());
+
+            startActivity(i);
         });
 
         // Otros botones (editar perfil, cambiar foto, etc.) se pueden agregar luego.

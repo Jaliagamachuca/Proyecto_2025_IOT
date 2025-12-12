@@ -33,10 +33,24 @@ public class ImageUriAdapter extends RecyclerView.Adapter<ImageUriAdapter.Holder
         return new Holder(v);
     }
 
-    @Override public void onBindViewHolder(@NonNull Holder h, int pos) {
+    @Override
+    public void onBindViewHolder(@NonNull Holder h, int pos) {
         Uri u = data.get(pos);
-        ((ImageView) h.itemView.findViewById(R.id.img)).setImageURI(u);
-        h.itemView.findViewById(R.id.btnEliminar).setOnClickListener(v -> listener.onRemove(h.getBindingAdapterPosition()));
+        ImageView img = h.itemView.findViewById(R.id.img);
+        View btnEliminar = h.itemView.findViewById(R.id.btnEliminar);
+
+        img.setImageURI(u);
+
+        if (listener != null) {
+            btnEliminar.setVisibility(View.VISIBLE);
+            btnEliminar.setOnClickListener(
+                    v -> listener.onRemove(h.getBindingAdapterPosition())
+            );
+        } else {
+            // Modo solo lectura: sin botón eliminar
+            btnEliminar.setVisibility(View.GONE);
+            btnEliminar.setOnClickListener(null);
+        }
     }
 
     @Override public int getItemCount() { return data.size(); }
