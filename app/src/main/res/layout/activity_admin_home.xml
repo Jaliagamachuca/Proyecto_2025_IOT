@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Contenedor con las seis pantallas incluidas (sin fragments) -->
+    <!-- Contenedor con pantallas incluidas -->
     <FrameLayout
         android:id="@+id/contentContainer"
         android:layout_width="0dp"
@@ -64,7 +64,13 @@
             android:layout_height="match_parent"
             android:visibility="gone" />
 
-
+        <!-- CHAT -->
+        <include
+            android:id="@+id/scrChat"
+            layout="@layout/screen_admin_chat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
 
         <!-- PERFIL -->
         <include
@@ -91,7 +97,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- FAB contextual (Tours/Guías) -->
+    <!-- FAB contextual -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:contentDescription="@string/add"

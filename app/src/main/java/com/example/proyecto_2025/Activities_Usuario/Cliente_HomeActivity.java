@@ -41,6 +41,9 @@ public class Cliente_HomeActivity extends AppCompatActivity {
     private static final int SCR_EXPLORAR  = R.id.scrExplorar;
     private static final int SCR_RESERVAS     = R.id.scrReservas;
     private static final int SCR_SEGUIMIENTO  = R.id.scrSeguimiento;
+
+    private static final int SCR_CHAT = R.id.scrChat;
+
     private static final int SCR_PERFIL    = R.id.scrPerfil;
 
 
@@ -131,6 +134,8 @@ public class Cliente_HomeActivity extends AppCompatActivity {
         View vExplorar = binding.scrExplorar.getRoot();
         View vReservas = binding.scrReservas.getRoot();
         View vSeguimiento = binding.scrSeguimiento.getRoot();
+        View vChat = binding.scrChat.getRoot();
+
 
         View vPerfil   = binding.scrPerfil.getRoot();
 
@@ -138,13 +143,17 @@ public class Cliente_HomeActivity extends AppCompatActivity {
         vExplorar.setVisibility(View.GONE);
         vReservas.setVisibility(View.GONE);
         vSeguimiento.setVisibility(View.GONE);
+        vChat.setVisibility(View.GONE);
+
         vPerfil.setVisibility(View.GONE);
 
         View target =
                 (screenId == SCR_DASHBOARD) ? vDash :
                         (screenId == SCR_EXPLORAR)  ? vExplorar :
                                 (screenId == SCR_RESERVAS)     ? vReservas :
-                                        (screenId == SCR_SEGUIMIENTO)  ? vSeguimiento : vPerfil;
+                                        (screenId == SCR_SEGUIMIENTO)  ? vSeguimiento :
+                                                (screenId == SCR_CHAT) ? vChat : vPerfil;
+
 
         target.setVisibility(View.VISIBLE);
     }

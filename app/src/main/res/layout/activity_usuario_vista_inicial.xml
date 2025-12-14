@@ -56,6 +56,10 @@
             android:layout_height="match_parent"
             android:visibility="gone"/>
 
+        <include
+            android:id="@+id/scrChat"
+            layout="@layout/screen_usuario_chat"
+            android:visibility="gone"/>
 
 
         <!-- Perfil -->

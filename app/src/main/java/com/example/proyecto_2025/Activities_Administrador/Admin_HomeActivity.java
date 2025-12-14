@@ -61,6 +61,8 @@ public class Admin_HomeActivity extends AppCompatActivity {
     private static final int SCR_TOURS    = R.id.scrTours;
     private static final int SCR_GUIAS    = R.id.scrGuias;
     private static final int SCR_REPORTES = R.id.scrReportes;
+    private static final int SCR_CHAT = R.id.scrChat;
+
     private static final int SCR_PERFIL   = R.id.scrPerfil;
 
     // ===================== REPOSITORIES =====================
@@ -239,6 +241,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
         initToursSection();
         initGuiasSection();
         initReportesSection();
+        initChatSection();
         //initPerfilSection();
         cargarPerfilActual();
         configurarAccionesPerfil();
@@ -252,8 +255,20 @@ public class Admin_HomeActivity extends AppCompatActivity {
         else if (id == R.id.nav_tours) { showScreen(SCR_TOURS); return true; }
         else if (id == R.id.nav_guias) { showScreen(SCR_GUIAS); return true; }
         else if (id == R.id.nav_reportes) { showScreen(SCR_REPORTES); return true; }
+        else if (id == R.id.nav_chat) { showScreen(SCR_CHAT); return true; }
         else if (id == R.id.nav_perfil) { showScreen(SCR_PERFIL); return true; }
         return false;
+    }
+
+    // ===================== SECTION X: CHAT =====================
+    private void initChatSection() {
+        // Por ahora solo dejamos el screen listo.
+        // Luego aquí conectamos Firestore + Adapter + filtros.
+        if (binding == null || binding.scrChat == null) return;
+
+        // Si tu screen tiene emptyState:
+        // binding.scrChat.emptyStateChat.setVisibility(View.VISIBLE);
+        // binding.scrChat.rvConversaciones.setVisibility(View.GONE);
     }
 
     private void showScreen(@IdRes int screenId) {
@@ -262,30 +277,30 @@ public class Admin_HomeActivity extends AppCompatActivity {
         binding.scrTours.getRoot().setVisibility(View.GONE);
         binding.scrGuias.getRoot().setVisibility(View.GONE);
         binding.scrReportes.getRoot().setVisibility(View.GONE);
+        binding.scrChat.getRoot().setVisibility(View.GONE);
         binding.scrPerfil.getRoot().setVisibility(View.GONE);
 
         // Mostrar pantalla seleccionada
         View target =
-                (screenId == SCR_EMPRESA)  ? binding.scrEmpresa.getRoot() :
-                        (screenId == SCR_TOURS)    ? binding.scrTours.getRoot() :
-                                (screenId == SCR_GUIAS)    ? binding.scrGuias.getRoot() :
-                                        (screenId == SCR_REPORTES) ? binding.scrReportes.getRoot() : binding.scrPerfil.getRoot();
+                (screenId == SCR_EMPRESA) ? binding.scrEmpresa.getRoot() :
+                        (screenId == SCR_TOURS) ? binding.scrTours.getRoot() :
+                                (screenId == SCR_GUIAS) ? binding.scrGuias.getRoot() :
+                                        (screenId == SCR_REPORTES) ? binding.scrReportes.getRoot() :
+                                                (screenId == SCR_CHAT) ? binding.scrChat.getRoot() :
+                                                        binding.scrPerfil.getRoot();
 
         target.setVisibility(View.VISIBLE);
 
-        // FAB visible solo en ciertas pantallas
+        // FAB global apagado
         binding.fab.setVisibility(View.GONE);
         binding.fab.setOnClickListener(null);
 
-        // Actualizar datos si es necesario
-        if (screenId == SCR_GUIAS) {
-            refreshGuiasDashboard();
-        }
+        if (screenId == SCR_GUIAS) refreshGuiasDashboard();
+        if (screenId == SCR_TOURS) loadToursEmpresa();
 
-        if (screenId == SCR_TOURS) {
-            loadToursEmpresa();
-        }
+        if (screenId == SCR_CHAT) initChatSection();  // o refreshChat();
     }
+
 
     // ===================== SECTION 1: EMPRESA =====================
 
