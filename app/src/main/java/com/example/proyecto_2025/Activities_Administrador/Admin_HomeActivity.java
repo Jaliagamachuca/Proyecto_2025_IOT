@@ -17,7 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.Activities_Guia.EditarPerfilActivityGuia;
+import com.example.proyecto_2025.Activities_Superadmin.CambiarFotoActivity;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.adapter.ImageUriAdapter;
 import com.example.proyecto_2025.adapter.GuideAdapter;
@@ -765,6 +767,15 @@ public class Admin_HomeActivity extends AppCompatActivity {
                     binding.scrPerfil.tvEmpresaNombre.setText(company);
 
                     binding.scrPerfil.tvRuc.setText("—");
+
+                    String photoUrl = u.getPhotoUrl();
+                    if (photoUrl != null && !photoUrl.isEmpty()) {
+                        Glide.with(this)
+                                .load(photoUrl)
+                                .placeholder(R.drawable.ic_user_placeholder)
+                                .error(R.drawable.ic_user_placeholder)
+                                .into(binding.scrPerfil.imgFotoPerfil);
+                    }
                 });
     }
 
@@ -790,6 +801,12 @@ public class Admin_HomeActivity extends AppCompatActivity {
             i.putExtra("fechaNacimiento", binding.scrPerfil.tvFechaNacimiento.getText().toString());
             i.putExtra("domicilio", binding.scrPerfil.tvDomicilio.getText().toString());
 
+            startActivity(i);
+        });
+
+        // 👉 SOLO CAMBIAR FOTO
+        binding.scrPerfil.btnCambiarFoto.setOnClickListener(v -> {
+            Intent i = new Intent(this, CambiarFotoActivityAdmin.class);
             startActivity(i);
         });
 

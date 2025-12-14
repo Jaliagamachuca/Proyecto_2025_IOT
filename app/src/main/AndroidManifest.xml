@@ -21,6 +21,15 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="33">
         <activity
+            android:name=".Activities_Usuario.CambiarFotoActivityCliente"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Guia.CambiarFotoActivityGuia"
+            android:exported="false" />
+        <activity
+            android:name=".Activities_Administrador.CambiarFotoActivityAdmin"
+            android:exported="false" />
+        <activity
             android:name=".Activities_Superadmin.CambiarFotoActivity"
             android:exported="false" />
         <activity
