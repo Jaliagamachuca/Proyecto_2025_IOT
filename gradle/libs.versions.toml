@@ -21,6 +21,7 @@ recyclerview = "1.4.0"
 retrofit = "3.0.0"
 roomCompiler = "2.8.2"
 workRuntime = "2.10.5"
+firebaseStorage = "22.0.1"
 
 [libraries]
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
@@ -49,6 +50,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomCompiler" }
 work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

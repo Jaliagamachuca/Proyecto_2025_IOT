@@ -39,7 +39,19 @@ public class ImageUriAdapter extends RecyclerView.Adapter<ImageUriAdapter.Holder
         ImageView img = h.itemView.findViewById(R.id.img);
         View btnEliminar = h.itemView.findViewById(R.id.btnEliminar);
 
-        img.setImageURI(u);
+        try {
+            img.setImageURI(u);
+
+            // Si setImageURI no crashea pero igual no carga, al menos no mostramos null
+            if (img.getDrawable() == null) {
+                img.setImageResource(R.drawable.ic_image_placeholder);
+            }
+
+        } catch (SecurityException se) {
+            img.setImageResource(R.drawable.ic_image_placeholder);
+        } catch (Exception e) {
+            img.setImageResource(R.drawable.ic_image_placeholder);
+        }
 
         if (listener != null) {
             btnEliminar.setVisibility(View.VISIBLE);
@@ -47,7 +59,6 @@ public class ImageUriAdapter extends RecyclerView.Adapter<ImageUriAdapter.Holder
                     v -> listener.onRemove(h.getBindingAdapterPosition())
             );
         } else {
-            // Modo solo lectura: sin botón eliminar
             btnEliminar.setVisibility(View.GONE);
             btnEliminar.setOnClickListener(null);
         }

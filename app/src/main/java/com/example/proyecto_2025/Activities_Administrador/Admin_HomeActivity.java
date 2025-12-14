@@ -18,7 +18,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.Activities_Guia.EditarPerfilActivityGuia;
+import com.example.proyecto_2025.Activities_Superadmin.CambiarFotoActivity;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.adapter.ImageUriAdapter;
 import com.example.proyecto_2025.adapter.GuideAdapter;
@@ -771,6 +773,15 @@ public class Admin_HomeActivity extends AppCompatActivity {
                     binding.scrPerfil.tvEmpresaNombre.setText(company);
 
                     binding.scrPerfil.tvRuc.setText("—");
+
+                    String photoUrl = u.getPhotoUrl();
+                    if (photoUrl != null && !photoUrl.isEmpty()) {
+                        Glide.with(this)
+                                .load(photoUrl)
+                                .placeholder(R.drawable.ic_user_placeholder)
+                                .error(R.drawable.ic_user_placeholder)
+                                .into(binding.scrPerfil.imgFotoPerfil);
+                    }
                 });
     }
 
@@ -796,6 +807,12 @@ public class Admin_HomeActivity extends AppCompatActivity {
             i.putExtra("fechaNacimiento", binding.scrPerfil.tvFechaNacimiento.getText().toString());
             i.putExtra("domicilio", binding.scrPerfil.tvDomicilio.getText().toString());
 
+            startActivity(i);
+        });
+
+        // 👉 SOLO CAMBIAR FOTO
+        binding.scrPerfil.btnCambiarFoto.setOnClickListener(v -> {
+            Intent i = new Intent(this, CambiarFotoActivityAdmin.class);
             startActivity(i);
         });
 
@@ -983,44 +1000,5 @@ public class Admin_HomeActivity extends AppCompatActivity {
     }
 
 
-    // ===================== DATA SEEDING (DEVELOPMENT ONLY) =====================
 
-    /**
-     * Crea tours de prueba si la BD est├í vac├¡a
-     * ELIMINAR en producci├│n
-     */
-    /*private void crearDatosDePruebaSiEsNecesario() {
-        TourRepository repo = new TourRepository(this);
-        if (!repo.findAll().isEmpty()) return;
-
-        // Tour 1
-        Tour t1 = new Tour();
-        t1.id = "1";
-        t1.titulo = "City Tour Lima Centro";
-        t1.descripcionCorta = "Conoce el centro histórico de Lima";
-        t1.precioPorPersona = 50.0;
-        t1.cupos = 15;
-        t1.estado = TourEstado.PUBLICADO;
-        repo.upsert(t1);
-
-        // Tour 2
-        Tour t2 = new Tour();
-        t2.id = "2";
-        t2.titulo = "Tour Gastronómico Miraflores";
-        t2.descripcionCorta = "Degusta los mejores platos peruanos";
-        t2.precioPorPersona = 80.0;
-        t2.cupos = 10;
-        t2.estado = TourEstado.PUBLICADO;
-        repo.upsert(t2);
-
-        // Tour 3
-        Tour t3 = new Tour();
-        t3.id = "3";
-        t3.titulo = "Huacachina Aventura";
-        t3.descripcionCorta = "Sandboarding en el desierto";
-        t3.precioPorPersona = 120.0;
-        t3.cupos = 8;
-        t3.estado = TourEstado.EN_CURSO;
-        repo.upsert(t3);
-    }*/
 }

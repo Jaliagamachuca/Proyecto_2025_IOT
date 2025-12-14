@@ -25,7 +25,12 @@ public class Admin_Guias_HomeActivity extends AppCompatActivity {
         Button btnAsignar  = findViewById(R.id.btnAsignar);
 
         btnExplorar.setOnClickListener(v-> startActivity(new Intent(this, GuideDirectoryActivity.class)));
-        btnOfertas.setOnClickListener(v-> startActivity(new Intent(this, OfferInboxActivity.class)));
-        btnAsignar.setOnClickListener(v-> startActivity(new Intent(this, OfferInboxActivity.class)));
+        btnOfertas.setOnClickListener(v ->
+                startActivity(new Intent(this, AdminSolicitudesGuiasActivity.class))
+        );
+        btnAsignar.setOnClickListener(v ->
+                startActivity(new Intent(this, AdminSolicitudesGuiasActivity.class))
+        );
+
     }
 }

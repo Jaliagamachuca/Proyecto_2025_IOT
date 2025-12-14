@@ -13,12 +13,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
+import com.example.proyecto_2025.Activities_Superadmin.CambiarFotoActivity;
 import com.example.proyecto_2025.Activities_Superadmin.EditarPerfilActivity;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.data.auth.AuthRepository;
 import com.example.proyecto_2025.databinding.ActivityGuiaVistaInicialBinding;
-import com.example.proyecto_2025.Activities_Guia.TourRepository;
+
 import com.example.proyecto_2025.login.LoginActivity;
+import com.example.proyecto_2025.model.TourEstado;
 import com.example.proyecto_2025.model.User;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.PieData;
@@ -28,6 +30,10 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import com.example.proyecto_2025.model.Tour;
+import com.google.firebase.firestore.Query;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,12 +54,10 @@ public class Guia_HomeActivity extends AppCompatActivity {
     private static final int SUB_PENDIENTES = R.id.subPendientes;
     private static final int SUB_HISTORIAL  = R.id.subHistorial;
 
-    // 🔹 Variables para los tours disponibles
-    private TourAdapter tourAdapter;
-    private List<Tour> tourList;
-    private List<Tour> tourListOriginal;
 
-    // Para extraer el guia actual y poner sus datos en el perfil
+    private TourAdapter tourAdapter;
+    private final List<Tour> tourList = new ArrayList<>();
+    private final List<Tour> tourListOriginal = new ArrayList<>();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
@@ -171,9 +175,9 @@ public class Guia_HomeActivity extends AppCompatActivity {
         binding.scrMisTours.toggleGroup.check(R.id.btnSolicitar);
         showSubScreen(SUB_SOLICITAR);
 
-        configurarGraficoDisponibles(binding.scrDashboard.chartDisponibles);
-        configurarGraficoPendientes(binding.scrDashboard.chartPendientes);
-        configurarGraficoFinalizados(binding.scrDashboard.chartFinalizados);
+        //configurarGraficoDisponibles(binding.scrDashboard.chartDisponibles);
+        //configurarGraficoPendientes(binding.scrDashboard.chartPendientes);
+        //configurarGraficoFinalizados(binding.scrDashboard.chartFinalizados);
 
         // Perfil (datos del usuario actual)
         cargarPerfilActual();
@@ -181,7 +185,7 @@ public class Guia_HomeActivity extends AppCompatActivity {
     }
 
     // 🔹 Configurar gráfico principal del Dashboard (tours por estado)
-    private void configurarGraficoDisponibles(PieChart chart) {
+    /*private void configurarGraficoDisponibles(PieChart chart) {
         TourRepository repo = TourRepository.get();
         repo.seedIfEmpty(this);
 
@@ -259,74 +263,134 @@ public class Guia_HomeActivity extends AppCompatActivity {
         chart.getDescription().setEnabled(false);
         chart.animateY(1000);
         chart.invalidate();
-    }
+    }*/
 
 
 
 
     // 🔸 Configurar RecyclerView de Tours Disponibles
     private void configurarRecyclerToursDisponibles() {
-        // Inicializar repositorio y cargar data demo si está vacío
-        TourRepository repo = TourRepository.get();
-        repo.seedIfEmpty(this);
 
-        // Obtenemos únicamente los tours con estado "disponible"
-        tourList = repo.byEstado("disponible");
-        tourListOriginal = new ArrayList<>(tourList);
+        binding.scrMisTours.subSolicitar.recyclerViewToursDisponibles
+                .setLayoutManager(new LinearLayoutManager(this));
 
-        // Configuramos el adaptador
         tourAdapter = new TourAdapter(this, tourList);
-        binding.scrMisTours.subSolicitar.recyclerViewToursDisponibles.setLayoutManager(new LinearLayoutManager(this));
-        binding.scrMisTours.subSolicitar.recyclerViewToursDisponibles.setAdapter(tourAdapter);
+        binding.scrMisTours.subSolicitar.recyclerViewToursDisponibles
+                .setAdapter(tourAdapter);
+
+        db.collection("tours")
+                .whereEqualTo("estado", TourEstado.PENDIENTE_GUIA.name())
+                .orderBy("fechaInicioUtc", Query.Direction.ASCENDING)
+                .addSnapshotListener((snap, e) -> {
+                    if (e != null || snap == null) return;
+
+                    tourList.clear();
+                    tourListOriginal.clear();
+
+                    for (var doc : snap.getDocuments()) {
+                        Tour t = doc.toObject(Tour.class);
+                        if (t == null) continue;
+                        t.id = doc.getId(); // si tu Tour tiene campo id público
+                        tourList.add(t);
+                    }
+
+                    tourListOriginal.addAll(tourList);
+                    tourAdapter.notifyDataSetChanged();
+                });
     }
+
 
     // 🔸 Configurar RecyclerView de Tours Pendientes
     private void configurarRecyclerToursPendientes() {
-        // Inicializar repositorio y cargar data demo si está vacío
-        TourRepository repo = TourRepository.get();
-        repo.seedIfEmpty(this);
 
-        // Obtenemos únicamente los tours con estado "disponible"
-        tourList = repo.byEstado("pendiente");
-        tourListOriginal = new ArrayList<>(tourList);
+        binding.scrMisTours.subPendientes.recyclerViewToursPendientes
+                .setLayoutManager(new LinearLayoutManager(this));
 
-        // Configuramos el adaptador
-        tourAdapter = new TourAdapter(this, tourList);
-        binding.scrMisTours.subPendientes.recyclerViewToursPendientes.setLayoutManager(new LinearLayoutManager(this));
-        binding.scrMisTours.subPendientes.recyclerViewToursPendientes.setAdapter(tourAdapter);
+        // si quieres usar otro adapter/lista distinta, crea otra lista + adapter
+        // por simplicidad aquí reutilizo la misma lista/adapter cambiando la query al entrar
+        TourAdapter adapterPendientes = new TourAdapter(this, new ArrayList<>());
+        binding.scrMisTours.subPendientes.recyclerViewToursPendientes.setAdapter(adapterPendientes);
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getUid()
+                : null;
+
+        if (uid == null) return;
+
+        db.collection("tours")
+                .whereEqualTo("guiaId", uid)
+                .whereIn("estado", java.util.Arrays.asList(
+                        TourEstado.SOLICITADO.name(),
+                        TourEstado.PENDIENTE_GUIA.name()
+                ))
+                .addSnapshotListener((snap, e) -> {
+                    if (e != null || snap == null) return;
+
+                    List<Tour> lista = new ArrayList<>();
+                    for (var doc : snap.getDocuments()) {
+                        Tour t = doc.toObject(Tour.class);
+                        if (t == null) continue;
+                        t.id = doc.getId();
+                        lista.add(t);
+                    }
+                    adapterPendientes.updateData(lista);
+                });
     }
+
 
     // 🔸 Configurar RecyclerView de Tours Pendientes
     private void configurarRecyclerToursHistorial() {
-        // Inicializar repositorio y cargar data demo si está vacío
-        TourRepository repo = TourRepository.get();
-        repo.seedIfEmpty(this);
 
-        // Obtenemos únicamente los tours con estado "disponible"
-        tourList = repo.byEstado("finalizado");
-        tourListOriginal = new ArrayList<>(tourList);
+        binding.scrMisTours.subHistorial.recyclerViewToursHistorial
+                .setLayoutManager(new LinearLayoutManager(this));
 
-        // Configuramos el adaptador
-        tourAdapter = new TourAdapter(this, tourList);
-        binding.scrMisTours.subHistorial.recyclerViewToursHistorial.setLayoutManager(new LinearLayoutManager(this));
-        binding.scrMisTours.subHistorial.recyclerViewToursHistorial.setAdapter(tourAdapter);
+        TourAdapter adapterHistorial = new TourAdapter(this, new ArrayList<>());
+        binding.scrMisTours.subHistorial.recyclerViewToursHistorial.setAdapter(adapterHistorial);
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getUid()
+                : null;
+
+        if (uid == null) return;
+
+        db.collection("tours")
+                .whereEqualTo("guiaId", uid)
+                .whereEqualTo("estado", TourEstado.FINALIZADO.name())
+                .addSnapshotListener((snap, e) -> {
+                    if (e != null || snap == null) return;
+
+                    List<Tour> lista = new ArrayList<>();
+                    for (var doc : snap.getDocuments()) {
+                        Tour t = doc.toObject(Tour.class);
+                        if (t == null) continue;
+                        t.id = doc.getId();
+                        lista.add(t);
+                    }
+                    adapterHistorial.updateData(lista);
+                });
     }
 
     // 🔹 Filtrar tours por texto
     private void filtrarTours(String texto) {
         tourList.clear();
-        if (texto.isEmpty()) {
+
+        if (texto == null) texto = "";
+        String q = texto.trim().toLowerCase();
+
+        if (q.isEmpty()) {
             tourList.addAll(tourListOriginal);
         } else {
             for (Tour t : tourListOriginal) {
-                if (t.getNombreTour().toLowerCase().contains(texto.toLowerCase()) ||
-                        t.getDescripcion().toLowerCase().contains(texto.toLowerCase())) {
+                String titulo = t.titulo != null ? t.titulo.toLowerCase() : "";
+                String desc   = t.descripcionCorta != null ? t.descripcionCorta.toLowerCase() : "";
+                if (titulo.contains(q) || desc.contains(q)) {
                     tourList.add(t);
                 }
             }
         }
         tourAdapter.notifyDataSetChanged();
     }
+
 
     // 🔹 Mostrar pantallas principales
     private boolean onBottomItemSelected(MenuItem item) {
@@ -469,6 +533,15 @@ public class Guia_HomeActivity extends AppCompatActivity {
                     binding.scrPerfil.tvEmpresaNombre.setText(company);
 
                     binding.scrPerfil.tvRuc.setText("—");
+
+                    String photoUrl = u.getPhotoUrl();
+                    if (photoUrl != null && !photoUrl.isEmpty()) {
+                        Glide.with(this)
+                                .load(photoUrl)
+                                .placeholder(R.drawable.ic_user_placeholder)
+                                .error(R.drawable.ic_user_placeholder)
+                                .into(binding.scrPerfil.imgFotoPerfil);
+                    }
                 });
     }
 
@@ -494,6 +567,12 @@ public class Guia_HomeActivity extends AppCompatActivity {
             i.putExtra("fechaNacimiento", binding.scrPerfil.tvFechaNacimiento.getText().toString());
             i.putExtra("domicilio", binding.scrPerfil.tvDomicilio.getText().toString());
 
+            startActivity(i);
+        });
+
+        // 👉 SOLO CAMBIAR FOTO
+        binding.scrPerfil.btnCambiarFoto.setOnClickListener(v -> {
+            Intent i = new Intent(this, CambiarFotoActivityGuia.class);
             startActivity(i);
         });
 

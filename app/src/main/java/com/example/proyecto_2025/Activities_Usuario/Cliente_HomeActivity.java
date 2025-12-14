@@ -9,7 +9,9 @@ import android.widget.Toast;
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.Activities_Guia.EditarPerfilActivityGuia;
+import com.example.proyecto_2025.Activities_Superadmin.CambiarFotoActivity;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.data.auth.AuthRepository;
 import com.example.proyecto_2025.databinding.ActivityUsuarioVistaInicialBinding;
@@ -173,9 +175,11 @@ public class Cliente_HomeActivity extends AppCompatActivity {
                         float rating        = ratingDb   != null ? ratingDb.floatValue() : 0f;
                         int totalResenas    = totalResDb != null ? totalResDb.intValue() : 0;
                         int totalTours      = totalToursDb != null ? totalToursDb.intValue() : 0;
+                        String empresaDocId = doc.getId();
 
                         // Usa el mismo modelo visual que ya tienes
                         EmpresaTurismo e = new EmpresaTurismo(
+                                empresaDocId,
                                 nombre != null ? nombre : "Sin nombre",
                                 descripcion != null ? descripcion : "",
                                 rating,
@@ -197,7 +201,10 @@ public class Cliente_HomeActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onVerToursClick(EmpresaTurismo empresa) {
-                                    // TODO: navegar a lista de tours de esa empresa
+                                    Intent i = new Intent(Cliente_HomeActivity.this, ToursPorEmpresaActivity.class);
+                                    i.putExtra("empresaDocId", empresa.getId());
+                                    i.putExtra("empresaNombre", empresa.getNombre());
+                                    startActivity(i);
                                 }
                             }
                     );
@@ -214,35 +221,7 @@ public class Cliente_HomeActivity extends AppCompatActivity {
     }
 
 
-    private List<EmpresaTurismo> crearDatosPrueba() {
-        List<EmpresaTurismo> empresas = new ArrayList<>();
 
-        empresas.add(new EmpresaTurismo(
-                "Inka Expeditions SAC",
-                "Tours culturales y aventura",
-                4.5f, 125, 8,
-                "Cusco, Perú",
-                R.drawable.ic_business_24
-        ));
-
-        empresas.add(new EmpresaTurismo(
-                "Machu Picchu Travel",
-                "Experiencias auténticas",
-                4.2f, 89, 5,
-                "Cusco, Perú",
-                R.drawable.ic_business_24
-        ));
-
-        empresas.add(new EmpresaTurismo(
-                "Arequipa Adventures",
-                "Naturaleza y volcanes",
-                4.7f, 156, 12,
-                "Arequipa, Perú",
-                R.drawable.ic_business_24
-        ));
-
-        return empresas;
-    }
 
 
     private void setupRecyclerViewToursRecomendados() {
@@ -446,6 +425,15 @@ public class Cliente_HomeActivity extends AppCompatActivity {
                             u.getFechaNacimiento() != null ? u.getFechaNacimiento() : "-");
                     binding.scrPerfil.tvDomicilio.setText(
                             u.getDomicilio() != null ? u.getDomicilio() : "-");
+
+                    String photoUrl = u.getPhotoUrl();
+                    if (photoUrl != null && !photoUrl.isEmpty()) {
+                        Glide.with(this)
+                                .load(photoUrl)
+                                .placeholder(R.drawable.ic_user_placeholder)
+                                .error(R.drawable.ic_user_placeholder)
+                                .into(binding.scrPerfil.imgFotoPerfil);
+                    }
                 });
     }
 
@@ -470,6 +458,12 @@ public class Cliente_HomeActivity extends AppCompatActivity {
             i.putExtra("fechaNacimiento", binding.scrPerfil.tvFechaNacimiento.getText().toString());
             i.putExtra("domicilio", binding.scrPerfil.tvDomicilio.getText().toString());
 
+            startActivity(i);
+        });
+
+        // 👉 SOLO CAMBIAR FOTO
+        binding.scrPerfil.btnCambiarFoto.setOnClickListener(v -> {
+            Intent i = new Intent(this, CambiarFotoActivityCliente.class);
             startActivity(i);
         });
 

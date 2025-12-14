@@ -394,7 +394,17 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
                     binding.scrPerfil.tvEmpresaNombre.setText(company);
 
                     binding.scrPerfil.tvRuc.setText("—");
+
+                    String photoUrl = u.getPhotoUrl();
+                    if (photoUrl != null && !photoUrl.isEmpty()) {
+                        Glide.with(this)
+                                .load(photoUrl)
+                                .placeholder(R.drawable.ic_user_placeholder)
+                                .error(R.drawable.ic_user_placeholder)
+                                .into(binding.scrPerfil.imgFotoPerfil);
+                    }
                 });
+
     }
 
     /** Listeners básicos del screen Perfil (cerrar sesión, etc.) */
@@ -417,6 +427,12 @@ public class Superadmin_HomeActivity extends AppCompatActivity {
             i.putExtra("empresa", binding.scrPerfil.tvEmpresaNombre.getText().toString());
             i.putExtra("dni", binding.scrPerfil.tvDni.getText().toString());
 
+            startActivity(i);
+        });
+
+        // 👉 SOLO CAMBIAR FOTO
+        binding.scrPerfil.btnCambiarFoto.setOnClickListener(v -> {
+            Intent i = new Intent(this, CambiarFotoActivity.class);
             startActivity(i);
         });
 

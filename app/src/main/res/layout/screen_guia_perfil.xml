@@ -36,14 +36,13 @@
                 app:cardCornerRadius="60dp"
                 app:cardElevation="4dp">
 
-                <TextView
-                    android:id="@+id/tvFotoPerfil"
+                <ImageView
+                    android:id="@+id/imgFotoPerfil"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="👤"
-                    android:textSize="64sp"
-                    android:gravity="center"
-                    android:background="#E3F2FD"/>
+                    android:scaleType="centerCrop"
+                    android:background="#E3F2FD"
+                    android:src="@drawable/ic_user_placeholder"/>
 
             </com.google.android.material.card.MaterialCardView>
 
