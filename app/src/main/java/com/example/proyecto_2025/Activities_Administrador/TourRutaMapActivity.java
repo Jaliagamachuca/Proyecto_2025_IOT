@@ -56,20 +56,24 @@ public class TourRutaMapActivity extends AppCompatActivity {
 
         repo = new TourRepository(this);
 
-        // id del tour que viene del detalle
-        String id = getIntent().getStringExtra("id");
-        if (id == null || id.isEmpty()) {
+        String jsonRuta = getIntent().getStringExtra("ruta_json");
+        if (jsonRuta == null || jsonRuta.isEmpty()) {
             finish();
             return;
         }
 
-        Tour tour = repo.findById(id);
-        if (tour == null || tour.ruta == null || tour.ruta.isEmpty()) {
+        java.lang.reflect.Type type =
+                new com.google.gson.reflect.TypeToken<java.util.List<PuntoRuta>>() {}.getType();
+
+        List<PuntoRuta> ruta = new com.google.gson.Gson().fromJson(jsonRuta, type);
+
+        if (ruta == null || ruta.isEmpty()) {
             finish();
             return;
         }
 
-        dibujarRuta(tour.ruta);
+        dibujarRuta(ruta);
+
     }
 
     private void dibujarRuta(List<PuntoRuta> puntosRuta) {
@@ -91,13 +95,16 @@ public class TourRutaMapActivity extends AppCompatActivity {
                     : "Punto " + i;
             m.setTitle(titulo);
 
-            // Texto extra del marcador
-            StringBuilder sb = new StringBuilder();
-            if (p.minutosEstimados > 0) {
-                sb.append("Estancia: ")
-                        .append(p.minutosEstimados)
-                        .append(" min\n");
+
+            if (i == 1) {
+                m.setTitle("INICIO - " + titulo);
+            } else if (i == puntosRuta.size()) {
+                m.setTitle("FIN - " + titulo);
             }
+
+
+            StringBuilder sb = new StringBuilder();
+
             sb.append("Lat: ").append(p.lat).append("\n");
             sb.append("Lon: ").append(p.lon);
 
@@ -113,11 +120,17 @@ public class TourRutaMapActivity extends AppCompatActivity {
         polyline.setWidth(6f);   // warning deprecado pero funciona sin problema
         mapView.getOverlays().add(polyline);
 
-        // Ajustar zoom para que se vea toda la ruta
         if (!geoPoints.isEmpty()) {
-            BoundingBox bb = BoundingBox.fromGeoPoints(geoPoints);
-            mapView.zoomToBoundingBox(bb, true, 100);
+            mapView.post(() -> {
+                BoundingBox bb = BoundingBox.fromGeoPoints(geoPoints);
+                mapView.zoomToBoundingBox(bb, true, 100);
+                mapView.invalidate();
+            });
+        } else {
+            mapView.getController().setZoom(15.0);
+            mapView.invalidate();
         }
+
     }
 
     @Override

@@ -173,9 +173,11 @@ public class Cliente_HomeActivity extends AppCompatActivity {
                         float rating        = ratingDb   != null ? ratingDb.floatValue() : 0f;
                         int totalResenas    = totalResDb != null ? totalResDb.intValue() : 0;
                         int totalTours      = totalToursDb != null ? totalToursDb.intValue() : 0;
+                        String empresaDocId = doc.getId();
 
                         // Usa el mismo modelo visual que ya tienes
                         EmpresaTurismo e = new EmpresaTurismo(
+                                empresaDocId,
                                 nombre != null ? nombre : "Sin nombre",
                                 descripcion != null ? descripcion : "",
                                 rating,
@@ -197,7 +199,10 @@ public class Cliente_HomeActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onVerToursClick(EmpresaTurismo empresa) {
-                                    // TODO: navegar a lista de tours de esa empresa
+                                    Intent i = new Intent(Cliente_HomeActivity.this, ToursPorEmpresaActivity.class);
+                                    i.putExtra("empresaDocId", empresa.getId());
+                                    i.putExtra("empresaNombre", empresa.getNombre());
+                                    startActivity(i);
                                 }
                             }
                     );
@@ -214,35 +219,7 @@ public class Cliente_HomeActivity extends AppCompatActivity {
     }
 
 
-    private List<EmpresaTurismo> crearDatosPrueba() {
-        List<EmpresaTurismo> empresas = new ArrayList<>();
 
-        empresas.add(new EmpresaTurismo(
-                "Inka Expeditions SAC",
-                "Tours culturales y aventura",
-                4.5f, 125, 8,
-                "Cusco, Perú",
-                R.drawable.ic_business_24
-        ));
-
-        empresas.add(new EmpresaTurismo(
-                "Machu Picchu Travel",
-                "Experiencias auténticas",
-                4.2f, 89, 5,
-                "Cusco, Perú",
-                R.drawable.ic_business_24
-        ));
-
-        empresas.add(new EmpresaTurismo(
-                "Arequipa Adventures",
-                "Naturaleza y volcanes",
-                4.7f, 156, 12,
-                "Arequipa, Perú",
-                R.drawable.ic_business_24
-        ));
-
-        return empresas;
-    }
 
 
     private void setupRecyclerViewToursRecomendados() {

@@ -98,12 +98,24 @@ public class TourDetalleActivity extends AppCompatActivity {
         if (tour.estado == TourEstado.BORRADOR) {
             binding.btnPublicar.setText("Enviar a guías");
             binding.btnPublicar.setEnabled(true);
-        } else if (tour.estado == TourEstado.PENDIENTE_GUIA) {
-            binding.btnPublicar.setText("Publicar a clientes");
+
+        } else if (tour.estado == TourEstado.SOLICITADO) {
+            binding.btnPublicar.setText("Aceptar guía");
             binding.btnPublicar.setEnabled(true);
+
+        } else if (tour.estado == TourEstado.PENDIENTE_GUIA) {
+            // aquí puede ser: aún sin guía (recién enviado) o ya con guía (aceptado)
+            if (tour.guiaId == null || tour.guiaId.isEmpty()) {
+                binding.btnPublicar.setText("Esperando guía...");
+                binding.btnPublicar.setEnabled(false);
+            } else {
+                binding.btnPublicar.setText("Publicar a clientes");
+                binding.btnPublicar.setEnabled(true);
+            }
+
         } else {
             binding.btnPublicar.setText("Publicar");
-            binding.btnPublicar.setEnabled(false); // ya no tiene sentido publicar de nuevo
+            binding.btnPublicar.setEnabled(false);
         }
 
         // ===== Datos básicos =====
@@ -241,22 +253,44 @@ public class TourDetalleActivity extends AppCompatActivity {
         }
 
 
-        // Publicar / enviar a guías
         binding.btnPublicar.setOnClickListener(v -> {
+
             if (tour.estado == TourEstado.BORRADOR) {
-                // 1) Borrador -> pendiente de guía
+                // 1) Admin: BORRADOR -> PENDIENTE_GUIA (visible para guías)
                 tour.estado = TourEstado.PENDIENTE_GUIA;
                 repo.upsert(tour);
 
                 binding.tvEstado.setText(tour.estado.name().replace("_", " "));
-                binding.btnPublicar.setText("Publicar a clientes");
+                binding.btnPublicar.setText("Esperando guía...");
+                binding.btnPublicar.setEnabled(false);
 
                 Snackbar.make(binding.getRoot(),
                         "Tour enviado a la bolsa de guías",
                         Snackbar.LENGTH_LONG).show();
 
+            } else if (tour.estado == TourEstado.SOLICITADO) {
+                // 2) Admin: Acepta al guía que solicitó
+                if (tour.guiaId == null || tour.guiaId.isEmpty()) {
+                    Snackbar.make(binding.getRoot(),
+                            "No hay guía asociado a esta solicitud.",
+                            Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+
+                // Confirmación admin: pasa a PENDIENTE_GUIA pero ya con guía asignado
+                tour.estado = TourEstado.PENDIENTE_GUIA;
+                repo.upsert(tour);
+
+                binding.tvEstado.setText(tour.estado.name().replace("_", " "));
+                binding.btnPublicar.setText("Publicar a clientes");
+                binding.btnPublicar.setEnabled(true);
+
+                Snackbar.make(binding.getRoot(),
+                        "Guía aceptado. Ya puedes publicar a clientes.",
+                        Snackbar.LENGTH_LONG).show();
+
             } else if (tour.estado == TourEstado.PENDIENTE_GUIA) {
-                // 2) Pendiente guía -> publicado (solo si ya hay guía)
+                // 3) Admin: Publicar a clientes (solo si ya hay guía asignado)
                 if (tour.guiaId == null || tour.guiaId.isEmpty()) {
                     Snackbar.make(binding.getRoot(),
                             "Aún no hay guía asignado. No puedes publicar a clientes.",
@@ -280,6 +314,7 @@ public class TourDetalleActivity extends AppCompatActivity {
                         Snackbar.LENGTH_LONG).show();
             }
         });
+
 
         // Empezar
         binding.btnEmpezar.setOnClickListener(v -> {

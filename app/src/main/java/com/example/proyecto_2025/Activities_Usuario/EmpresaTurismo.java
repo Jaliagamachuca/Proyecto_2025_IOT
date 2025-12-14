@@ -1,6 +1,7 @@
 package com.example.proyecto_2025.Activities_Usuario;
 
 public class EmpresaTurismo {
+    private String id;
     private String nombre;
     private String descripcion;
     private float rating;
@@ -10,8 +11,9 @@ public class EmpresaTurismo {
     private int logoResId; // Resource ID para el logo
 
     // Constructor
-    public EmpresaTurismo(String nombre, String descripcion, float rating,
+    public EmpresaTurismo(String id, String nombre, String descripcion, float rating,
                           int numeroResenias, int toursDisponibles, String ubicacion, int logoResId) {
+        this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.rating = rating;
@@ -22,6 +24,8 @@ public class EmpresaTurismo {
     }
 
     // Getters
+    public String getId() { return id; }
+
     public String getNombre() { return nombre; }
     public String getDescripcion() { return descripcion; }
     public float getRating() { return rating; }
@@ -38,4 +42,6 @@ public class EmpresaTurismo {
     public void setToursDisponibles(int toursDisponibles) { this.toursDisponibles = toursDisponibles; }
     public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
     public void setLogoResId(int logoResId) { this.logoResId = logoResId; }
+
+    public void setId(String id) { this.id = id; }
 }
