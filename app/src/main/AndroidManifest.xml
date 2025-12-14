@@ -21,6 +21,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="33">
         <activity
+            android:name=".Activities_Superadmin.CambiarFotoActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activities_Administrador.EditarPerfilActivityAdmin"
             android:exported="false" />
         <activity
@@ -161,16 +164,12 @@
         <activity
             android:name=".Activities_Administrador.TourRutaMapActivity"
             android:exported="false" />
-
         <activity
             android:name=".Activities_Usuario.ToursPorEmpresaActivity"
-            android:exported="false"/>
-
+            android:exported="false" />
         <activity
             android:name=".Activities_Administrador.AdminSolicitudesGuiasActivity"
             android:exported="false" />
-
-
     </application>
 
 </manifest>
