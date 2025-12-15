@@ -11,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.proyecto_2025.R;
 import com.example.proyecto_2025.model.PuntoRuta;
 import com.example.proyecto_2025.model.Tour;
@@ -94,16 +96,19 @@ public class TourAdapter extends RecyclerView.Adapter<TourAdapter.VH> {
             }
         }
 
-        // ===== Portada =====
+        // ===== Portada (usar Glide para URLs remotas) =====
+        String url = null;
         if (t.imagenUris != null && !t.imagenUris.isEmpty()) {
-            try {
-                h.ivPortada.setImageURI(Uri.parse(t.imagenUris.get(0)));
-            } catch (Exception e) {
-                h.ivPortada.setImageResource(R.drawable.ic_image_placeholder);
-            }
-        } else {
-            h.ivPortada.setImageResource(R.drawable.ic_image_placeholder);
+            url = t.imagenUris.get(0);
+            if (url != null) url = url.trim();
         }
+
+        Glide.with(h.itemView)
+                .load((url == null || url.isEmpty()) ? null : url)
+                .placeholder(R.drawable.ic_image_placeholder)
+                .error(R.drawable.ic_image_placeholder)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .into(h.ivPortada);
 
         // ===== Fechas =====
         if (t.fechaInicioUtc > 0 && t.fechaFinUtc > 0) {

@@ -56,46 +56,12 @@ public class TourDetalleActivity extends AppCompatActivity {
         if (tourId == null || tourId.isEmpty()) { finish(); return; }
 
         tour = repo.findById(tourId);
+
+        renderImagenes(); // funciona aunque tour sea null
         fetchTourFromFirestoreAndRefresh();
-        if (tour == null) { finish(); return; }
 
-
-        // ===== Carrusel de imágenes =====
-        if (tour.imagenUris != null && !tour.imagenUris.isEmpty()) {
-            binding.rvImagenes.setVisibility(View.VISIBLE);
-            binding.tvSinImagenes.setVisibility(View.GONE);
-
-            // Convertir List<String> -> List<Uri>
-            java.util.List<android.net.Uri> uris = new java.util.ArrayList<>();
-            for (String s : tour.imagenUris) {
-                try {
-                    uris.add(android.net.Uri.parse(s));
-                } catch (Exception ignored) {}
-            }
-
-            androidx.recyclerview.widget.LinearLayoutManager lm =
-                    new androidx.recyclerview.widget.LinearLayoutManager(
-                            this,
-                            androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL,
-                            false
-                    );
-            binding.rvImagenes.setLayoutManager(lm);
-
-            com.example.proyecto_2025.adapter.ImageUriAdapter adapter =
-                    new com.example.proyecto_2025.adapter.ImageUriAdapter(
-                            uris,
-                            null // sin eliminación en detalle
-                    );
-            binding.rvImagenes.setAdapter(adapter);
-
-            // Opcional: efecto "una imagen por pantalla"
-            androidx.recyclerview.widget.SnapHelper snapHelper =
-                    new androidx.recyclerview.widget.PagerSnapHelper();
-            snapHelper.attachToRecyclerView(binding.rvImagenes);
-
-        } else {
-            binding.rvImagenes.setVisibility(View.GONE);
-            binding.tvSinImagenes.setVisibility(View.VISIBLE);
+        if (tour == null) {
+            return; // solo evita pintar datos ahora
         }
 
 
@@ -133,10 +99,6 @@ public class TourDetalleActivity extends AppCompatActivity {
                     sbRuta.append("Punto sin nombre");
                 }
 
-                // Minutos estimados
-                if (p.minutosEstimados > 0) {
-                    sbRuta.append(" (").append(p.minutosEstimados).append(" min)");
-                }
 
                 // Coordenadas
                 sbRuta.append("\n   lat: ").append(p.lat)
@@ -326,6 +288,47 @@ public class TourDetalleActivity extends AppCompatActivity {
 
     }
 
+    private void renderImagenes() {
+        if (binding == null) return;
+
+        if (tour != null && tour.imagenUris != null && !tour.imagenUris.isEmpty()) {
+            binding.rvImagenes.setVisibility(android.view.View.VISIBLE);
+            binding.tvSinImagenes.setVisibility(android.view.View.GONE);
+
+            java.util.List<android.net.Uri> uris = new java.util.ArrayList<>();
+            for (String s : tour.imagenUris) {
+                if (s == null) continue;
+                s = s.trim();
+                if (s.isEmpty()) continue;
+                try { uris.add(android.net.Uri.parse(s)); }
+                catch (Exception ignored) {}
+            }
+
+            androidx.recyclerview.widget.LinearLayoutManager lm =
+                    new androidx.recyclerview.widget.LinearLayoutManager(
+                            this,
+                            androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL,
+                            false
+                    );
+            binding.rvImagenes.setLayoutManager(lm);
+
+            com.example.proyecto_2025.adapter.ImageUriAdapter adapter =
+                    new com.example.proyecto_2025.adapter.ImageUriAdapter(uris, null);
+            binding.rvImagenes.setAdapter(adapter);
+
+            // Evita crash/duplicación si lo llamas varias veces
+            if (binding.rvImagenes.getOnFlingListener() == null) {
+                new androidx.recyclerview.widget.PagerSnapHelper()
+                        .attachToRecyclerView(binding.rvImagenes);
+            }
+
+        } else {
+            binding.rvImagenes.setVisibility(android.view.View.GONE);
+            binding.tvSinImagenes.setVisibility(android.view.View.VISIBLE);
+        }
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_tour_detalle, menu);
@@ -363,6 +366,8 @@ public class TourDetalleActivity extends AppCompatActivity {
 
                     tour = t;
                     repo.upsert(tour);
+
+                    renderImagenes();
 
                     binding.tvEstado.setText(tour.estado != null
                             ? tour.estado.name().replace("_", " ")

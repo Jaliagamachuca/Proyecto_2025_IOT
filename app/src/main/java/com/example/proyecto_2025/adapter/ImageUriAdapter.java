@@ -9,6 +9,8 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.proyecto_2025.R;
 
 import java.util.List;
@@ -39,19 +41,15 @@ public class ImageUriAdapter extends RecyclerView.Adapter<ImageUriAdapter.Holder
         ImageView img = h.itemView.findViewById(R.id.img);
         View btnEliminar = h.itemView.findViewById(R.id.btnEliminar);
 
-        try {
-            img.setImageURI(u);
+        String url = (u != null) ? u.toString() : null;
 
-            // Si setImageURI no crashea pero igual no carga, al menos no mostramos null
-            if (img.getDrawable() == null) {
-                img.setImageResource(R.drawable.ic_image_placeholder);
-            }
+        Glide.with(h.itemView)
+                .load(url)
+                .placeholder(R.drawable.ic_image_placeholder)
+                .error(R.drawable.ic_image_placeholder)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .into(img);
 
-        } catch (SecurityException se) {
-            img.setImageResource(R.drawable.ic_image_placeholder);
-        } catch (Exception e) {
-            img.setImageResource(R.drawable.ic_image_placeholder);
-        }
 
         if (listener != null) {
             btnEliminar.setVisibility(View.VISIBLE);
