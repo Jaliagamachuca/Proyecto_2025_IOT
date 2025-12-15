@@ -338,11 +338,33 @@ public class Cliente_HomeActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onVerToursClick(EmpresaTurismo empresa) {
+
+                                    if (empresa == null) {
+                                        android.util.Log.e("VER_TOURS", "empresa == null");
+                                        return;
+                                    }
+
+                                    android.util.Log.d("VER_TOURS", "empresa obj=" + empresa);
+                                    android.util.Log.d("VER_TOURS", "empresa.getId()=" + empresa.getId());
+                                    android.util.Log.d("VER_TOURS", "empresa.getNombre()=" + empresa.getNombre());
+                                    android.util.Log.d("VER_TOURS", "empresa.getAdminId()=" + empresa.getAdminId()); // ✅
+
                                     Intent i = new Intent(Cliente_HomeActivity.this, ToursPorEmpresaActivity.class);
                                     i.putExtra("empresaDocId", empresa.getId());
+                                    i.putExtra("empresaAdminId", empresa.getAdminId()); // ✅ CLAVE (fallback)
                                     i.putExtra("empresaNombre", empresa.getNombre());
+
+                                    android.util.Log.d(
+                                            "VER_TOURS",
+                                            "intent extras empresaDocId=" + i.getStringExtra("empresaDocId")
+                                                    + " empresaAdminId=" + i.getStringExtra("empresaAdminId")
+                                                    + " empresaNombre=" + i.getStringExtra("empresaNombre")
+                                    );
+
                                     startActivity(i);
                                 }
+
+
 
                                 // (el botón mensaje lo agregamos luego en el adapter)
                             }
