@@ -42,6 +42,7 @@ public class EmpresaRepository {
     }
 
     // ================== CALLBACK ==================
+    @FunctionalInterface
     public interface EmpresaCallback {
         void onResult(Empresa empresa);
     }
@@ -112,8 +113,7 @@ public class EmpresaRepository {
                 .get()
                 .addOnSuccessListener(snaps -> {
                     if (snaps.isEmpty()) {
-                        // No tiene empresa aún → devolvemos lo que haya local (vacío normalmente)
-                        cb.onResult(load());
+                        cb.onResult(null);   // <- clave
                         return;
                     }
 
@@ -162,7 +162,7 @@ public class EmpresaRepository {
                 })
                 .addOnFailureListener(err -> {
                     Log.e(TAG, "Error leyendo empresa remota", err);
-                    cb.onResult(load());  // fallback a cache
+                    cb.onResult(null);  // <- para que no te pinte cache viejo
                 });
     }
 

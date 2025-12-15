@@ -146,7 +146,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
     private void initializeRepositories() {
 
         empresaRepo = new EmpresaRepository(this);
-        empresa = empresaRepo.load();
+        empresa = new Empresa();
         adminRepo = new AdminRepository(this);
         admin = adminRepo.load();
 
@@ -161,31 +161,48 @@ public class Admin_HomeActivity extends AppCompatActivity {
     }
     private void syncEmpresaFromRemote() {
         empresaRepo.loadFromRemote(remoteEmpresa -> {
-            if (remoteEmpresa == null) return;
-
-            empresa = remoteEmpresa;
-
             runOnUiThread(() -> {
-                // === Recargar UI de empresa con la data remota ===
-                binding.scrEmpresa.etNombre.setText(empresa.nombre);
-                binding.scrEmpresa.etCorreo.setText(empresa.correo);
-                binding.scrEmpresa.etTelefono.setText(empresa.telefono);
-                binding.scrEmpresa.etWeb.setText(empresa.web);
-                binding.scrEmpresa.etDescripcion.setText(empresa.descripcion);
+                if (remoteEmpresa == null) {
+                    // remoto no existe -> reset total
+                    empresaRepo.clear();
+                    empresa = new Empresa();
+                    galeriaUris.clear();
 
-                if (empresa.direccion != null && !empresa.direccion.isEmpty()) {
-                    binding.scrEmpresa.tvDireccion.setText(empresa.direccion);
-                } else {
+                    binding.scrEmpresa.etNombre.setText("");
+                    binding.scrEmpresa.etCorreo.setText("");
+                    binding.scrEmpresa.etTelefono.setText("");
+                    binding.scrEmpresa.etWeb.setText("");
+                    binding.scrEmpresa.etDescripcion.setText("");
                     binding.scrEmpresa.tvDireccion.setText("Sin dirección");
+
+                    if (binding.scrEmpresa.rvGaleria.getAdapter() != null) {
+                        binding.scrEmpresa.rvGaleria.getAdapter().notifyDataSetChanged();
+                    }
+
+                    updateMapPreview();
+                    actualizarChecklistYEstado();
+                    return;
                 }
 
-                // Galería
+                empresa = remoteEmpresa;
+
+                binding.scrEmpresa.etNombre.setText(empresa.nombre != null ? empresa.nombre : "");
+                binding.scrEmpresa.etCorreo.setText(empresa.correo != null ? empresa.correo : "");
+                binding.scrEmpresa.etTelefono.setText(empresa.telefono != null ? empresa.telefono : "");
+                binding.scrEmpresa.etWeb.setText(empresa.web != null ? empresa.web : "");
+                binding.scrEmpresa.etDescripcion.setText(empresa.descripcion != null ? empresa.descripcion : "");
+
+                binding.scrEmpresa.tvDireccion.setText(
+                        (empresa.direccion != null && !empresa.direccion.isEmpty()) ? empresa.direccion : "Sin dirección"
+                );
+
                 galeriaUris.clear();
-                for (String s : empresa.imagenUris) {
-                    try {
-                        galeriaUris.add(Uri.parse(s));
-                    } catch (Exception ignore) {}
+                if (empresa.imagenUris != null) {
+                    for (String s : empresa.imagenUris) {
+                        try { galeriaUris.add(Uri.parse(s)); } catch (Exception ignore) {}
+                    }
                 }
+
                 if (binding.scrEmpresa.rvGaleria.getAdapter() != null) {
                     binding.scrEmpresa.rvGaleria.getAdapter().notifyDataSetChanged();
                 }
@@ -195,6 +212,8 @@ public class Admin_HomeActivity extends AppCompatActivity {
             });
         });
     }
+
+
 
     private void setupLaunchers() {
         // Launcher para seleccionar im├ígenes
@@ -436,28 +455,25 @@ public class Admin_HomeActivity extends AppCompatActivity {
         setupMapPreview();
         updateMapPreview();
 
-        // Cargar datos previos
-        binding.scrEmpresa.etNombre.setText(empresa.nombre);
-        binding.scrEmpresa.etCorreo.setText(empresa.correo);
-        binding.scrEmpresa.etTelefono.setText(empresa.telefono);
-        binding.scrEmpresa.etWeb.setText(empresa.web);
-        binding.scrEmpresa.etDescripcion.setText(empresa.descripcion);
+        // NO cargar desde 'empresaRepo.load()' aquí
+        // Deja la UI limpia y que syncEmpresaFromRemote() pinte lo correcto
+        binding.scrEmpresa.etNombre.setText("");
+        binding.scrEmpresa.etCorreo.setText("");
+        binding.scrEmpresa.etTelefono.setText("");
+        binding.scrEmpresa.etWeb.setText("");
+        binding.scrEmpresa.etDescripcion.setText("");
+        binding.scrEmpresa.tvDireccion.setText("Sin dirección");
 
-        if (empresa.direccion != null && !empresa.direccion.isEmpty()) {
-            binding.scrEmpresa.tvDireccion.setText(empresa.direccion);
-        }
-
-        // Configurar galer├¡a
-        for (String s : empresa.imagenUris) galeriaUris.add(Uri.parse(s));
+        galeriaUris.clear();
         binding.scrEmpresa.rvGaleria.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        );
         binding.scrEmpresa.rvGaleria.setAdapter(new ImageUriAdapter(galeriaUris, pos -> {
             galeriaUris.remove(pos);
             binding.scrEmpresa.rvGaleria.getAdapter().notifyItemRemoved(pos);
             actualizarChecklistYEstado();
         }));
 
-        // Botones
         binding.scrEmpresa.btnAgregarFotos.setOnClickListener(v -> abrirPickerImagenes());
         binding.scrEmpresa.btnElegirUbicacion.setOnClickListener(v -> abrirPickerUbicacion());
         binding.scrEmpresa.btnGuardar.setOnClickListener(v -> guardarEmpresa(false));
@@ -465,6 +481,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
         actualizarChecklistYEstado();
     }
+
 
     private void setupMapPreview() {
         org.osmdroid.config.Configuration.getInstance().setUserAgentValue(getPackageName());

@@ -2,6 +2,7 @@ package com.example.proyecto_2025.data.repository;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 
 import com.example.proyecto_2025.model.Tour;
 import com.example.proyecto_2025.model.TourEstado;
@@ -51,6 +52,67 @@ public class TourRepository {
         try { return gson.fromJson(json, type); }
         catch (Exception e) { return new ArrayList<>(); }
     }
+    public interface UploadFotosCallback {
+        void onSuccess(java.util.List<String> downloadUrls);
+        void onError(Exception e);
+    }
+
+    public void uploadFotosTour(
+            String empresaId,
+            String tourId,
+            java.util.List<Uri> localUris,
+            UploadFotosCallback cb
+    ) {
+        com.google.firebase.auth.FirebaseUser current =
+                com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+
+        if (current == null) { cb.onError(new IllegalStateException("No hay usuario autenticado")); return; }
+        if (empresaId == null || empresaId.trim().isEmpty()) { cb.onError(new IllegalArgumentException("empresaId vacío")); return; }
+        if (tourId == null || tourId.trim().isEmpty()) { cb.onError(new IllegalArgumentException("tourId vacío")); return; }
+        if (localUris == null || localUris.isEmpty()) { cb.onSuccess(new java.util.ArrayList<>()); return; }
+
+        com.google.firebase.storage.FirebaseStorage storage =
+                com.google.firebase.storage.FirebaseStorage.getInstance();
+
+        java.util.List<String> out = new java.util.ArrayList<>();
+
+        // Filtra nulls para que el conteo sea real
+        java.util.List<Uri> uris = new java.util.ArrayList<>();
+        for (Uri u : localUris) if (u != null) uris.add(u);
+
+        if (uris.isEmpty()) { cb.onSuccess(new java.util.ArrayList<>()); return; }
+
+        final int total = uris.size();
+        final java.util.concurrent.atomic.AtomicInteger done = new java.util.concurrent.atomic.AtomicInteger(0);
+        final java.util.concurrent.atomic.AtomicBoolean failed = new java.util.concurrent.atomic.AtomicBoolean(false);
+
+        for (int i = 0; i < uris.size(); i++) {
+            Uri uri = uris.get(i);
+
+            String name = "foto_" + System.currentTimeMillis() + "_" + i + ".jpg";
+
+            com.google.firebase.storage.StorageReference ref = storage.getReference()
+                    .child("tours")
+                    .child(empresaId)
+                    .child(tourId)
+                    .child(name);
+
+            ref.putFile(uri)
+                    .continueWithTask(t -> {
+                        if (!t.isSuccessful()) throw t.getException();
+                        return ref.getDownloadUrl();
+                    })
+                    .addOnSuccessListener(downloadUri -> {
+                        if (failed.get()) return;
+                        out.add(downloadUri.toString());
+                        if (done.incrementAndGet() == total) cb.onSuccess(out);
+                    })
+                    .addOnFailureListener(e -> {
+                        if (failed.compareAndSet(false, true)) cb.onError(e);
+                    });
+        }
+    }
+    
 
     private synchronized void saveAll(List<Tour> tours) {
         sp.edit().putString(KEY, gson.toJson(tours)).apply();

@@ -33,7 +33,8 @@ public class TourFormActivity extends AppCompatActivity {
     private ActivityTourFormBinding binding;
     private int step = 1;
     private final Tour tour = new Tour();
-    private final ArrayList<String> imagenes = new ArrayList<>();
+    // antes: ArrayList<String>
+    private final ArrayList<Uri> imagenes = new ArrayList<>();
     private final ArrayList<PuntoRuta> ruta = new ArrayList<>();
     private TourRepository repo;
 
@@ -120,26 +121,31 @@ public class TourFormActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(), result -> {
                     if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) return;
                     Intent data = result.getData();
+
                     try {
                         if (data.getClipData() != null) {
                             int c = data.getClipData().getItemCount();
                             for (int i = 0; i < c; i++) {
                                 Uri u = data.getClipData().getItemAt(i).getUri();
                                 getContentResolver().takePersistableUriPermission(
-                                        u, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                imagenes.add(u.toString());
+                                        u, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                );
+                                imagenes.add(u);
                             }
                         } else if (data.getData() != null) {
                             Uri u = data.getData();
                             getContentResolver().takePersistableUriPermission(
-                                    u, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            imagenes.add(u.toString());
+                                    u, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            );
+                            imagenes.add(u);
                         }
                     } catch (SecurityException ignore) {
-                        if (data.getData() != null) imagenes.add(data.getData().toString());
+                        if (data.getData() != null) imagenes.add(data.getData());
                     }
+
                     binding.tvImgsCount.setText(imagenes.size() + " imágenes");
-                });
+                }
+        );
 
         // Selector de punto en mapa
         pickPointLauncher = registerForActivityResult(
@@ -230,8 +236,9 @@ public class TourFormActivity extends AppCompatActivity {
         String precioStr = binding.etPrecio.getText().toString().trim();
         String cuposStr  = binding.etCupos.getText().toString().trim();
 
-        android.util.Log.d(TAG, "inputs: titulo='" + tour.titulo + "', descLen=" + (tour.descripcionCorta != null ? tour.descripcionCorta.length() : 0)
-                + ", precioStr='" + precioStr + "', cuposStr='" + cuposStr + "'");
+        android.util.Log.d(TAG, "inputs: titulo='" + tour.titulo + "', descLen=" +
+                (tour.descripcionCorta != null ? tour.descripcionCorta.length() : 0) +
+                ", precioStr='" + precioStr + "', cuposStr='" + cuposStr + "'");
 
         try {
             tour.precioPorPersona = TextUtils.isEmpty(precioStr) ? 0 : Double.parseDouble(precioStr);
@@ -257,9 +264,11 @@ public class TourFormActivity extends AppCompatActivity {
                 + ", almuerzo=" + chkAlmuerzo.isChecked()
                 + ", cena=" + chkCena.isChecked());
 
-        tour.imagenUris.clear();
-        tour.imagenUris.addAll(imagenes);
-        android.util.Log.d(TAG, "imagenes count=" + tour.imagenUris.size());
+        // ⚠️ IMPORTANTE:
+        // NO metas aquí URIs locales en tour.imagenUris (eso solo funciona en este dispositivo).
+        // Primero validamos que hayan imágenes, luego las subimos y recién ahí seteamos downloadUrls.
+        int selectedImagesCount = (imagenes != null ? imagenes.size() : 0);
+        android.util.Log.d(TAG, "imagenes seleccionadas (local) count=" + selectedImagesCount);
 
         // ===== Idiomas seleccionados =====
         tour.idiomas.clear();
@@ -329,7 +338,7 @@ public class TourFormActivity extends AppCompatActivity {
 
         tour.pagoEsPorcentaje = binding.swPorcentaje.isChecked();
 
-        // 🔗 Ligar tour con la empresa del admin (usamos UID del usuario como empresaId)
+        // 🔗 Ligar tour con la empresa del admin (mantengo tu lógica actual para no romper flujo)
         FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
         android.util.Log.d(TAG, "firebaseUser=" + (fbUser != null ? fbUser.getUid() : "null"));
 
@@ -342,7 +351,7 @@ public class TourFormActivity extends AppCompatActivity {
         }
         tour.empresaId = fbUser.getUid();
 
-        // ✅ Asegurar ID antes de upsert (para evitar fallos silenciosos / NPE)
+        // ✅ Asegurar ID antes de subir (necesitamos tour.id para ruta en Storage)
         if (tour.id == null || tour.id.trim().isEmpty()) {
             tour.id = java.util.UUID.randomUUID().toString();
             android.util.Log.w(TAG, "tour.id estaba null/vacio -> generado: " + tour.id);
@@ -350,24 +359,24 @@ public class TourFormActivity extends AppCompatActivity {
             android.util.Log.d(TAG, "tour.id existente: " + tour.id);
         }
 
-        // De inicio siempre BORRADOR. Luego desde Detalle se pasará a PENDIENTE_GUIA
+        // Estado inicial
         tour.guiaId = null;
         tour.estado = TourEstado.BORRADOR;
 
-        android.util.Log.d(TAG, "final model: id=" + tour.id
+        android.util.Log.d(TAG, "final model pre-upload: id=" + tour.id
                 + ", empresaId=" + tour.empresaId
                 + ", estado=" + (tour.estado != null ? tour.estado.name() : "null")
-                + ", imgs=" + (tour.imagenUris != null ? tour.imagenUris.size() : -1)
-                + ", ruta=" + (tour.ruta != null ? tour.ruta.size() : -1));
+                + ", ruta=" + (tour.ruta != null ? tour.ruta.size() : -1)
+                + ", imgsLocal=" + selectedImagesCount);
 
-        // ==== Validaciones mínimas ====
+        // ==== Validaciones mínimas (SIN usar tour.imagenUris todavía) ====
         if (TextUtils.isEmpty(tour.titulo)) {
             android.util.Log.w(TAG, "VALIDATION FAIL: titulo vacío");
             Snackbar.make(binding.getRoot(), "Falta título", Snackbar.LENGTH_LONG).show();
             step = 1; updateStep(); return;
         }
-        if (tour.imagenUris.size() < 2) {
-            android.util.Log.w(TAG, "VALIDATION FAIL: imagenes < 2 (" + tour.imagenUris.size() + ")");
+        if (selectedImagesCount < 2) {
+            android.util.Log.w(TAG, "VALIDATION FAIL: imagenes < 2 (" + selectedImagesCount + ")");
             Snackbar.make(binding.getRoot(), "Mínimo 2 imágenes", Snackbar.LENGTH_LONG).show();
             step = 1; updateStep(); return;
         }
@@ -382,23 +391,75 @@ public class TourFormActivity extends AppCompatActivity {
             step = 2; updateStep(); return;
         }
 
-        // Guardar (local + Firestore)
-        try {
-            android.util.Log.d(TAG, "calling repo.upsert(...) id=" + tour.id);
-            repo.upsert(tour);
-            android.util.Log.d(TAG, "repo.upsert OK (local). Firestore sync depende del repo.");
-        } catch (Exception e) {
-            android.util.Log.e(TAG, "repo.upsert FAIL", e);
-            Snackbar.make(binding.getRoot(), "Error al guardar: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-            return;
-        }
-        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
-        if (u != null) activarEmpresaSiPendiente(u.getUid());
+        // =========================
+        // NUEVO FLUJO: subir imágenes a Storage y guardar solo URLs remotas
+        // =========================
+        binding.btnGuardar.setEnabled(false);
+        binding.btnNext.setEnabled(false);
+        binding.btnBack.setEnabled(false);
+        Snackbar.make(binding.getRoot(), "Subiendo imágenes...", Snackbar.LENGTH_SHORT).show();
 
-        Snackbar.make(binding.getRoot(), "Tour guardado como borrador", Snackbar.LENGTH_LONG).show();
-        android.util.Log.d(TAG, "DONE -> finish()");
-        finish();
+        try {
+            // repo.uploadFotosTour(empresaId, tourId, localUris, cb)
+            repo.uploadFotosTour(
+                    tour.empresaId,
+                    tour.id,
+                    imagenes,
+                    new TourRepository.UploadFotosCallback() {
+                        @Override
+                        public void onSuccess(java.util.List<String> downloadUrls) {
+                            android.util.Log.d(TAG, "uploadFotosTour OK urls=" + (downloadUrls != null ? downloadUrls.size() : 0));
+
+                            // Guardar SOLO remotas en Firestore
+                            tour.imagenUris.clear();
+                            if (downloadUrls != null) tour.imagenUris.addAll(downloadUrls);
+
+                            android.util.Log.d(TAG, "imagenes remotas set count=" + tour.imagenUris.size());
+
+                            // Guardar (local + Firestore)
+                            try {
+                                android.util.Log.d(TAG, "calling repo.upsert(...) id=" + tour.id);
+                                repo.upsert(tour);
+                                android.util.Log.d(TAG, "repo.upsert OK");
+                            } catch (Exception e) {
+                                android.util.Log.e(TAG, "repo.upsert FAIL", e);
+                                Snackbar.make(binding.getRoot(), "Error al guardar: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                                restoreButtons();
+                                return;
+                            }
+
+                            FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+                            if (u != null) activarEmpresaSiPendiente(u.getUid());
+
+                            Snackbar.make(binding.getRoot(), "Tour guardado como borrador", Snackbar.LENGTH_LONG).show();
+                            android.util.Log.d(TAG, "DONE -> finish()");
+                            restoreButtons();
+                            finish();
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            android.util.Log.e(TAG, "uploadFotosTour FAIL", e);
+                            Snackbar.make(binding.getRoot(), "Error subiendo imágenes: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                            restoreButtons();
+                        }
+
+                        private void restoreButtons() {
+                            binding.btnGuardar.setEnabled(true);
+                            binding.btnNext.setEnabled(true);
+                            binding.btnBack.setEnabled(true);
+                        }
+                    }
+            );
+        } catch (Exception e) {
+            android.util.Log.e(TAG, "ERROR iniciando uploadFotosTour", e);
+            Snackbar.make(binding.getRoot(), "Error iniciando subida: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+            binding.btnGuardar.setEnabled(true);
+            binding.btnNext.setEnabled(true);
+            binding.btnBack.setEnabled(true);
+        }
     }
+
 
 
 }
