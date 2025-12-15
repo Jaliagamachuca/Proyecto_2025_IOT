@@ -30,6 +30,10 @@ public class Tour implements Serializable {
     private Boolean incluyeAlmuerzo = false;
     private Boolean incluyeCena = false;
 
+    public String solicitudEstado;
+
+    public long solicitudAceptadaUtc;
+
     public boolean esPublicable() {
         return titulo != null && !titulo.isEmpty()
                 && descripcionCorta != null && !descripcionCorta.isEmpty()

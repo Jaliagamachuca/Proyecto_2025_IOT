@@ -50,42 +50,60 @@ public class AssignGuideActivity extends AppCompatActivity {
 
                     TextView tv = findViewById(R.id.tvSummary);
 
-                    String guia = (tour.guiaId != null) ? tour.guiaId : "(sin guía)";
-                    String estado = doc.getString("estado");
+                    String estado = (tour.estado != null) ? tour.estado.name() : "-";
+
                     if (estado == null) estado = "-";
 
-                    tv.setText(
+                    String base =
                             "Tour: " + (tour.titulo != null ? tour.titulo : tour.id) +
                                     "\nEstado: " + estado +
-                                    "\nGuía (uid): " + guia +
-                                    "\nPago guía: S/ " + String.format("%.2f", tour.propuestaPagoGuia)
-                    );
+                                    "\nPago guía: S/ " + String.format("%.2f", tour.propuestaPagoGuia);
+
+                    String guiaId = (tour.guiaId != null) ? tour.guiaId.trim() : "";
+
+                    if (guiaId.isEmpty()) {
+                        tv.setText(base + "\nGuía: (pendiente)");
+                        return;
+                    }
+
+                    db.collection("users").document(guiaId).get()
+                            .addOnSuccessListener(uDoc -> {
+                                String nombre = uDoc.getString("displayName");
+                                String guiaNombre = (nombre != null && !nombre.trim().isEmpty())
+                                        ? nombre
+                                        : "(pendiente)";
+                                tv.setText(base + "\nGuía: " + guiaNombre);
+                            })
+                            .addOnFailureListener(err -> tv.setText(base + "\nGuía: (pendiente)"));
                 });
     }
+
 
     private void aceptarGuia() {
         if (tour == null) return;
 
+        if (tour.guiaId == null || tour.guiaId.isEmpty()) {
+            Toast.makeText(this, "No hay guía asignado.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Map<String, Object> updates = new HashMap<>();
-        // Mantener estado SOLICITADO (como tú quieres)
-        updates.put("estado", "SOLICITADO");
-
-        // Marcar que ya fue aceptado por admin
-        updates.put("solicitudEstado", "ACEPTADA"); // NUEVO CAMPO
-
-        // opcional: timestamp
+        updates.put("solicitudEstado", "ACEPTADA");
         updates.put("solicitudAceptadaUtc", System.currentTimeMillis());
+        // ❌ NO CAMBIAR estado aquí
 
         db.collection("tours").document(tourId)
                 .update(updates)
                 .addOnSuccessListener(x -> {
-                    Toast.makeText(this, "Solicitud aceptada. Listo para publicar a clientes.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Guía aceptado.", Toast.LENGTH_LONG).show();
+                    setResult(RESULT_OK);
                     finish();
                 })
                 .addOnFailureListener(err ->
-                        Toast.makeText(this, "Error: " + err.getMessage(), Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, err.getMessage(), Toast.LENGTH_LONG).show()
                 );
     }
+
 
 
     private void rechazarSolicitud() {
@@ -100,6 +118,7 @@ public class AssignGuideActivity extends AppCompatActivity {
                 .update(updates)
                 .addOnSuccessListener(x -> {
                     Toast.makeText(this, "Solicitud rechazada (vuelve a bolsa).", Toast.LENGTH_LONG).show();
+                    setResult(RESULT_OK);
                     finish();
                 })
                 .addOnFailureListener(err ->

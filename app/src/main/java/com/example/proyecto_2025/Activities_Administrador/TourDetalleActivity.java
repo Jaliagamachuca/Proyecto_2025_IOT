@@ -1,5 +1,6 @@
 package com.example.proyecto_2025.Activities_Administrador;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -20,6 +21,15 @@ public class TourDetalleActivity extends AppCompatActivity {
     private ActivityTourDetalleBinding binding;
     private TourRepository repo;
     private Tour tour;
+
+    private String tourId;
+
+    private final androidx.activity.result.ActivityResultLauncher<Intent> assignLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        // recarga desde Firestore para traer solicitudEstado actualizado
+                        fetchTourFromFirestoreAndRefresh();
+                    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,19 +52,13 @@ public class TourDetalleActivity extends AppCompatActivity {
 
         repo = new TourRepository(this);
 
-        // 1) Obtener id del intent
-        String id = getIntent().getStringExtra("id");
-        if (id == null || id.isEmpty()) {
-            finish();
-            return;
-        }
+        tourId = getIntent().getStringExtra("id");
+        if (tourId == null || tourId.isEmpty()) { finish(); return; }
 
-        // 2) Cargar tour desde repo
-        tour = repo.findById(id);
-        if (tour == null) {
-            finish();
-            return;
-        }
+        tour = repo.findById(tourId);
+        fetchTourFromFirestoreAndRefresh();
+        if (tour == null) { finish(); return; }
+
 
         // ===== Carrusel de imágenes =====
         if (tour.imagenUris != null && !tour.imagenUris.isEmpty()) {
@@ -94,29 +98,6 @@ public class TourDetalleActivity extends AppCompatActivity {
             binding.tvSinImagenes.setVisibility(View.VISIBLE);
         }
 
-        // 3) Configurar texto del botón según estado
-        if (tour.estado == TourEstado.BORRADOR) {
-            binding.btnPublicar.setText("Enviar a guías");
-            binding.btnPublicar.setEnabled(true);
-
-        } else if (tour.estado == TourEstado.SOLICITADO) {
-            binding.btnPublicar.setText("Aceptar guía");
-            binding.btnPublicar.setEnabled(true);
-
-        } else if (tour.estado == TourEstado.PENDIENTE_GUIA) {
-            // aquí puede ser: aún sin guía (recién enviado) o ya con guía (aceptado)
-            if (tour.guiaId == null || tour.guiaId.isEmpty()) {
-                binding.btnPublicar.setText("Esperando guía...");
-                binding.btnPublicar.setEnabled(false);
-            } else {
-                binding.btnPublicar.setText("Publicar a clientes");
-                binding.btnPublicar.setEnabled(true);
-            }
-
-        } else {
-            binding.btnPublicar.setText("Publicar");
-            binding.btnPublicar.setEnabled(false);
-        }
 
         // ===== Datos básicos =====
         binding.tvTitulo.setText(tour.titulo);
@@ -255,59 +236,55 @@ public class TourDetalleActivity extends AppCompatActivity {
 
         binding.btnPublicar.setOnClickListener(v -> {
 
+            if (tour == null || tour.estado == null) return;
+
             if (tour.estado == TourEstado.BORRADOR) {
-                // 1) Admin: BORRADOR -> PENDIENTE_GUIA (visible para guías)
+
                 tour.estado = TourEstado.PENDIENTE_GUIA;
                 repo.upsert(tour);
-
-                binding.tvEstado.setText(tour.estado.name().replace("_", " "));
-                binding.btnPublicar.setText("Esperando guía...");
-                binding.btnPublicar.setEnabled(false);
+                fetchTourFromFirestoreAndRefresh();
 
                 Snackbar.make(binding.getRoot(),
                         "Tour enviado a la bolsa de guías",
                         Snackbar.LENGTH_LONG).show();
 
             } else if (tour.estado == TourEstado.SOLICITADO) {
-                // 2) Admin: Acepta al guía que solicitó
-                if (tour.guiaId == null || tour.guiaId.isEmpty()) {
-                    Snackbar.make(binding.getRoot(),
-                            "No hay guía asociado a esta solicitud.",
-                            Snackbar.LENGTH_LONG).show();
+
+                boolean aceptada = "ACEPTADA".equalsIgnoreCase(tour.solicitudEstado);
+
+                if (!aceptada) {
+                    Intent i = new Intent(this, AssignGuideActivity.class);
+                    i.putExtra("tourId", tourId);
+                    assignLauncher.launch(i);
                     return;
                 }
 
-                // Confirmación admin: pasa a PENDIENTE_GUIA pero ya con guía asignado
-                tour.estado = TourEstado.PENDIENTE_GUIA;
-                repo.upsert(tour);
-
-                binding.tvEstado.setText(tour.estado.name().replace("_", " "));
-                binding.btnPublicar.setText("Publicar a clientes");
-                binding.btnPublicar.setEnabled(true);
-
-                Snackbar.make(binding.getRoot(),
-                        "Guía aceptado. Ya puedes publicar a clientes.",
-                        Snackbar.LENGTH_LONG).show();
-
-            } else if (tour.estado == TourEstado.PENDIENTE_GUIA) {
-                // 3) Admin: Publicar a clientes (solo si ya hay guía asignado)
-                if (tour.guiaId == null || tour.guiaId.isEmpty()) {
-                    Snackbar.make(binding.getRoot(),
-                            "Aún no hay guía asignado. No puedes publicar a clientes.",
-                            Snackbar.LENGTH_LONG).show();
-                    return;
-                }
-
+                // ya aceptado -> publicar
                 tour.estado = TourEstado.PUBLICADO;
                 repo.upsert(tour);
+                fetchTourFromFirestoreAndRefresh();
 
-                binding.tvEstado.setText(tour.estado.name().replace("_", " "));
                 Snackbar.make(binding.getRoot(),
                         "Tour publicado para clientes",
                         Snackbar.LENGTH_LONG).show();
 
-                binding.btnPublicar.setEnabled(false);
+            } else if (tour.estado == TourEstado.PENDIENTE_GUIA) {
 
+                if (tour.guiaId == null || tour.guiaId.isEmpty()) {
+                    Snackbar.make(binding.getRoot(),
+                            "Aún no hay guía asignado.",
+                            Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+
+                // Publicar a clientes
+                tour.estado = TourEstado.PUBLICADO;
+                repo.upsert(tour);
+                fetchTourFromFirestoreAndRefresh();
+
+                Snackbar.make(binding.getRoot(),
+                        "Tour publicado para clientes",
+                        Snackbar.LENGTH_LONG).show();
             } else {
                 Snackbar.make(binding.getRoot(),
                         "Este tour ya no puede cambiarse desde aquí.",
@@ -321,7 +298,8 @@ public class TourDetalleActivity extends AppCompatActivity {
             if (tour.estado == TourEstado.PUBLICADO) {
                 tour.estado = TourEstado.EN_CURSO;
                 repo.upsert(tour);
-                binding.tvEstado.setText(tour.estado.name().replace("_", " "));
+                fetchTourFromFirestoreAndRefresh();
+
             } else {
                 Snackbar.make(binding.getRoot(),
                         "Solo puedes empezar tours publicados",
@@ -334,13 +312,18 @@ public class TourDetalleActivity extends AppCompatActivity {
             if (tour.estado == TourEstado.EN_CURSO) {
                 tour.estado = TourEstado.FINALIZADO;
                 repo.upsert(tour);
-                binding.tvEstado.setText(tour.estado.name().replace("_", " "));
+                fetchTourFromFirestoreAndRefresh();
+
             } else {
                 Snackbar.make(binding.getRoot(),
                         "Solo puedes finalizar tours en curso",
                         Snackbar.LENGTH_LONG).show();
             }
         });
+
+        renderButtonsByEstado();
+
+
     }
 
     @Override
@@ -357,5 +340,83 @@ public class TourDetalleActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void fetchTourFromFirestoreAndRefresh() {
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("tours")
+                .document(tourId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc == null || !doc.exists()) return;
+
+                    Tour t = doc.toObject(Tour.class);
+                    if (t == null) return;
+
+                    t.id = doc.getId();
+
+                    // ✅ normalizar estado (Firestore lo guarda como String)
+                    Object estadoObj = doc.get("estado");
+                    if (estadoObj instanceof String) {
+                        try { t.estado = TourEstado.valueOf((String) estadoObj); }
+                        catch (Exception ignored) {}
+                    }
+
+                    tour = t;
+                    repo.upsert(tour);
+
+                    binding.tvEstado.setText(tour.estado != null
+                            ? tour.estado.name().replace("_", " ")
+                            : "Sin estado");
+
+                    renderButtonsByEstado();
+                });
+    }
+
+
+    private void renderButtonsByEstado() {
+        // Por defecto ocultar acciones operativas
+        binding.btnEmpezar.setVisibility(View.GONE);
+        binding.btnFinalizar.setVisibility(View.GONE);
+
+        // Botón principal según estado
+        if (tour.estado == TourEstado.BORRADOR) {
+            binding.btnPublicar.setText("Enviar a guías");
+            binding.btnPublicar.setEnabled(true);
+
+        } else if (tour.estado == TourEstado.SOLICITADO) {
+            boolean aceptada = "ACEPTADA".equalsIgnoreCase(tour.solicitudEstado);
+            binding.btnPublicar.setText(aceptada ? "Publicar a clientes" : "Aceptar guía");
+            binding.btnPublicar.setEnabled(true);
+
+        } else if (tour.estado == TourEstado.PENDIENTE_GUIA) {
+            if (tour.guiaId == null || tour.guiaId.isEmpty()) {
+                binding.btnPublicar.setText("Esperando guía...");
+                binding.btnPublicar.setEnabled(false);
+            } else {
+                binding.btnPublicar.setText("Publicar a clientes");
+                binding.btnPublicar.setEnabled(true);
+            }
+
+        } else if (tour.estado == TourEstado.PUBLICADO) {
+            binding.btnPublicar.setText("Publicado");
+            binding.btnPublicar.setEnabled(false);
+
+            // ✅ SOLO aquí mostrar “Empezar”
+            binding.btnEmpezar.setVisibility(View.VISIBLE);
+
+        } else if (tour.estado == TourEstado.EN_CURSO) {
+            binding.btnPublicar.setText("En curso");
+            binding.btnPublicar.setEnabled(false);
+
+            // ✅ SOLO aquí mostrar “Finalizar”
+            binding.btnFinalizar.setVisibility(View.VISIBLE);
+
+        } else {
+            binding.btnPublicar.setText("—");
+            binding.btnPublicar.setEnabled(false);
+        }
+    }
+
+
 }
 
