@@ -2,6 +2,7 @@ package com.example.proyecto_2025.Activities_Guia;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -16,6 +17,7 @@ import com.example.proyecto_2025.databinding.ItemTourBinding;
 import com.example.proyecto_2025.model.Tour;
 import com.example.proyecto_2025.model.TourEstado;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -95,48 +97,98 @@ public class TourAdapter extends RecyclerView.Adapter<TourAdapter.TourViewHolder
     }
 
     private void solicitarComoGuia(Tour tour) {
+        final String TAG = "TOUR_SOLICITAR";
+
+        Log.d(TAG, "=== solicitarComoGuia() ===");
+
         String uid = FirebaseAuth.getInstance().getCurrentUser() != null
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid()
                 : null;
 
+        Log.d(TAG, "uid=" + uid
+                + " tourId=" + (tour != null ? tour.id : "null"));
+
         if (uid == null) {
+            Log.e(TAG, "ABORT: uid null (no hay sesión activa)");
             Toast.makeText(context, "No hay sesión activa", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (tour.id == null || tour.id.isEmpty()) {
+        if (tour == null || tour.id == null || tour.id.isEmpty()) {
+            Log.e(TAG, "ABORT: tour o tour.id null/vacío");
             Toast.makeText(context, "Tour sin ID", Toast.LENGTH_SHORT).show();
             return;
         }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        Log.d(TAG, "Iniciando transaction sobre tours/" + tour.id);
+
         db.runTransaction(transaction -> {
+
             var ref = db.collection("tours").document(tour.id);
             var snap = transaction.get(ref);
 
-            String estadoActual = snap.getString("estado");
-            String guiaActual = snap.getString("guiaId");
+            if (!snap.exists()) {
+                Log.e(TAG, "TX ABORT: documento no existe");
+                throw new IllegalStateException("El tour ya no existe.");
+            }
 
+            String estadoActual = snap.getString("estado");
+            String guiaActual   = snap.getString("guiaId");
+
+            Log.d(TAG, "TX READ: estadoActual=" + estadoActual
+                    + " guiaActual=" + guiaActual);
+
+            // ===== VALIDACIONES DE NEGOCIO =====
             if (!TourEstado.PENDIENTE_GUIA.name().equals(estadoActual)) {
+                Log.w(TAG, "TX FAIL: estado != PENDIENTE_GUIA (" + estadoActual + ")");
                 throw new IllegalStateException("Este tour ya no está disponible.");
             }
+
             if (guiaActual != null && !guiaActual.isEmpty()) {
+                Log.w(TAG, "TX FAIL: guiaId ya asignado (" + guiaActual + ")");
                 throw new IllegalStateException("Este tour ya fue tomado por otro guía.");
             }
 
             Map<String, Object> updates = new HashMap<>();
             updates.put("estado", TourEstado.SOLICITADO.name());
+            updates.put("updatedAt", FieldValue.serverTimestamp());
+
             updates.put("guiaId", uid);
+            // 👇 si tus rules exigen updatedAt, actívalo
+            // updates.put("updatedAt", FieldValue.serverTimestamp());
+
+            Log.d(TAG, "TX UPDATE PATCH=" + updates);
 
             transaction.update(ref, updates);
+
+            Log.d(TAG, "TX UPDATE queued OK");
+
             return null;
-        }).addOnSuccessListener(unused ->
-                Toast.makeText(context, "Solicitud enviada al admin", Toast.LENGTH_SHORT).show()
-        ).addOnFailureListener(e ->
-                Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show()
-        );
+
+        }).addOnSuccessListener(unused -> {
+            Log.d(TAG, "SUCCESS: solicitud enviada tours/" + tour.id
+                    + " guiaId=" + uid);
+            Toast.makeText(context, "Solicitud enviada al admin", Toast.LENGTH_SHORT).show();
+        }).addOnFailureListener(e -> {
+
+            Log.e(TAG, "FAILURE solicitarComoGuia: " + e.getMessage(), e);
+
+            // 🔥 CLAVE: identificar error exacto de Firestore
+            if (e instanceof com.google.firebase.firestore.FirebaseFirestoreException) {
+                com.google.firebase.firestore.FirebaseFirestoreException fe =
+                        (com.google.firebase.firestore.FirebaseFirestoreException) e;
+                Log.e(TAG, "Firestore code=" + fe.getCode()
+                        + " (" + fe.getCode().name() + ")");
+            }
+
+            Toast.makeText(context,
+                    e.getMessage() != null ? e.getMessage() : "Error al solicitar tour",
+                    Toast.LENGTH_LONG).show();
+        });
     }
+
 
 
     @Override
