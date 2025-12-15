@@ -39,43 +39,47 @@ public class AdminSolicitudesAdapter extends RecyclerView.Adapter<AdminSolicitud
     public void onBindViewHolder(@NonNull VH h, int position) {
         Tour t = data.get(position);
 
-        h.b.tvNombreGuia.setText(t.titulo != null ? t.titulo : "(sin título)");
+        // 1) Tour (título)
+        String titulo = (t.titulo != null && !t.titulo.trim().isEmpty()) ? t.titulo : "(sin título)";
+        h.b.tvNombreGuia.setText("Tour: " + titulo);
 
-        // placeholders por recycle
-        h.b.tvDniGuia.setText("Guía: —");
-        h.b.tvCorreoGuia.setText("Tel: —");
+        // 2) Pago guía
+        // Ajusta el nombre del campo según tu Tour (en tu AssignGuideActivity usas propuestaPagoGuia)
+        double pago = 0.0;
+        try { pago = t.propuestaPagoGuia; } catch (Exception ignore) {}
+        h.b.tvCorreoGuia.setText(String.format("Pago guía: S/ %.2f", pago));
 
-        // Empresa (si no tienes otro TextView, al menos no lo mezcles con Tel)
-        // Si quieres mostrar empresa, ponlo en el nombre:
-        if (t.empresaId != null && !t.empresaId.isEmpty()) {
-            h.b.tvNombreGuia.setText((t.titulo != null ? t.titulo : "(sin título)") + " · " + t.empresaId);
-        }
-
-        // Estado (funciona si es enum o string)
+        // 3) Estado (SOLICITADO, etc.)
         String estadoTxt = "—";
-        try {
-            // si es enum
-            estadoTxt = (t.estado != null) ? t.estado.name() : "—";
-        } catch (Exception ignore) {
-            // si es string
-            try {
-                estadoTxt = (String) Tour.class.getField("estado").get(t);
-            } catch (Exception ignored2) {}
+        if (t.estado != null) {
+            try { estadoTxt = t.estado.name(); } catch (Exception e) { estadoTxt = String.valueOf(t.estado); }
         }
         h.b.tvEstadoSolicitud.setText(estadoTxt);
 
-        // Datos del guía
-        if (t.guiaId != null && !t.guiaId.isEmpty()) {
-            db.collection("users").document(t.guiaId).get()
-                    .addOnSuccessListener(doc -> {
-                        String nombre = doc.getString("displayName");
-                        String phone  = doc.getString("phone");
+        // 4) Guía: por defecto (para evitar "saltos" por el RecyclerView)
+        h.b.tvDniGuia.setText("Guía: (pendiente)");
 
-                        h.b.tvDniGuia.setText("Guía: " + (nombre != null && !nombre.isEmpty() ? nombre : t.guiaId));
-                        h.b.tvCorreoGuia.setText("Tel: " + (phone != null && !phone.isEmpty() ? phone : "—"));
+        // 5) Buscar nombre del guía SOLO si hay guiaId
+        if (t.guiaId != null && !t.guiaId.trim().isEmpty()) {
+            final String guiaId = t.guiaId;   // captura segura
+
+            db.collection("users").document(guiaId).get()
+                    .addOnSuccessListener(doc -> {
+                        // evita que un callback viejo escriba en otra tarjeta reciclada
+                        int pos = h.getBindingAdapterPosition();
+                        if (pos == RecyclerView.NO_POSITION) return;
+                        Tour current = data.get(pos);
+                        if (current == null || current.guiaId == null || !current.guiaId.equals(guiaId)) return;
+
+                        String nombre = doc.getString("displayName");
+                        if (nombre != null && !nombre.trim().isEmpty()) {
+                            h.b.tvDniGuia.setText("Guía: " + nombre);
+                        } else {
+                            h.b.tvDniGuia.setText("Guía: (pendiente)");
+                        }
                     })
                     .addOnFailureListener(err -> {
-                        h.b.tvDniGuia.setText("Guía UID: " + t.guiaId);
+                        h.b.tvDniGuia.setText("Guía: (pendiente)");
                     });
         }
 
@@ -85,6 +89,7 @@ public class AdminSolicitudesAdapter extends RecyclerView.Adapter<AdminSolicitud
             ctx.startActivity(i);
         });
     }
+
 
 
 
