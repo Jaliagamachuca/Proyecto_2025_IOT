@@ -445,51 +445,6 @@ public class Guia_HomeActivity extends AppCompatActivity {
         target.setVisibility(View.VISIBLE);
     }
 
-    // 🔹 Diálogos
-    public void solicitarTour() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Solicitar Tour");
-        dialogBuilder.setMessage("¿Está seguro de solicitar este tour?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
-    }
-
-    public void rechazarTour() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Cancelar Tour");
-        dialogBuilder.setMessage("¿Está seguro cancelar la solicitud de este tour?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
-    }
-
-    public void errorSolicitar() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("ERROR");
-        dialogBuilder.setMessage("Usted ya tiene otro tour solicitado con la misma fecha, cancele la solicitud anterior y vuelva a intentarlo ");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
-    }
-
-    public void errorCancelar() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("ERROR");
-        dialogBuilder.setMessage("Este Tour ya ha sido publicado por el Administrador de la Empresa, ya no puede cancelar su solicitud");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
-    }
-
-    public void iniciarTour() {
-        MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);
-        dialogBuilder.setTitle("Iniciar Tour");
-        dialogBuilder.setMessage("¿Está seguro de iniciar este tour?");
-        dialogBuilder.setNeutralButton(R.string.cancel, (dialogInterface, i) -> Log.d("msg-test","btn neutral"));
-        dialogBuilder.setPositiveButton(R.string.ok, (dialogInterface, i) -> Log.d("msg-test","btn positivo"));
-        dialogBuilder.show();
-    }
 
     public void descargarTour() {
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this);

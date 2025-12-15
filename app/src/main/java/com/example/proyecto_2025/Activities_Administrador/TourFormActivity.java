@@ -194,20 +194,47 @@ public class TourFormActivity extends AppCompatActivity {
     }
 
     private void save() {
+        final String TAG = "TOUR_SAVE";
+
+        android.util.Log.d(TAG, "==== CLICK GUARDAR ====");
+
         // Paso 1: básicos
         tour.titulo = binding.etTitulo.getText().toString().trim();
         tour.descripcionCorta = binding.etDescripcion.getText().toString().trim();
+
         String precioStr = binding.etPrecio.getText().toString().trim();
-        String cuposStr = binding.etCupos.getText().toString().trim();
-        tour.precioPorPersona = TextUtils.isEmpty(precioStr) ? 0 : Double.parseDouble(precioStr);
-        tour.cupos = TextUtils.isEmpty(cuposStr) ? 0 : Integer.parseInt(cuposStr);
+        String cuposStr  = binding.etCupos.getText().toString().trim();
+
+        android.util.Log.d(TAG, "inputs: titulo='" + tour.titulo + "', descLen=" + (tour.descripcionCorta != null ? tour.descripcionCorta.length() : 0)
+                + ", precioStr='" + precioStr + "', cuposStr='" + cuposStr + "'");
+
+        try {
+            tour.precioPorPersona = TextUtils.isEmpty(precioStr) ? 0 : Double.parseDouble(precioStr);
+        } catch (Exception e) {
+            android.util.Log.e(TAG, "parse precio FAIL: '" + precioStr + "'", e);
+            Snackbar.make(binding.getRoot(), "Precio inválido", Snackbar.LENGTH_LONG).show();
+            step = 1; updateStep(); return;
+        }
+
+        try {
+            tour.cupos = TextUtils.isEmpty(cuposStr) ? 0 : Integer.parseInt(cuposStr);
+        } catch (Exception e) {
+            android.util.Log.e(TAG, "parse cupos FAIL: '" + cuposStr + "'", e);
+            Snackbar.make(binding.getRoot(), "Cupos inválidos", Snackbar.LENGTH_LONG).show();
+            step = 1; updateStep(); return;
+        }
 
         tour.setIncluyeDesayuno(chkDesayuno.isChecked());
         tour.setIncluyeAlmuerzo(chkAlmuerzo.isChecked());
         tour.setIncluyeCena(chkCena.isChecked());
 
+        android.util.Log.d(TAG, "servicios: desayuno=" + chkDesayuno.isChecked()
+                + ", almuerzo=" + chkAlmuerzo.isChecked()
+                + ", cena=" + chkCena.isChecked());
+
         tour.imagenUris.clear();
         tour.imagenUris.addAll(imagenes);
+        android.util.Log.d(TAG, "imagenes count=" + tour.imagenUris.size());
 
         // ===== Idiomas seleccionados =====
         tour.idiomas.clear();
@@ -219,14 +246,19 @@ public class TourFormActivity extends AppCompatActivity {
         if (chkIdiomaItaliano.isChecked())  tour.idiomas.add("Italiano");
         if (chkIdiomaJapones.isChecked())   tour.idiomas.add("Japonés");
 
+        android.util.Log.d(TAG, "idiomas=" + tour.idiomas);
 
         // Paso 2: ruta y fechas
         tour.ruta.clear();
         tour.ruta.addAll(ruta);
+        android.util.Log.d(TAG, "ruta puntos=" + tour.ruta.size());
 
         // ===== FECHA + HORA DE INICIO =====
         int hIni = calInicio.get(Calendar.HOUR_OF_DAY);
         int mIni = calInicio.get(Calendar.MINUTE);
+
+        android.util.Log.d(TAG, "horaInicio UI=" + String.format(java.util.Locale.getDefault(), "%02d:%02d", hIni, mIni)
+                + " dpInicio=" + binding.dpInicio.getYear() + "-" + (binding.dpInicio.getMonth() + 1) + "-" + binding.dpInicio.getDayOfMonth());
 
         calInicio.set(
                 binding.dpInicio.getYear(),
@@ -238,9 +270,12 @@ public class TourFormActivity extends AppCompatActivity {
         );
         tour.fechaInicioUtc = calInicio.getTimeInMillis();
 
-// ===== FECHA + HORA DE FIN =====
+        // ===== FECHA + HORA DE FIN =====
         int hFin = calFin.get(Calendar.HOUR_OF_DAY);
         int mFin = calFin.get(Calendar.MINUTE);
+
+        android.util.Log.d(TAG, "horaFin UI=" + String.format(java.util.Locale.getDefault(), "%02d:%02d", hFin, mFin)
+                + " dpFin=" + binding.dpFin.getYear() + "-" + (binding.dpFin.getMonth() + 1) + "-" + binding.dpFin.getDayOfMonth());
 
         calFin.set(
                 binding.dpFin.getYear(),
@@ -252,47 +287,91 @@ public class TourFormActivity extends AppCompatActivity {
         );
         tour.fechaFinUtc = calFin.getTimeInMillis();
 
+        android.util.Log.d(TAG, "fechas ms: ini=" + tour.fechaInicioUtc + " (" + new java.util.Date(tour.fechaInicioUtc) + ")"
+                + " fin=" + tour.fechaFinUtc + " (" + new java.util.Date(tour.fechaFinUtc) + ")");
+
         // Paso 3: guía (por ahora solo propuesta, sin asignar guía)
         String propStr = binding.etPropuesta.getText().toString().trim();
-        tour.propuestaPagoGuia = TextUtils.isEmpty(propStr) ? 0 : Double.parseDouble(propStr);
+        android.util.Log.d(TAG, "propStr='" + propStr + "', swPorcentaje=" + binding.swPorcentaje.isChecked());
+
+        try {
+            tour.propuestaPagoGuia = TextUtils.isEmpty(propStr) ? 0 : Double.parseDouble(propStr);
+        } catch (Exception e) {
+            android.util.Log.e(TAG, "parse propuesta FAIL: '" + propStr + "'", e);
+            Snackbar.make(binding.getRoot(), "Propuesta de pago inválida", Snackbar.LENGTH_LONG).show();
+            step = 3; updateStep(); return;
+        }
+
         tour.pagoEsPorcentaje = binding.swPorcentaje.isChecked();
 
         // 🔗 Ligar tour con la empresa del admin (usamos UID del usuario como empresaId)
         FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        android.util.Log.d(TAG, "firebaseUser=" + (fbUser != null ? fbUser.getUid() : "null"));
+
         if (fbUser == null) {
             Snackbar.make(binding.getRoot(),
                     "No se pudo obtener tu sesión. Vuelve a iniciar sesión.",
                     Snackbar.LENGTH_LONG).show();
+            android.util.Log.e(TAG, "ABORT: fbUser null");
             return;
         }
         tour.empresaId = fbUser.getUid();
+
+        // ✅ Asegurar ID antes de upsert (para evitar fallos silenciosos / NPE)
+        if (tour.id == null || tour.id.trim().isEmpty()) {
+            tour.id = java.util.UUID.randomUUID().toString();
+            android.util.Log.w(TAG, "tour.id estaba null/vacio -> generado: " + tour.id);
+        } else {
+            android.util.Log.d(TAG, "tour.id existente: " + tour.id);
+        }
 
         // De inicio siempre BORRADOR. Luego desde Detalle se pasará a PENDIENTE_GUIA
         tour.guiaId = null;
         tour.estado = TourEstado.BORRADOR;
 
+        android.util.Log.d(TAG, "final model: id=" + tour.id
+                + ", empresaId=" + tour.empresaId
+                + ", estado=" + (tour.estado != null ? tour.estado.name() : "null")
+                + ", imgs=" + (tour.imagenUris != null ? tour.imagenUris.size() : -1)
+                + ", ruta=" + (tour.ruta != null ? tour.ruta.size() : -1));
+
         // ==== Validaciones mínimas ====
         if (TextUtils.isEmpty(tour.titulo)) {
+            android.util.Log.w(TAG, "VALIDATION FAIL: titulo vacío");
             Snackbar.make(binding.getRoot(), "Falta título", Snackbar.LENGTH_LONG).show();
             step = 1; updateStep(); return;
         }
         if (tour.imagenUris.size() < 2) {
+            android.util.Log.w(TAG, "VALIDATION FAIL: imagenes < 2 (" + tour.imagenUris.size() + ")");
             Snackbar.make(binding.getRoot(), "Mínimo 2 imágenes", Snackbar.LENGTH_LONG).show();
             step = 1; updateStep(); return;
         }
         if (tour.ruta.size() < 2) {
+            android.util.Log.w(TAG, "VALIDATION FAIL: ruta < 2 (" + tour.ruta.size() + ")");
             Snackbar.make(binding.getRoot(), "Agrega al menos 2 puntos en la ruta", Snackbar.LENGTH_LONG).show();
             step = 2; updateStep(); return;
         }
         if (tour.fechaFinUtc <= tour.fechaInicioUtc) {
+            android.util.Log.w(TAG, "VALIDATION FAIL: fin <= inicio (" + tour.fechaFinUtc + " <= " + tour.fechaInicioUtc + ")");
             Snackbar.make(binding.getRoot(), "La fecha fin debe ser posterior a inicio", Snackbar.LENGTH_LONG).show();
             step = 2; updateStep(); return;
         }
 
         // Guardar (local + Firestore)
-        repo.upsert(tour);
+        try {
+            android.util.Log.d(TAG, "calling repo.upsert(...) id=" + tour.id);
+            repo.upsert(tour);
+            android.util.Log.d(TAG, "repo.upsert OK (local). Firestore sync depende del repo.");
+        } catch (Exception e) {
+            android.util.Log.e(TAG, "repo.upsert FAIL", e);
+            Snackbar.make(binding.getRoot(), "Error al guardar: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+            return;
+        }
+
         Snackbar.make(binding.getRoot(), "Tour guardado como borrador", Snackbar.LENGTH_LONG).show();
+        android.util.Log.d(TAG, "DONE -> finish()");
         finish();
     }
+
 
 }
