@@ -104,9 +104,9 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         h.tvTime.setText(c.time != null ? c.time : "");
         h.unreadDot.setVisibility(c.unread ? View.VISIBLE : View.GONE);
 
-        if (c.photoUrl != null && !c.photoUrl.isEmpty()) {
-            Glide.with(ctx)
-                    .load(c.photoUrl)
+        if (c.otherPhotoUrl != null && !c.otherPhotoUrl.isEmpty()) {
+            Glide.with(h.itemView.getContext())
+                    .load(c.otherPhotoUrl)
                     .placeholder(R.drawable.ic_user_placeholder)
                     .error(R.drawable.ic_user_placeholder)
                     .into(h.imgAvatar);

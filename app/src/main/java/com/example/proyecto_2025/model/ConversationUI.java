@@ -1,19 +1,30 @@
 package com.example.proyecto_2025.model;
 
 public class ConversationUI {
-    public String id;           // id de conversación (docId)
-    public String title;        // nombre mostrado (otro usuario)
-    public String lastMessage;  // último mensaje
-    public String time;         // hora/fecha display (string ya formateado)
-    public boolean unread;      // no leído (para el usuario actual)
-    public String otherUserId;  // uid del otro usuario
-    public String otherRole;    // guia/cliente/admin/etc
-    public String photoUrl;     // foto del otro usuario (opcional)
 
+    public String id;           // roomId
+    public String title;        // nombre visible
+    public String lastMessage;
+    public String time;
+    public boolean unread;
+    public String otherUserId;
+    public String otherRole;
+    public String otherPhotoUrl; // opcional (si no lo usas, pasa null)
+
+    // 🔹 Constructor vacío (Firestore / JavaBeans)
     public ConversationUI() {}
 
-    public ConversationUI(String id, String title, String lastMessage, String time,
-                          boolean unread, String otherUserId, String otherRole, String photoUrl) {
+    // 🔹 Constructor completo (para UI)
+    public ConversationUI(
+            String id,
+            String title,
+            String lastMessage,
+            String time,
+            boolean unread,
+            String otherUserId,
+            String otherRole,
+            String otherPhotoUrl
+    ) {
         this.id = id;
         this.title = title;
         this.lastMessage = lastMessage;
@@ -21,6 +32,6 @@ public class ConversationUI {
         this.unread = unread;
         this.otherUserId = otherUserId;
         this.otherRole = otherRole;
-        this.photoUrl = photoUrl;
+        this.otherPhotoUrl = otherPhotoUrl;
     }
 }
