@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.Activities_Guia.EditarPerfilActivityGuia;
 import com.example.proyecto_2025.Activities_Superadmin.CambiarFotoActivity;
 import com.example.proyecto_2025.R;
+import com.example.proyecto_2025.adapter.ConversationAdapter;
 import com.example.proyecto_2025.adapter.ImageUriAdapter;
 import com.example.proyecto_2025.adapter.GuideAdapter;
 import com.example.proyecto_2025.adapter.OfferAdapter;
@@ -85,6 +86,9 @@ public class Admin_HomeActivity extends AppCompatActivity {
     private TourAdapter tourAdapter;
     private final List<Tour> allTours = new ArrayList<>();
     private String empresaId;
+    private ConversationAdapter chatAdapter;
+    private final List<com.example.proyecto_2025.model.ConversationUI> chatData = new ArrayList<>();
+
 
     // Para extraer el guia actual y poner sus datos en el perfil
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -262,13 +266,67 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
     // ===================== SECTION X: CHAT =====================
     private void initChatSection() {
-        // Por ahora solo dejamos el screen listo.
-        // Luego aquí conectamos Firestore + Adapter + filtros.
-        if (binding == null || binding.scrChat == null) return;
+        // Recycler
+        binding.scrChat.rvConversaciones.setLayoutManager(new LinearLayoutManager(this));
+        chatAdapter = new ConversationAdapter(this, c -> {
+            // Por ahora: aquí luego abres la Activity del chat
+            // Intent i = new Intent(this, ChatRoomActivity.class);
+            // i.putExtra("conversationId", c.id);
+            // i.putExtra("otherUserId", c.otherUserId);
+            // startActivity(i);
+            Snackbar.make(binding.getRoot(),
+                    "Abrir chat con: " + (c.title != null ? c.title : c.otherUserId),
+                    Snackbar.LENGTH_SHORT).show();
+        });
+        binding.scrChat.rvConversaciones.setAdapter(chatAdapter);
 
-        // Si tu screen tiene emptyState:
-        // binding.scrChat.emptyStateChat.setVisibility(View.VISIBLE);
-        // binding.scrChat.rvConversaciones.setVisibility(View.GONE);
+        // Search
+        binding.scrChat.etBuscarChat.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (chatAdapter != null) chatAdapter.setQuery(String.valueOf(s));
+            }
+            @Override public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        // Chips
+        binding.scrChat.chipTodos.setOnClickListener(v -> {
+            chatAdapter.setRoleFilter("ALL");
+            chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
+        });
+
+        binding.scrChat.chipGuias.setOnClickListener(v -> {
+            chatAdapter.setRoleFilter("guia");
+            chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
+        });
+
+        binding.scrChat.chipClientes.setOnClickListener(v -> {
+            chatAdapter.setRoleFilter("cliente");
+            chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
+        });
+
+        binding.scrChat.chipNoLeidos.setOnClickListener(v -> {
+            chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
+        });
+
+        // Data inicial (MOCK por ahora, para que el flujo ya funcione)
+        chatData.clear();
+        chatData.add(new com.example.proyecto_2025.model.ConversationUI(
+                "c1", "Guía: Juan Pérez", "Hola! ¿Listo para el tour?", "12:10",
+                true, "uid_guia_1", "guia", ""
+        ));
+        chatData.add(new com.example.proyecto_2025.model.ConversationUI(
+                "c2", "Cliente: María", "Gracias por la info", "Ayer",
+                false, "uid_cliente_9", "cliente", ""
+        ));
+
+        chatAdapter.submit(chatData);
+        toggleEmptyChat();
+    }
+    private void toggleEmptyChat() {
+        boolean empty = (chatAdapter == null || chatAdapter.getItemCount() == 0);
+        binding.scrChat.emptyStateChat.setVisibility(empty ? View.VISIBLE : View.GONE);
+        binding.scrChat.rvConversaciones.setVisibility(empty ? View.GONE : View.VISIBLE);
     }
 
     private void showScreen(@IdRes int screenId) {
