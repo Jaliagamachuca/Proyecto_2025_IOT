@@ -285,30 +285,33 @@ public class Cliente_HomeActivity extends AppCompatActivity {
         binding.scrExplorar.rvEmpresasTurismo
                 .setLayoutManager(new LinearLayoutManager(this));
 
-        // Muestra un pequeño loader si quieres (puede ser un ProgressBar en el layout)
-        // binding.scrExplorar.progressEmpresas.setVisibility(View.VISIBLE);
-
         db.collection("empresas")
-                .whereEqualTo("status", "active")      // solo empresas publicadas
+                .whereEqualTo("status", "active")
                 .get()
                 .addOnSuccessListener(snaps -> {
                     List<EmpresaTurismo> empresas = new ArrayList<>();
 
                     for (DocumentSnapshot doc : snaps.getDocuments()) {
+
                         String nombre       = doc.getString("nombre");
                         String descripcion  = doc.getString("descripcionCorta");
                         String direccion    = doc.getString("direccion");
+                        String adminId      = doc.getString("adminId"); // ✅ para chat luego
 
                         Double ratingDb     = doc.getDouble("ratingPromedio");
                         Double totalResDb   = doc.getDouble("totalReservas");
-                        Double totalToursDb = doc.getDouble("totalToursActivos"); // si lo agregas luego
+                        Double totalToursDb = doc.getDouble("totalToursActivos");
 
-                        float rating        = ratingDb   != null ? ratingDb.floatValue() : 0f;
+                        float rating        = ratingDb != null ? ratingDb.floatValue() : 0f;
                         int totalResenas    = totalResDb != null ? totalResDb.intValue() : 0;
                         int totalTours      = totalToursDb != null ? totalToursDb.intValue() : 0;
+
                         String empresaDocId = doc.getId();
 
-                        // Usa el mismo modelo visual que ya tienes
+                        // ✅ leer primera foto (downloadUrl) desde "fotos"
+                        List<String> fotos = (List<String>) doc.get("fotos");
+                        String logoUrl = (fotos != null && !fotos.isEmpty()) ? fotos.get(0) : null;
+
                         EmpresaTurismo e = new EmpresaTurismo(
                                 empresaDocId,
                                 nombre != null ? nombre : "Sin nombre",
@@ -317,8 +320,11 @@ public class Cliente_HomeActivity extends AppCompatActivity {
                                 totalResenas,
                                 totalTours,
                                 direccion != null ? direccion : "Sin dirección",
-                                R.drawable.ic_business_24   // icono default
+                                logoUrl,                     // ✅ NUEVO
+                                adminId,                     // ✅ NUEVO (lo usaremos para botón mensaje)
+                                R.drawable.ic_business_24    // fallback
                         );
+
                         empresas.add(e);
                     }
 
@@ -327,7 +333,7 @@ public class Cliente_HomeActivity extends AppCompatActivity {
                             new EmpresasAdapter.OnEmpresaClickListener() {
                                 @Override
                                 public void onEmpresaClick(EmpresaTurismo empresa) {
-                                    // TODO: abrir detalles de la empresa (otra activity)
+                                    // TODO detalle empresa
                                 }
 
                                 @Override
@@ -337,19 +343,20 @@ public class Cliente_HomeActivity extends AppCompatActivity {
                                     i.putExtra("empresaNombre", empresa.getNombre());
                                     startActivity(i);
                                 }
+
+                                // (el botón mensaje lo agregamos luego en el adapter)
                             }
                     );
 
                     binding.scrExplorar.rvEmpresasTurismo.setAdapter(adapter);
-                    // binding.scrExplorar.progressEmpresas.setVisibility(View.GONE);
                 })
                 .addOnFailureListener(err -> {
                     Toast.makeText(this,
                             "Error cargando empresas: " + err.getMessage(),
                             Toast.LENGTH_LONG).show();
-                    // binding.scrExplorar.progressEmpresas.setVisibility(View.GONE);
                 });
     }
+
 
 
 

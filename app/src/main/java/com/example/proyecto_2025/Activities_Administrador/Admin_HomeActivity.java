@@ -201,24 +201,27 @@ public class Admin_HomeActivity extends AppCompatActivity {
         pickImagesLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(), result -> {
                     if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) return;
+
                     Intent data = result.getData();
+
+                    int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    if (takeFlags == 0) takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
 
                     try {
                         if (data.getClipData() != null) {
                             int count = data.getClipData().getItemCount();
                             for (int i = 0; i < count; i++) {
                                 Uri u = data.getClipData().getItemAt(i).getUri();
-                                getContentResolver().takePersistableUriPermission(
-                                        u, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                try { getContentResolver().takePersistableUriPermission(u, takeFlags); } catch (SecurityException ignore) {}
                                 galeriaUris.add(u);
                             }
                         } else if (data.getData() != null) {
                             Uri u = data.getData();
-                            getContentResolver().takePersistableUriPermission(
-                                    u, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            try { getContentResolver().takePersistableUriPermission(u, takeFlags); } catch (SecurityException ignore) {}
                             galeriaUris.add(u);
                         }
-                    } catch (SecurityException ignore) {
+                    } catch (Exception e) {
+                        // último fallback: igual agrega el uri (pero si no hay permiso, no podrá subirse)
                         if (data.getData() != null) galeriaUris.add(data.getData());
                     }
 
@@ -226,7 +229,9 @@ public class Admin_HomeActivity extends AppCompatActivity {
                         binding.scrEmpresa.rvGaleria.getAdapter().notifyDataSetChanged();
                     }
                     actualizarChecklistYEstado();
-                });
+                }
+        );
+
 
         // Launcher para seleccionar ubicaci├│n
         pickLocationLauncher = registerForActivityResult(
@@ -507,11 +512,14 @@ public class Admin_HomeActivity extends AppCompatActivity {
         i.addCategory(Intent.CATEGORY_OPENABLE);
         i.setType("image/*");
         i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        i.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-        i.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION |
-                Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        pickImagesLauncher.launch(Intent.createChooser(i, "Selecciona imágenes"));
+
+        // IMPORTANTE: estos flags deben ir sí o sí
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        i.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+
+        pickImagesLauncher.launch(i);
     }
+
 
     private void abrirPickerUbicacion() {
         pickLocationLauncher.launch(new Intent(this, MapPickerActivity.class));
@@ -520,12 +528,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
     private void guardarEmpresa(boolean publicar) {
         if (!capturarFormulario(publicar)) return;
 
-        // Definir estado lógico según acción
         empresa.status = publicar ? "active" : "pending";
-        Log.d("EMPRESA_DEBUG", "guardarEmpresa(publicar=" + publicar + ")");
-        if (!capturarFormulario(publicar)) return;
-        empresa.status = publicar ? "active" : "pending";
-        persistir();
 
         if (publicar && !empresa.esCompleta()) {
             Snackbar.make(binding.getRoot(),
@@ -533,9 +536,55 @@ public class Admin_HomeActivity extends AppCompatActivity {
             return;
         }
 
-        persistir();
-        String msg = publicar ? "Perfil publicado" : "Empresa guardada";
-        Snackbar.make(binding.getRoot(), msg, Snackbar.LENGTH_SHORT).show();
+        // ✅ Subir fotos a Storage y guardar downloadUrls en Firestore
+        // (si no hay fotos, igual guarda)
+        List<Uri> fotosLocal = new ArrayList<>(galeriaUris);
+
+        // Asegurar que exista empresa.id (si es nuevo, aún podría ser null)
+        if (empresa.id == null || empresa.id.trim().isEmpty()) {
+            // crea un id local para usarlo como folder en storage
+            empresa.id = FirebaseFirestore.getInstance().collection("empresas").document().getId();
+        }
+
+        binding.scrEmpresa.btnGuardar.setEnabled(false);
+        binding.scrEmpresa.btnPublicar.setEnabled(false);
+
+        empresaRepo.uploadFotosEmpresa(empresa.id, fotosLocal, new EmpresaRepository.UploadFotosCallback() {
+            @Override
+            public void onSuccess(List<String> downloadUrls) {
+                // Reemplazar URIs locales por URLs remotas
+                empresa.imagenUris.clear();
+                empresa.imagenUris.addAll(downloadUrls);
+
+                // Guardar en Firestore (ya con URLs)
+                empresaRepo.save(empresa);
+
+                runOnUiThread(() -> {
+                    binding.scrEmpresa.btnGuardar.setEnabled(true);
+                    binding.scrEmpresa.btnPublicar.setEnabled(true);
+
+                    Snackbar.make(binding.getRoot(),
+                            publicar ? "Perfil publicado" : "Empresa guardada",
+                            Snackbar.LENGTH_SHORT).show();
+
+                    // refresca la galería visual para que muestre URLs (si tu adapter soporta)
+                    if (binding.scrEmpresa.rvGaleria.getAdapter() != null) {
+                        binding.scrEmpresa.rvGaleria.getAdapter().notifyDataSetChanged();
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Exception e) {
+                runOnUiThread(() -> {
+                    binding.scrEmpresa.btnGuardar.setEnabled(true);
+                    binding.scrEmpresa.btnPublicar.setEnabled(true);
+                    Snackbar.make(binding.getRoot(),
+                            "Error subiendo fotos: " + e.getMessage(),
+                            Snackbar.LENGTH_LONG).show();
+                });
+            }
+        });
     }
 
 
@@ -572,9 +621,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
             return false;
         }
 
-        // Guardar URIs de galer├¡a
-        empresa.imagenUris.clear();
-        for (Uri u : galeriaUris) empresa.imagenUris.add(u.toString());
+
 
         return true;
     }

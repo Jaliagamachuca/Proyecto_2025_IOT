@@ -8,11 +8,14 @@ public class EmpresaTurismo {
     private int numeroResenias;
     private int toursDisponibles;
     private String ubicacion;
-    private int logoResId; // Resource ID para el logo
 
-    // Constructor
+    private String logoUrl;   // ✅ nuevo
+    private String adminId;   // ✅ nuevo
+    private int logoResId;    // fallback
+
     public EmpresaTurismo(String id, String nombre, String descripcion, float rating,
-                          int numeroResenias, int toursDisponibles, String ubicacion, int logoResId) {
+                          int numeroResenias, int toursDisponibles, String ubicacion,
+                          String logoUrl, String adminId, int logoResId) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -20,28 +23,20 @@ public class EmpresaTurismo {
         this.numeroResenias = numeroResenias;
         this.toursDisponibles = toursDisponibles;
         this.ubicacion = ubicacion;
+        this.logoUrl = logoUrl;
+        this.adminId = adminId;
         this.logoResId = logoResId;
     }
 
-    // Getters
     public String getId() { return id; }
-
     public String getNombre() { return nombre; }
     public String getDescripcion() { return descripcion; }
     public float getRating() { return rating; }
     public int getNumeroResenias() { return numeroResenias; }
     public int getToursDisponibles() { return toursDisponibles; }
     public String getUbicacion() { return ubicacion; }
-    public int getLogoResId() { return logoResId; }
 
-    // Setters
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-    public void setRating(float rating) { this.rating = rating; }
-    public void setNumeroResenias(int numeroResenias) { this.numeroResenias = numeroResenias; }
-    public void setToursDisponibles(int toursDisponibles) { this.toursDisponibles = toursDisponibles; }
-    public void setUbicacion(String ubicacion) { this.ubicacion = ubicacion; }
-    public void setLogoResId(int logoResId) { this.logoResId = logoResId; }
-
-    public void setId(String id) { this.id = id; }
+    public String getLogoUrl() { return logoUrl; }   // ✅ nuevo
+    public String getAdminId() { return adminId; }   // ✅ nuevo
+    public int getLogoResId() { return logoResId; }  // fallback
 }

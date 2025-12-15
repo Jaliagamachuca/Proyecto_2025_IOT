@@ -37,20 +37,42 @@ public class CambiarFotoActivityAdmin extends AppCompatActivity {
     }
 
     private void abrirGaleria() {
-        Intent intent = new Intent(Intent.ACTION_PICK);
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        intent.addFlags(
+                Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+        );
         startActivityForResult(intent, PICK_IMAGE);
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK && data != null) {
-            imageUri = data.getData();
-            binding.imgPerfil.setImageURI(imageUri);
+
+            if (data.getData() != null) {
+                Uri uri = data.getData();
+
+                try {
+                    getContentResolver().takePersistableUriPermission(
+                            uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    );
+                } catch (SecurityException e) {
+                    // en algunos dispositivos no es persistente, se ignora
+                }
+
+                imageUri = uri;
+                binding.imgPerfil.setImageURI(imageUri);
+            }
         }
     }
+
 
     private void subirFoto() {
 

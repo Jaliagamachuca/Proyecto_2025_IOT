@@ -2,6 +2,7 @@ package com.example.proyecto_2025.data.repository;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.util.Log;
 
 import com.example.proyecto_2025.model.Empresa;
@@ -10,11 +11,14 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +32,10 @@ public class EmpresaRepository {
     private final SharedPreferences sp;
     private final FirebaseFirestore db;
     private final FirebaseAuth auth;
+    private final Context appContext;
 
     public EmpresaRepository(Context ctx) {
+        this.appContext = ctx.getApplicationContext();
         sp   = ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE);
         db   = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
@@ -296,6 +302,99 @@ public class EmpresaRepository {
     }
 
 
+
+    public interface UploadFotosCallback {
+        void onSuccess(List<String> downloadUrls);
+        void onError(Exception e);
+    }
+
+    public void uploadFotosEmpresa(String empresaId, List<Uri> localUris, UploadFotosCallback cb) {
+        FirebaseUser current = auth.getCurrentUser();
+        if (current == null) { cb.onError(new IllegalStateException("No hay usuario autenticado")); return; }
+        if (empresaId == null || empresaId.trim().isEmpty()) { cb.onError(new IllegalArgumentException("empresaId vacío")); return; }
+        if (localUris == null || localUris.isEmpty()) { cb.onSuccess(new ArrayList<>()); return; }
+
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
+        // Filtrar URIs válidos
+        List<Uri> uris = new ArrayList<>();
+        for (Uri u : localUris) if (u != null) uris.add(u);
+
+        if (uris.isEmpty()) { cb.onSuccess(new ArrayList<>()); return; }
+
+        List<String> out = java.util.Collections.synchronizedList(new ArrayList<>());
+        java.util.concurrent.atomic.AtomicInteger done = new java.util.concurrent.atomic.AtomicInteger(0);
+        java.util.concurrent.atomic.AtomicBoolean finished = new java.util.concurrent.atomic.AtomicBoolean(false);
+
+        final int total = uris.size();
+
+        for (int i = 0; i < uris.size(); i++) {
+            Uri originalUri = uris.get(i);
+
+            Uri uploadUri;
+            try {
+                // 🔒 Lo más robusto: copiar a cache para evitar SecurityException con MediaDocumentsProvider
+                uploadUri = copyToCacheAndGetUri(originalUri);
+            } catch (Exception ex) {
+                if (finished.compareAndSet(false, true)) cb.onError(ex);
+                return;
+            }
+
+            String name = "foto_" + System.currentTimeMillis() + "_" + i + ".jpg";
+            String uid = current.getUid();
+
+            StorageReference ref = storage.getReference()
+                    .child("empresas")
+                    .child(uid)
+                    .child(empresaId)
+                    .child(name);
+
+
+            com.google.firebase.storage.StorageMetadata meta =
+                    new com.google.firebase.storage.StorageMetadata.Builder()
+                            .setContentType("image/jpeg")
+                            .build();
+
+            ref.putFile(uploadUri, meta)
+                    .continueWithTask(t -> {
+                        if (!t.isSuccessful()) throw (t.getException() != null ? t.getException() : new RuntimeException("Upload falló"));
+                        return ref.getDownloadUrl();
+                    })
+                    .addOnSuccessListener(downloadUri -> {
+                        out.add(downloadUri.toString());
+                        int d = done.incrementAndGet();
+                        if (d == total && finished.compareAndSet(false, true)) cb.onSuccess(new ArrayList<>(out));
+                    })
+                    .addOnFailureListener(err -> {
+                        if (finished.compareAndSet(false, true)) cb.onError(err);
+                    });
+        }
+    }
+
+    /**
+     * Copia el contenido del content:// a un archivo temporal en cache y devuelve Uri file://.
+     * Esto evita el crash: "requires that you obtain access using ACTION_OPEN_DOCUMENT..."
+     */
+    private Uri copyToCacheAndGetUri(Uri src) throws Exception {
+        android.content.ContentResolver cr = appContext.getContentResolver(); // <-- asegúrate de tener appContext en el repo
+
+        java.io.InputStream in = cr.openInputStream(src);
+        if (in == null) throw new IllegalStateException("No se pudo abrir InputStream del Uri");
+
+        java.io.File outFile = new java.io.File(appContext.getCacheDir(),
+                "empresa_upload_" + System.currentTimeMillis() + ".jpg");
+
+        java.io.OutputStream out = new java.io.FileOutputStream(outFile);
+        byte[] buf = new byte[8192];
+        int len;
+        while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+
+        out.flush();
+        out.close();
+        in.close();
+
+        return Uri.fromFile(outFile);
+    }
 
 
 

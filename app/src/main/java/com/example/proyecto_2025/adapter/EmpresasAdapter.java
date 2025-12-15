@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.proyecto_2025.Activities_Usuario.EmpresaTurismo;
 import com.example.proyecto_2025.R;
 
@@ -114,7 +115,16 @@ public class EmpresasAdapter extends RecyclerView.Adapter<EmpresasAdapter.Empres
             txtToursDisponibles.setText(empresa.getToursDisponibles() + " tours disponibles");
 
             // Logo (usar el resource ID)
-            ivLogoEmpresa.setImageResource(empresa.getLogoResId());
+            String url = empresa.getLogoUrl();
+            if (url != null && !url.trim().isEmpty()) {
+                Glide.with(itemView.getContext())
+                        .load(url)
+                        .placeholder(empresa.getLogoResId())
+                        .error(empresa.getLogoResId())
+                        .into(ivLogoEmpresa);
+            } else {
+                ivLogoEmpresa.setImageResource(empresa.getLogoResId());
+            }
         }
     }
 
