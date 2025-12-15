@@ -1,27 +1,59 @@
 package com.example.proyecto_2025.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Guide implements Serializable {
-    public enum Language {ES, EN, FR, PT, DE}
-    private String id;
-    private String name;
-    private List<Language> languages;
-    private String photoUrl;
-    private String bio;
-    private float rating;
-    private String zone;
 
-    public Guide(String id, String name, List<Language> languages, String photoUrl, String bio, float rating, String zone) {
-        this.id = id; this.name = name; this.languages = languages;
-        this.photoUrl = photoUrl; this.bio = bio; this.rating = rating; this.zone = zone;
+    // ===== IDs =====
+    public String uid;   // id del documento Firestore
+
+    // ===== Datos básicos =====
+    public String displayName;
+    public String phone;
+    public String photoUrl;
+
+    // ===== Métricas =====
+    public float ratingPromedio = 0f;
+    public int totalValoraciones = 0;
+    public int toursRealizados = 0;
+
+    // ===== Arrays =====
+    public List<String> idiomas = new ArrayList<>();
+    public List<String> zonaOperacion = new ArrayList<>();
+
+    // ===== Requerido por Firestore =====
+    public Guide() {}
+
+    // ===== GETTERS (para adapters y activities) =====
+    public String getId() { return uid; }
+
+    public String getName() {
+        return displayName != null ? displayName : "";
     }
-    public String getId(){return id;}
-    public String getName(){return name;}
-    public List<Language> getLanguages(){return languages;}
-    public String getPhotoUrl(){return photoUrl;}
-    public String getBio(){return bio;}
-    public float getRating(){return rating;}
-    public String getZone(){return zone;}
+
+    public String getPhone() {
+        return phone != null ? phone : "";
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl != null ? photoUrl : "";
+    }
+
+    public float getRating() {
+        return ratingPromedio;
+    }
+
+    public List<String> getLanguages() {
+        return idiomas != null ? idiomas : new ArrayList<>();
+    }
+
+    /** Devuelve una zona legible (primera o "-") */
+    public String getZone() {
+        if (zonaOperacion != null && !zonaOperacion.isEmpty()) {
+            return zonaOperacion.get(0);
+        }
+        return "-";
+    }
 }

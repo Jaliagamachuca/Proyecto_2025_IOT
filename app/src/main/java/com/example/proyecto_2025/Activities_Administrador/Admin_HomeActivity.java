@@ -33,7 +33,6 @@ import com.example.proyecto_2025.data.repository.ChatRepository;
 import com.example.proyecto_2025.data.repository.EmpresaRepository;
 import com.example.proyecto_2025.data.repository.TourRepository;
 import com.example.proyecto_2025.data.repository.OfferRepository;
-import com.example.proyecto_2025.data.repository.GuideRepository;
 import com.example.proyecto_2025.data.repository.AdminRepository;
 import com.example.proyecto_2025.databinding.ActivityAdminHomeBinding;
 import com.example.proyecto_2025.login.LoginActivity;
@@ -145,7 +144,7 @@ public class Admin_HomeActivity extends AppCompatActivity {
     }
 
     private void initializeRepositories() {
-        GuideRepository.get().seedIfEmpty(this);
+
         empresaRepo = new EmpresaRepository(this);
         empresa = empresaRepo.load();
         adminRepo = new AdminRepository(this);
@@ -758,9 +757,10 @@ public class Admin_HomeActivity extends AppCompatActivity {
         );
 
         // KPI: Guías activos
-        binding.scrGuias.kpiGuiasActivos.setText(
-                String.valueOf(GuideRepository.get().all().size())
-        );
+        binding.scrGuias.kpiGuiasActivos.setText("0"); // placeholder
+
+        cargarKpisGuiasFirestore();
+
 
         db.collection("tours")
                 .whereEqualTo("empresaId", empresaId)      // importante: filtrar por tu empresa
@@ -813,20 +813,12 @@ public class Admin_HomeActivity extends AppCompatActivity {
     private void refreshGuiasDashboard() {
         // Actualizar KPIs
 
-        int acep = OfferRepository.get().byStatus(Offer.Status.ACEPTADA).size();
-        int activos = GuideRepository.get().all().size();
+        // KPIs reales
+        cargarKpisGuiasFirestore();
 
+        // Carrusel real
+        loadGuiasSugeridos();
 
-        binding.scrGuias.kpiOfertasAceptadas.setText(String.valueOf(acep));
-        binding.scrGuias.kpiGuiasActivos.setText(String.valueOf(activos));
-
-        // Actualizar gu├¡as sugeridos
-        sugeridos.clear();
-        List<Guide> all = GuideRepository.get().all();
-        for (int i = 0; i < Math.min(5, all.size()); i++) {
-            sugeridos.add(all.get(i));
-        }
-        guiasAdapter.notifyDataSetChanged();
 
         binding.scrGuias.emptyStateGuias.setVisibility(
                 sugeridos.isEmpty() ? View.VISIBLE : View.GONE);
@@ -881,8 +873,14 @@ public class Admin_HomeActivity extends AppCompatActivity {
         }
 
         binding.scrReportes.tvToursActivos.setText(String.valueOf(toursActivos));
-        binding.scrReportes.tvGuiasContratados.setText(
-                String.valueOf(GuideRepository.get().all().size()));
+        binding.scrReportes.tvGuiasContratados.setText("—");
+        db.collection("users")
+                .whereEqualTo("role", "guia")
+                .get()
+                .addOnSuccessListener(snap ->
+                        binding.scrReportes.tvGuiasContratados.setText(String.valueOf(snap.size()))
+                );
+
         binding.scrReportes.tvSatisfaccion.setText("4.7");
     }
 
@@ -1121,16 +1119,27 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
     private void loadGuiasSugeridos() {
         sugeridos.clear();
-        List<Guide> all = GuideRepository.get().all();
-        for (int i = 0; i < Math.min(5, all.size()); i++) {
-            sugeridos.add(all.get(i));
-        }
-        guiasAdapter.notifyDataSetChanged();
 
-        binding.scrGuias.emptyStateGuias.setVisibility(
-                sugeridos.isEmpty() ? View.VISIBLE : View.GONE
-        );
+        db.collection("users")
+                .whereEqualTo("role", "guia")
+                .limit(20)
+                .get()
+                .addOnSuccessListener(snap -> {
+                    for (var doc : snap.getDocuments()) {
+                        Guide g = doc.toObject(Guide.class);
+                        if (g == null) g = new Guide();
+
+                        g.uid = doc.getId(); // importante: uid = id del documento
+                        sugeridos.add(g);
+                    }
+                    guiasAdapter.notifyDataSetChanged();
+                    binding.scrGuias.emptyStateGuias.setVisibility(sugeridos.isEmpty() ? View.VISIBLE : View.GONE);
+
+                    guiasAdapter.notifyDataSetChanged();
+                    binding.scrGuias.emptyStateGuias.setVisibility(sugeridos.isEmpty() ? View.VISIBLE : View.GONE);
+                });
     }
+
 
     private void cargarKpisGuiasFirestore() {
         // Guías activos (si están en users)

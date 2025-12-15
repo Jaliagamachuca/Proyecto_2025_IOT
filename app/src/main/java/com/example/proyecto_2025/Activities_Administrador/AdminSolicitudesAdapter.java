@@ -39,45 +39,53 @@ public class AdminSolicitudesAdapter extends RecyclerView.Adapter<AdminSolicitud
     public void onBindViewHolder(@NonNull VH h, int position) {
         Tour t = data.get(position);
 
-        // 1) Título del tour
         h.b.tvNombreGuia.setText(t.titulo != null ? t.titulo : "(sin título)");
 
-        // 2) Empresa
-        h.b.tvCorreoGuia.setText(t.empresaId != null ? ("Empresa: " + t.empresaId) : "Empresa: —");
+        // placeholders por recycle
+        h.b.tvDniGuia.setText("Guía: —");
+        h.b.tvCorreoGuia.setText("Tel: —");
 
-        // 3) Datos del guía (si existe guiaId)
+        // Empresa (si no tienes otro TextView, al menos no lo mezcles con Tel)
+        // Si quieres mostrar empresa, ponlo en el nombre:
+        if (t.empresaId != null && !t.empresaId.isEmpty()) {
+            h.b.tvNombreGuia.setText((t.titulo != null ? t.titulo : "(sin título)") + " · " + t.empresaId);
+        }
+
+        // Estado (funciona si es enum o string)
+        String estadoTxt = "—";
+        try {
+            // si es enum
+            estadoTxt = (t.estado != null) ? t.estado.name() : "—";
+        } catch (Exception ignore) {
+            // si es string
+            try {
+                estadoTxt = (String) Tour.class.getField("estado").get(t);
+            } catch (Exception ignored2) {}
+        }
+        h.b.tvEstadoSolicitud.setText(estadoTxt);
+
+        // Datos del guía
         if (t.guiaId != null && !t.guiaId.isEmpty()) {
-            h.b.tvDniGuia.setText("Guía UID: " + t.guiaId);
-
             db.collection("users").document(t.guiaId).get()
                     .addOnSuccessListener(doc -> {
                         String nombre = doc.getString("displayName");
                         String phone  = doc.getString("phone");
 
-                        if (nombre != null && !nombre.isEmpty()) {
-                            h.b.tvDniGuia.setText("Guía: " + nombre);
-                        }
-                        if (phone != null && !phone.isEmpty()) {
-                            h.b.tvCorreoGuia.setText("Tel: " + phone);
-                        }
+                        h.b.tvDniGuia.setText("Guía: " + (nombre != null && !nombre.isEmpty() ? nombre : t.guiaId));
+                        h.b.tvCorreoGuia.setText("Tel: " + (phone != null && !phone.isEmpty() ? phone : "—"));
                     })
                     .addOnFailureListener(err -> {
-                        // deja el UID si falla
+                        h.b.tvDniGuia.setText("Guía UID: " + t.guiaId);
                     });
-        } else {
-            h.b.tvDniGuia.setText("Guía UID: —");
         }
 
-        // 4) Estado
-        h.b.tvEstadoSolicitud.setText(t.estado != null ? t.estado.name() : "—");
-
-        // 5) Botón revisar
         h.b.btnRevisarGuia.setOnClickListener(v -> {
             Intent i = new Intent(ctx, AssignGuideActivity.class);
             i.putExtra("tourId", t.id);
             ctx.startActivity(i);
         });
     }
+
 
 
     @Override
