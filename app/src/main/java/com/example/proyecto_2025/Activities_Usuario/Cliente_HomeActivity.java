@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
@@ -333,8 +334,22 @@ public class Cliente_HomeActivity extends AppCompatActivity {
                             new EmpresasAdapter.OnEmpresaClickListener() {
                                 @Override
                                 public void onEmpresaClick(EmpresaTurismo empresa) {
-                                    // TODO detalle empresa
+                                    if (empresa == null) return;
+
+                                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(Cliente_HomeActivity.this)
+                                            .setTitle(empresa.getNombre())
+                                            .setItems(new CharSequence[]{"Ver tours", "Enviar mensaje (Atención al cliente)"}, (dlg, which) -> {
+                                                if (which == 0) {
+                                                    // Reusar tu flujo existente
+                                                    onVerToursClick(empresa);
+                                                } else if (which == 1) {
+                                                    abrirChatAtencion(empresa);
+                                                }
+                                            })
+                                            .setNegativeButton("Cancelar", null)
+                                            .show();
                                 }
+
 
                                 @Override
                                 public void onVerToursClick(EmpresaTurismo empresa) {
@@ -388,6 +403,156 @@ public class Cliente_HomeActivity extends AppCompatActivity {
         if (chatReg != null) chatReg.remove();
     }
 
+    private void abrirChatAtencion(EmpresaTurismo empresa) {
+        if (empresa == null || empresa.getAdminId() == null || empresa.getAdminId().trim().isEmpty()) {
+            Toast.makeText(this, "Empresa sin adminId", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String adminUid = empresa.getAdminId();
+        String myUid = FirebaseAuth.getInstance().getUid();
+        if (myUid == null) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        ChatRepository chatRepo = new ChatRepository();
+
+        // 1) Leer MI user doc (nombre/foto)
+        db.collection("users").document(myUid).get().addOnSuccessListener(myDoc -> {
+
+            String myName = myDoc.getString("displayName");
+            String myPhoto = myDoc.getString("photoUrl");
+            String myRole = "cliente";
+
+            // 2) Leer ADMIN user doc (nombre/foto/companyId)  ← aquí te salía PERMISSION_DENIED antes si no permitías esto
+            db.collection("users").document(adminUid).get().addOnSuccessListener(admDoc -> {
+
+                String adminName = admDoc.getString("displayName");
+                String adminPhoto = admDoc.getString("photoUrl");
+                String adminRole = "admin";
+                String companyId = admDoc.getString("companyId"); // ✅ requerido por rules create
+
+                if (companyId == null || companyId.trim().isEmpty()) {
+                    Toast.makeText(this, "Admin sin companyId (requerido por rules)", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                chatRepo.ensureConversation(
+                        myUid, myRole, myName != null ? myName : "Cliente", myPhoto != null ? myPhoto : "",
+                        adminUid, adminRole, adminName != null ? adminName : empresa.getNombre(), adminPhoto != null ? adminPhoto : "",
+                        companyId,
+                        new ChatRepository.SimpleCb() {
+                            @Override
+                            public void onOk() {
+                                String conversationId = chatRepo.buildConversationId(myUid, adminUid);
+
+                                Intent i = new Intent(Cliente_HomeActivity.this, ChatRoomActivity.class);
+                                i.putExtra("conversationId", conversationId);
+                                i.putExtra("otherUserId", adminUid);
+                                i.putExtra("otherName", empresa.getNombre() != null ? empresa.getNombre() : "Atención");
+                                startActivity(i);
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Toast.makeText(Cliente_HomeActivity.this, "No se pudo abrir chat: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                );
+
+            }).addOnFailureListener(e ->
+                    Toast.makeText(this, "Error leyendo admin: " + e.getMessage(), Toast.LENGTH_LONG).show()
+            );
+
+        }).addOnFailureListener(e ->
+                Toast.makeText(this, "Error leyendo mi usuario: " + e.getMessage(), Toast.LENGTH_LONG).show()
+        );
+    }
+
+
+    private void abrirChatConEmpresa(@NonNull EmpresaTurismo empresa) {
+
+        String adminUid = empresa.getAdminId();
+        if (adminUid == null || adminUid.trim().isEmpty()) {
+            Toast.makeText(this, "Esta empresa no tiene adminId para chat", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (myUid == null || myUid.trim().isEmpty()) {
+            Toast.makeText(this, "Sesión inválida", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 1) Traer mis datos (cliente)
+        db.collection("users").document(myUid).get()
+                .addOnSuccessListener(myDoc -> {
+                    String myRole = safeStr(myDoc.getString("role"));
+                    String myName = safeStr(myDoc.getString("displayName"));
+                    String myPhoto = safeStr(myDoc.getString("photoUrl"));
+
+                    if (myRole.isEmpty()) myRole = "cliente";
+
+                    // 2) Traer datos del admin de la empresa
+                    String finalMyRole = myRole;
+                    db.collection("users").document(adminUid).get()
+                            .addOnSuccessListener(adminDoc -> {
+                                if (!adminDoc.exists()) {
+                                    Toast.makeText(this, "No existe el usuario admin de esta empresa", Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+
+                                String adminRole = safeStr(adminDoc.getString("role"));
+                                String adminName = safeStr(adminDoc.getString("displayName"));
+                                String adminPhoto = safeStr(adminDoc.getString("photoUrl"));
+
+                                // CLAVE para rules: companyId debe ser el de admin
+                                String adminCompanyId = safeStr(adminDoc.getString("companyId"));
+
+                                if (adminRole.isEmpty()) adminRole = "admin";
+
+                                if (adminCompanyId.isEmpty()) {
+                                    Toast.makeText(this, "El admin no tiene companyId configurado (rules lo requieren)", Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+
+                                // 3) Crear/asegurar conversación (con companyId)
+                                chatRepo.ensureConversation(
+                                        myUid, finalMyRole, myName, myPhoto,
+                                        adminUid, adminRole, adminName, adminPhoto,
+                                        adminCompanyId,
+                                        new ChatRepository.SimpleCb() {
+                                            @Override public void onOk() {
+                                                String convId = chatRepo.buildConversationId(myUid, adminUid);
+
+                                                Intent i = new Intent(Cliente_HomeActivity.this, ChatRoomActivity.class);
+                                                i.putExtra("conversationId", convId);
+                                                i.putExtra("otherUserId", adminUid);
+                                                // Título: puedes usar nombre de empresa como “soporte”
+                                                i.putExtra("otherName", empresa.getNombre());
+                                                startActivity(i);
+
+                                                // opcional: ir a la pestaña chat
+                                                binding.bottomNav.setSelectedItemId(R.id.nav_chat);
+                                                showScreen(SCR_CHAT);
+                                            }
+
+                                            @Override public void onError(Exception e) {
+                                                Toast.makeText(Cliente_HomeActivity.this,
+                                                        "No se pudo abrir chat: " + e.getMessage(),
+                                                        Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+                                );
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, "Error leyendo admin: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                            );
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error leyendo mi usuario: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                );
+    }
+
+    private String safeStr(String s) {
+        return s == null ? "" : s.trim();
+    }
 
     private void setupRecyclerViewToursRecomendados() {
         // Los ítems siguen siendo UI de ejemplo, pero al hacer click creamos una reserva REAL

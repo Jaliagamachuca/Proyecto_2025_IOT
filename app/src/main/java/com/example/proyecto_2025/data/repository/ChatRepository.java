@@ -1,5 +1,6 @@
 package com.example.proyecto_2025.data.repository;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.proyecto_2025.model.ChatMsgAtencion;
@@ -65,8 +66,15 @@ public class ChatRepository {
                             ChatMsgAtencion m = d.toObject(ChatMsgAtencion.class);
                             if (m != null) {
                                 m.id = d.getId();
+
+                                // 🔒 Defensa adicional
+                                if (m.createdAt == null) {
+                                    m.createdAt = com.google.firebase.Timestamp.now();
+                                }
+
                                 out.add(m);
                             }
+
                         });
                     }
                     cb.onData(out);
@@ -118,8 +126,10 @@ public class ChatRepository {
         return uidB + "_" + uidA;
     }
 
-    public void ensureConversation(String uidA, String roleA, String nameA, String photoA,
-                                   String uidB, String roleB, String nameB, String photoB,
+    // ✅ AGREGA companyId (requerido por tus rules en create)
+    public void ensureConversation(@NonNull String uidA, @NonNull String roleA, @NonNull String nameA, @NonNull String photoA,
+                                   @NonNull String uidB, @NonNull String roleB, @NonNull String nameB, @NonNull String photoB,
+                                   @NonNull String companyId,
                                    SimpleCb cb) {
 
         String id = buildConversationId(uidA, uidB);
@@ -158,6 +168,9 @@ public class ChatRepository {
             data.put("lastMessage", "");
             data.put("lastSenderId", "");
             data.put("updatedAt", FieldValue.serverTimestamp());
+
+            // ✅ CLAVE para pasar reglas
+            data.put("companyId", companyId);
 
             convRef.set(data)
                     .addOnSuccessListener(v -> cb.onOk())

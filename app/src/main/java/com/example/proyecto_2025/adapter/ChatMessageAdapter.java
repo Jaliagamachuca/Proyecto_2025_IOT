@@ -46,8 +46,14 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
 
         h.tvBubble.setText(m.text != null ? m.text : "");
 
+        long timeMs = 0L;
+        if (m.createdAt != null) {
+            timeMs = m.createdAt.toDate().getTime();
+        }
+
         String time = new SimpleDateFormat("HH:mm", Locale.getDefault())
-                .format(new Date(m.createdAt));
+                .format(new Date(timeMs));
+
         h.tvMeta.setText(time);
 
         // “Alineación” simple (izq/der) según sender

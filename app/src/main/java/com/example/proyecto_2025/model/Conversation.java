@@ -11,6 +11,7 @@ public class Conversation {
     public Map<String, String> roles;              // uid -> role
     public Map<String, String> displayNames;       // uid -> name
     public Map<String, String> photoUrls;          // uid -> photoUrl
+    public String companyId;
 
     public String lastMessage;
     public String lastSenderId;

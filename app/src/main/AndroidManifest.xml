@@ -176,6 +176,11 @@
         <activity
             android:name=".Activities_Usuario.ToursPorEmpresaActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".Activities_Chat.ChatRoomActivity"
+            android:exported="false" />
+
         <activity
             android:name=".Activities_Administrador.AdminSolicitudesGuiasActivity"
             android:exported="false" />
