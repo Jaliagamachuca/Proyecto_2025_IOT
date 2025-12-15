@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.proyecto_2025.Activities_Chat.ChatRoomActivity;
 import com.example.proyecto_2025.Activities_Guia.EditarPerfilActivityGuia;
 import com.example.proyecto_2025.Activities_Superadmin.CambiarFotoActivity;
 import com.example.proyecto_2025.R;
@@ -28,6 +29,7 @@ import com.example.proyecto_2025.adapter.GuideAdapter;
 import com.example.proyecto_2025.adapter.OfferAdapter;
 import com.example.proyecto_2025.adapter.TourAdapter;
 import com.example.proyecto_2025.data.auth.AuthRepository;
+import com.example.proyecto_2025.data.repository.ChatRepository;
 import com.example.proyecto_2025.data.repository.EmpresaRepository;
 import com.example.proyecto_2025.data.repository.TourRepository;
 import com.example.proyecto_2025.data.repository.OfferRepository;
@@ -35,6 +37,7 @@ import com.example.proyecto_2025.data.repository.GuideRepository;
 import com.example.proyecto_2025.data.repository.AdminRepository;
 import com.example.proyecto_2025.databinding.ActivityAdminHomeBinding;
 import com.example.proyecto_2025.login.LoginActivity;
+import com.example.proyecto_2025.model.Conversation;
 import com.example.proyecto_2025.model.Empresa;
 import com.example.proyecto_2025.model.Guide;
 import com.example.proyecto_2025.model.Offer;
@@ -97,6 +100,9 @@ public class Admin_HomeActivity extends AppCompatActivity {
     // ===================== LIFECYCLE =====================
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        myUid = (u != null) ? u.getUid() : null;
+
         super.onCreate(savedInstanceState);
         binding = ActivityAdminHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -126,6 +132,9 @@ public class Admin_HomeActivity extends AppCompatActivity {
     }
 
     // ===================== SETUP METHODS =====================
+    private final ChatRepository chatRepo = new ChatRepository();
+    private com.google.firebase.firestore.ListenerRegistration chatReg;
+    private String myUid;
 
     private void setupToolbar() {
         setSupportActionBar(binding.toolbar);
@@ -267,63 +276,113 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
     // ===================== SECTION X: CHAT =====================
     private void initChatSection() {
-        // Recycler
-        binding.scrChat.rvConversaciones.setLayoutManager(new LinearLayoutManager(this));
-        chatAdapter = new ConversationAdapter(this, c -> {
-            // Por ahora: aquí luego abres la Activity del chat
-            // Intent i = new Intent(this, ChatRoomActivity.class);
-            // i.putExtra("conversationId", c.id);
-            // i.putExtra("otherUserId", c.otherUserId);
-            // startActivity(i);
-            Snackbar.make(binding.getRoot(),
-                    "Abrir chat con: " + (c.title != null ? c.title : c.otherUserId),
-                    Snackbar.LENGTH_SHORT).show();
-        });
-        binding.scrChat.rvConversaciones.setAdapter(chatAdapter);
 
-        // Search
-        binding.scrChat.etBuscarChat.addTextChangedListener(new android.text.TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (chatAdapter != null) chatAdapter.setQuery(String.valueOf(s));
+        // Evita re-crear listeners cada vez que entras al tab
+        if (chatAdapter == null) {
+            binding.scrChat.rvConversaciones.setLayoutManager(new LinearLayoutManager(this));
+
+            chatAdapter = new ConversationAdapter(this, c -> {
+                // Abrir sala real
+                Intent i = new Intent(this, ChatRoomActivity.class);
+                i.putExtra("conversationId", c.id);
+                i.putExtra("otherUserId", c.otherUserId);
+                startActivity(i);
+            });
+
+            binding.scrChat.rvConversaciones.setAdapter(chatAdapter);
+
+            // Search
+            binding.scrChat.etBuscarChat.addTextChangedListener(new android.text.TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (chatAdapter != null) chatAdapter.setQuery(String.valueOf(s));
+                }
+                @Override public void afterTextChanged(android.text.Editable s) {}
+            });
+
+            // Chips
+            binding.scrChat.chipTodos.setOnClickListener(v -> {
+                chatAdapter.setRoleFilter("ALL");
+                chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
+            });
+            binding.scrChat.chipGuias.setOnClickListener(v -> {
+                chatAdapter.setRoleFilter("guia");
+                chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
+            });
+            binding.scrChat.chipClientes.setOnClickListener(v -> {
+                chatAdapter.setRoleFilter("cliente");
+                chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
+            });
+            binding.scrChat.chipNoLeidos.setOnClickListener(v -> {
+                chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
+            });
+        }
+
+        if (myUid == null) return;
+
+        // Listener Firestore (REAL)
+        if (chatReg != null) chatReg.remove();
+        chatReg = chatRepo.listenMyConversations(myUid, new ChatRepository.ConversationsCb() {
+            @Override
+            public void onData(List<Conversation> list) {
+                // Mapear a UI
+                List<com.example.proyecto_2025.model.ConversationUI> ui = new ArrayList<>();
+
+                for (Conversation c : list) {
+                    if (c == null) continue;
+
+                    String otherId = getOtherUserId(c, myUid);
+                    String otherRole = (c.roles != null && otherId != null) ? c.roles.get(otherId) : null;
+
+                    String otherName = (c.displayNames != null && otherId != null) ? c.displayNames.get(otherId) : null;
+                    String otherPhoto = (c.photoUrls != null && otherId != null) ? c.photoUrls.get(otherId) : null;
+
+                    boolean unread = (c.unread != null && c.unread.get(myUid) != null) && Boolean.TRUE.equals(c.unread.get(myUid));
+
+                    String title = buildTitle(otherRole, otherName, otherId);
+                    String time = ""; // si quieres, luego lo formateamos con updatedAt
+
+                    com.example.proyecto_2025.model.ConversationUI row = new com.example.proyecto_2025.model.ConversationUI();
+                    row.id = c.id;
+                    row.title = title;
+                    row.lastMessage = (c.lastMessage != null) ? c.lastMessage : "";
+                    row.time = time;
+                    row.unread = unread;
+                    row.otherUserId = otherId;
+                    row.otherRole = otherRole;
+                    row.otherPhotoUrl = (otherPhoto != null) ? otherPhoto : "";
+
+                    ui.add(row);
+                }
+
+                chatAdapter.submit(ui);
+                toggleEmptyChat();
             }
-            @Override public void afterTextChanged(android.text.Editable s) {}
+
+            @Override
+            public void onError(Exception e) {
+                Snackbar.make(binding.getRoot(), "Error chat: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+            }
         });
 
-        // Chips
-        binding.scrChat.chipTodos.setOnClickListener(v -> {
-            chatAdapter.setRoleFilter("ALL");
-            chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
-        });
-
-        binding.scrChat.chipGuias.setOnClickListener(v -> {
-            chatAdapter.setRoleFilter("guia");
-            chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
-        });
-
-        binding.scrChat.chipClientes.setOnClickListener(v -> {
-            chatAdapter.setRoleFilter("cliente");
-            chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
-        });
-
-        binding.scrChat.chipNoLeidos.setOnClickListener(v -> {
-            chatAdapter.setUnreadOnly(binding.scrChat.chipNoLeidos.isChecked());
-        });
-
-        // Data inicial (MOCK por ahora, para que el flujo ya funcione)
-        chatData.clear();
-        chatData.add(new com.example.proyecto_2025.model.ConversationUI(
-                "c1", "Guía: Juan Pérez", "Hola! ¿Listo para el tour?", "12:10",
-                true, "uid_guia_1", "guia", ""
-        ));
-        chatData.add(new com.example.proyecto_2025.model.ConversationUI(
-                "c2", "Cliente: María", "Gracias por la info", "Ayer",
-                false, "uid_cliente_9", "cliente", ""
-        ));
-
-        chatAdapter.submit(chatData);
         toggleEmptyChat();
     }
+
+    private String getOtherUserId(Conversation c, String myUid) {
+        if (c.participants == null) return null;
+        for (String p : c.participants) {
+            if (p != null && !p.equals(myUid)) return p;
+        }
+        return null;
+    }
+
+    private String buildTitle(String role, String name, String uid) {
+        String who = (name != null && !name.trim().isEmpty()) ? name : (uid != null ? uid : "Usuario");
+        if ("guia".equalsIgnoreCase(role)) return "Guía: " + who;
+        if ("cliente".equalsIgnoreCase(role)) return "Cliente: " + who;
+        return who;
+    }
+
     private void toggleEmptyChat() {
         boolean empty = (chatAdapter == null || chatAdapter.getItemCount() == 0);
         binding.scrChat.emptyStateChat.setVisibility(empty ? View.VISIBLE : View.GONE);

@@ -2,7 +2,7 @@ package com.example.proyecto_2025.data.repository;
 
 import androidx.annotation.Nullable;
 
-import com.example.proyecto_2025.model.ChatMessage;
+import com.example.proyecto_2025.model.ChatMsgAtencion;
 import com.example.proyecto_2025.model.Conversation;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
@@ -23,7 +23,7 @@ public class ChatRepository {
     }
 
     public interface MessagesCb {
-        void onData(java.util.List<ChatMessage> list);
+        void onData(java.util.List<ChatMsgAtencion> list);
         void onError(Exception e);
     }
 
@@ -59,10 +59,10 @@ public class ChatRepository {
                 .orderBy("createdAt", Query.Direction.ASCENDING)
                 .addSnapshotListener((snap, e) -> {
                     if (e != null) { cb.onError(e); return; }
-                    java.util.List<ChatMessage> out = new java.util.ArrayList<>();
+                    java.util.List<ChatMsgAtencion> out = new java.util.ArrayList<>();
                     if (snap != null) {
                         snap.getDocuments().forEach(d -> {
-                            ChatMessage m = d.toObject(ChatMessage.class);
+                            ChatMsgAtencion m = d.toObject(ChatMsgAtencion.class);
                             if (m != null) {
                                 m.id = d.getId();
                                 out.add(m);
@@ -154,6 +154,7 @@ public class ChatRepository {
             data.put("displayNames", displayNames);
             data.put("photoUrls", photoUrls);
             data.put("unread", unread);
+
             data.put("lastMessage", "");
             data.put("lastSenderId", "");
             data.put("updatedAt", FieldValue.serverTimestamp());

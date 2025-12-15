@@ -206,79 +206,98 @@ public class EmpresaRepository {
             return;
         }
 
-        // Asegurar adminId
-        if (e.adminId == null || e.adminId.isEmpty()) {
-            e.adminId = current.getUid();
-        }
+        final String uid = current.getUid();
 
-        boolean isNew = (e.id == null || e.id.isEmpty());
+        // Forzar adminId siempre al UID actual
+        e.adminId = uid;
 
-        // Si no tiene id de empresa aún, crear uno nuevo
+        // Defaults seguros
+        if (e.status == null || e.status.trim().isEmpty()) e.status = "pending";
+        if (e.nombre == null) e.nombre = "";
+        if (e.descripcion == null) e.descripcion = "";
+        if (e.direccion == null) e.direccion = "";
+        if (e.correo == null) e.correo = "";
+        if (e.telefono == null) e.telefono = "";
+        if (e.web == null) e.web = "";
+        if (e.imagenUris == null) e.imagenUris = java.util.Collections.emptyList();
+
+        boolean isNew = (e.id == null || e.id.trim().isEmpty());
+
         if (isNew) {
             e.id = db.collection("empresas").document().getId();
-            saveLocal(e); // guardamos id en cache
+            saveLocal(e);
         }
 
         Map<String, Object> data = new HashMap<>();
         data.put("id", e.id);
 
-        // Datos básicos
         data.put("nombre", e.nombre);
         data.put("descripcionCorta", e.descripcion);
 
-        // Ubicación
         data.put("direccion", e.direccion);
         data.put("lat", e.lat);
-        data.put("lng", e.lon);  // nuestro campo se llama lon
+        data.put("lng", e.lon);
 
-        // Contacto
         data.put("email", e.correo);
         data.put("telefono", e.telefono);
-        // ⬇️ AHORA también subimos la web
         data.put("web", e.web);
 
-        // Imágenes
         data.put("fotos", e.imagenUris);
 
-        // Lógica de negocio
-        data.put("adminId", e.adminId);
+        // IMPORTANTE: adminId debe viajar en el payload para que CREATE pase en rules
+        data.put("adminId", uid);
         data.put("status", e.status);
 
-        // Métricas
         data.put("ratingPromedio", e.ratingPromedio);
         data.put("totalValoraciones", e.totalValoraciones);
         data.put("totalReservas", e.totalReservas);
         data.put("totalIngresos", e.totalIngresos);
 
-        // Timestamps
         data.put("updatedAt", FieldValue.serverTimestamp());
+        if (isNew) data.put("createdAt", FieldValue.serverTimestamp());
+
+        Log.d(TAG, "saveRemote empresaId=" + e.id + " isNew=" + isNew + " adminId=" + uid);
+
+        var empresaRef = db.collection("empresas").document(e.id);
+
         if (isNew) {
-            data.put("createdAt", FieldValue.serverTimestamp());
+            // CREATE (sobrescribe doc)
+            empresaRef.set(data)
+                    .addOnSuccessListener(unused -> {
+                        Log.d(TAG, "Empresa creada en Firestore: " + e.id);
+                        actualizarCompanyIdUsuario(uid, e.id);
+                    })
+                    .addOnFailureListener(err ->
+                            Log.e(TAG, "Error creando empresa en Firestore", err));
+        } else {
+            // UPDATE (merge)
+            empresaRef.set(data, SetOptions.merge())
+                    .addOnSuccessListener(unused -> {
+                        Log.d(TAG, "Empresa actualizada en Firestore: " + e.id);
+                        actualizarCompanyIdUsuario(uid, e.id);
+                    })
+                    .addOnFailureListener(err ->
+                            Log.e(TAG, "Error actualizando empresa en Firestore", err));
         }
+    }
 
-        db.collection("empresas")
-                .document(e.id)
-                .set(data, SetOptions.merge())
-                .addOnSuccessListener(unused ->
-                        Log.d(TAG, "Empresa guardada en Firestore: " + e.id))
-                .addOnFailureListener(err ->
-                        Log.e(TAG, "Error guardando empresa en Firestore", err));
-
-        // ====== Actualizar companyId del usuario en "users" ======
+    private void actualizarCompanyIdUsuario(String uid, String empresaId) {
         Map<String, Object> userUpdate = new HashMap<>();
-        userUpdate.put("companyId", e.id);
+        userUpdate.put("companyId", empresaId);
         userUpdate.put("updatedAt", FieldValue.serverTimestamp());
 
         db.collection("users")
-                .document(current.getUid())
+                .document(uid)
                 .set(userUpdate, SetOptions.merge())
-                .addOnSuccessListener(unused ->
-                        Log.d(TAG, "User.companyId actualizado: " + e.id))
-                .addOnFailureListener(err ->
-                        Log.e(TAG, "Error actualizando companyId del usuario", err));
+                .addOnSuccessListener(u2 ->
+                        Log.d(TAG, "User.companyId actualizado: " + empresaId))
+                .addOnFailureListener(err2 ->
+                        Log.e(TAG, "Error actualizando companyId del usuario", err2));
     }
 
-    
+
+
+
 
     // ================== LIMPIAR CACHE LOCAL ==================
     public void clear() {
