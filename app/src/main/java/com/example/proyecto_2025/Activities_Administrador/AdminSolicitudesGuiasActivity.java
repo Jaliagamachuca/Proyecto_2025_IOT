@@ -33,7 +33,11 @@ public class AdminSolicitudesGuiasActivity extends AppCompatActivity {
     }
 
     private void escucharSolicitudes() {
+        String adminUid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+        if (adminUid == null) return;
+
         db.collection("tours")
+                .whereEqualTo("empresaId", adminUid)
                 .whereEqualTo("estado", "SOLICITADO")
                 .addSnapshotListener((snap, e) -> {
                     if (e != null || snap == null) return;
@@ -49,4 +53,5 @@ public class AdminSolicitudesGuiasActivity extends AppCompatActivity {
                     adapter.notifyDataSetChanged();
                 });
     }
+
 }

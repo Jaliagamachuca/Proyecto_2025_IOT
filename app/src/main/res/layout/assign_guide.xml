@@ -1,9 +1,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="16dp"
-    android:layout_width="match_parent" android:layout_height="match_parent">
-    <TextView android:id="@+id/tvSummary" android:textSize="16sp"
-        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvSummary"
+        android:textSize="16sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnConfirm" android:text="Confirmar asignación"
-        android:layout_marginTop="16dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        android:id="@+id/btnConfirm"
+        android:text="Confirmar asignación"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnReject"
+        android:text="Rechazar solicitud"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
 </LinearLayout>

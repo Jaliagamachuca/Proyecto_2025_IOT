@@ -46,6 +46,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -349,16 +350,22 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
         target.setVisibility(View.VISIBLE);
 
-        // FAB global apagado
+        // FAB visible solo en ciertas pantallas
         binding.fab.setVisibility(View.GONE);
         binding.fab.setOnClickListener(null);
 
-        if (screenId == SCR_GUIAS) refreshGuiasDashboard();
-        if (screenId == SCR_TOURS) loadToursEmpresa();
+        if (screenId == SCR_GUIAS) {
+            refreshGuiasDashboard();   // si quieres actualizar carrusel
+            loadSolicitudesRecientes(); // <-- NECESARIO para ver SOLICITADO
+            cargarKpisGuiasFirestore(); // <-- para KPIs reales
+        }
 
-        if (screenId == SCR_CHAT) initChatSection();  // o refreshChat();
+        if (screenId == SCR_TOURS) {
+            loadToursEmpresa();
+        }
+
+        if (screenId == SCR_CHAT) initChatSection();
     }
-
 
     // ===================== SECTION 1: EMPRESA =====================
 
@@ -688,17 +695,22 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
         binding.scrGuias.btnOfertasGuias.setText("📨 Ver solicitudes de guías");
         binding.scrGuias.btnOfertasGuias.setOnClickListener(v ->
-                startActivity(new Intent(this, OfferInboxActivity.class)));
+                startActivity(new Intent(this, AdminSolicitudesGuiasActivity.class))
+        );
 
         // KPI: Guías activos
         binding.scrGuias.kpiGuiasActivos.setText(
                 String.valueOf(GuideRepository.get().all().size())
         );
 
-        // KPI: Solicitudes pendientes
-        binding.scrGuias.kpiOfertasPendientes.setText(
-                String.valueOf(OfferRepository.get().byStatus(Offer.Status.PENDIENTE).size())
-        );
+        db.collection("tours")
+                .whereEqualTo("empresaId", empresaId)      // importante: filtrar por tu empresa
+                .whereEqualTo("estado", "SOLICITADO")
+                .get()
+                .addOnSuccessListener(snap ->
+                        binding.scrGuias.kpiOfertasPendientes.setText(String.valueOf(snap.size()))
+                );
+
 
         // KPI: Guías con tours asignados (ofertas aceptadas)
         binding.scrGuias.kpiOfertasAceptadas.setText(
@@ -741,11 +753,11 @@ public class Admin_HomeActivity extends AppCompatActivity {
 
     private void refreshGuiasDashboard() {
         // Actualizar KPIs
-        int pend = OfferRepository.get().byStatus(Offer.Status.PENDIENTE).size();
+
         int acep = OfferRepository.get().byStatus(Offer.Status.ACEPTADA).size();
         int activos = GuideRepository.get().all().size();
 
-        binding.scrGuias.kpiOfertasPendientes.setText(String.valueOf(pend));
+
         binding.scrGuias.kpiOfertasAceptadas.setText(String.valueOf(acep));
         binding.scrGuias.kpiGuiasActivos.setText(String.valueOf(activos));
 
@@ -1017,45 +1029,34 @@ public class Admin_HomeActivity extends AppCompatActivity {
     }
 
     private void loadSolicitudesRecientes() {
-        List<Offer> pendientes = OfferRepository.get().byStatus(Offer.Status.PENDIENTE);
-
-        binding.scrGuias.tvContadorSolicitudes.setText(pendientes.size() + " solicitudes");
-
-        if (pendientes.isEmpty()) {
-            binding.scrGuias.emptyStateSolicitudes.setVisibility(View.VISIBLE);
-            binding.scrGuias.rvSolicitudesGuias.setVisibility(View.GONE);
-            return;
-        }
-
-        binding.scrGuias.emptyStateSolicitudes.setVisibility(View.GONE);
-        binding.scrGuias.rvSolicitudesGuias.setVisibility(View.VISIBLE);
-
-        OfferAdapter adapter = new OfferAdapter(
-                this,
-                pendientes,
-                new OfferAdapter.OnAction() {
-                    @Override
-                    public void onAssign(Offer o) {
-                        // Si quieres permitir asignar guía desde aquí:
-                        Intent i = new Intent(Admin_HomeActivity.this, AssignGuideActivity.class);
-                        i.putExtra("offerId", o.getId());   // o.id si tu modelo no tiene getId()
-                        startActivity(i);
+        db.collection("tours")
+                .whereEqualTo("empresaId", empresaId)
+                .whereEqualTo("estado", "SOLICITADO")
+                .orderBy("fechaInicioUtc", Query.Direction.DESCENDING)
+                .limit(5)
+                .get()
+                .addOnSuccessListener(snap -> {
+                    List<Tour> lista = new ArrayList<>();
+                    for (var doc : snap.getDocuments()) {
+                        Tour t = doc.toObject(Tour.class);
+                        if (t != null) {
+                            t.id = doc.getId();
+                            lista.add(t);
+                        }
                     }
 
-                    @Override
-                    public void onDetail(Offer o) {
-                        Intent i = new Intent(Admin_HomeActivity.this, OfferDetailActivity.class);
-                        i.putExtra("offerId", o.getId());   // o.id si tu modelo no tiene getId()
-                        startActivity(i);
-                    }
-                }
-        );
+                    binding.scrGuias.tvContadorSolicitudes.setText(lista.size() + " solicitudes");
 
-        binding.scrGuias.rvSolicitudesGuias.setLayoutManager(
-                new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        );
-        binding.scrGuias.rvSolicitudesGuias.setAdapter(adapter);
+                    boolean vacio = lista.isEmpty();
+                    binding.scrGuias.emptyStateSolicitudes.setVisibility(vacio ? View.VISIBLE : View.GONE);
+                    binding.scrGuias.rvSolicitudesGuias.setVisibility(vacio ? View.GONE : View.VISIBLE);
+
+                    // ADAPTER: usa el adapter que ya hiciste para tours solicitados (AdminSolicitudesAdapter)
+                    binding.scrGuias.rvSolicitudesGuias.setLayoutManager(new LinearLayoutManager(this));
+                    binding.scrGuias.rvSolicitudesGuias.setAdapter(new AdminSolicitudesAdapter(this, lista));
+                });
     }
+
 
 
 
@@ -1072,6 +1073,33 @@ public class Admin_HomeActivity extends AppCompatActivity {
         );
     }
 
+    private void cargarKpisGuiasFirestore() {
+        // Guías activos (si están en users)
+        db.collection("users")
+                .whereEqualTo("role", "guia")
+                .get()
+                .addOnSuccessListener(snap ->
+                        binding.scrGuias.kpiGuiasActivos.setText(String.valueOf(snap.size()))
+                );
+
+        // Solicitudes = tours SOLICITADO de MI empresa
+        db.collection("tours")
+                .whereEqualTo("empresaId", empresaId)
+                .whereEqualTo("estado", "SOLICITADO")
+                .get()
+                .addOnSuccessListener(snap ->
+                        binding.scrGuias.kpiOfertasPendientes.setText(String.valueOf(snap.size()))
+                );
+
+        // Guías con tours (elige estados reales que uses)
+        db.collection("tours")
+                .whereEqualTo("empresaId", empresaId)
+                .whereIn("estado", java.util.Arrays.asList("ASIGNADO","EN_PROCESO","FINALIZADO"))
+                .get()
+                .addOnSuccessListener(snap ->
+                        binding.scrGuias.kpiOfertasAceptadas.setText(String.valueOf(snap.size()))
+                );
+    }
 
 
 }
