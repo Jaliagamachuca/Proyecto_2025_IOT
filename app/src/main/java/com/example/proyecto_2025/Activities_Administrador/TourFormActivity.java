@@ -165,7 +165,32 @@ public class TourFormActivity extends AppCompatActivity {
 
         updateStep();
     }
+    private void activarEmpresaSiPendiente(String empresaId) {
+        com.google.firebase.firestore.FirebaseFirestore db =
+                com.google.firebase.firestore.FirebaseFirestore.getInstance();
 
+        java.util.Map<String, Object> upd = new java.util.HashMap<>();
+        upd.put("status", "active");
+        upd.put("updatedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+
+        db.collection("empresas")
+                .document(empresaId)
+                .update(upd)
+                .addOnSuccessListener(v -> {
+                    com.google.android.material.snackbar.Snackbar
+                            .make(findViewById(android.R.id.content),
+                                    "Perfil guardado. Empresa activada.",
+                                    com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+                            .show();
+                })
+                .addOnFailureListener(e -> {
+                    com.google.android.material.snackbar.Snackbar
+                            .make(findViewById(android.R.id.content),
+                                    "No se pudo activar la empresa: " + e.getMessage(),
+                                    com.google.android.material.snackbar.Snackbar.LENGTH_LONG)
+                            .show();
+                });
+    }
     private void abrirPickerImagenes() {
         Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         i.addCategory(Intent.CATEGORY_OPENABLE);
@@ -367,6 +392,8 @@ public class TourFormActivity extends AppCompatActivity {
             Snackbar.make(binding.getRoot(), "Error al guardar: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
             return;
         }
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        if (u != null) activarEmpresaSiPendiente(u.getUid());
 
         Snackbar.make(binding.getRoot(), "Tour guardado como borrador", Snackbar.LENGTH_LONG).show();
         android.util.Log.d(TAG, "DONE -> finish()");

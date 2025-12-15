@@ -137,10 +137,10 @@
 
             <Button
                 android:id="@+id/btnGuardar" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Guardar"/>
+                android:text="Guardar (Borrador)"/>
             <Button
                 android:id="@+id/btnPublicar" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Guardar perfil" android:layout_marginStart="8dp"/>
+                android:text="Publicar perfil" android:layout_marginStart="8dp"/>
         </LinearLayout>
 
     </LinearLayout>
